@@ -1,0 +1,475 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="manifest" href="/manifest.json">
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
+<link rel="import" href="../bower_components/paper-search/paper-search-bar.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+
+<!-- iron elements  -->
+<link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../bower_components/paper-styles/shadow.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+
+<!-- Firebase Auth -->
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+
+<!-- Firebase Query -->
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-database-behavior.html">
+<link rel="import" href="thought-card-attachments.html">
+<link rel="import" href="comments-box.html">
+<link rel="import" href="delete-pldp.html">
+
+<link rel="import" href="app-icons.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="w3-styles.html">
+
+<dom-module id="pldp-articles">
+  <template>
+    <firebase-query
+      id="articles"
+      path="/myPLDP/news"
+      order-by-child="PLDPUserID"
+      equal-to="[[user.userID]]"
+      limit-to-last="15"
+      data="{{articlesData}}">
+    </firebase-query>
+
+    <style include="w3-styles"></style>
+    <style include="shared-styles">
+        @media screen and (max-width: 1010px){
+    
+            #videoPlayer{
+              width: 100%;
+              height: auto;
+              left: 0px;
+              top: 0px;
+              opacity: 1;
+            }
+    
+            .video-side{
+              display: block;
+              margin: 10px auto;
+              max-height: 200px;
+            }
+        }
+    
+        @media screen and (max-width: 500px){
+    
+          #videoPlayer{
+            width: 100%;
+            height: auto;
+            left: 0px;
+            top: 0px;
+            opacity: 1;
+          }
+    
+          .video-side{
+            display: block;
+            margin: 10px auto;
+            height: auto;
+          }
+        }
+        </style>
+  
+    <div class="container">
+        <paper-dialog id="imgDialog"  class="image-dailog">
+          <!-- <h2>Scrollable</h2> -->
+          <paper-dialog-scrollable>
+              <iron-image class="thought-expand-img" sizing="cover" src="" id="showImage"></iron-image>
+          </paper-dialog-scrollable>
+          <div class="buttons">
+            <paper-button dialog-dismiss>Close</paper-button>
+          </div>
+        </paper-dialog>
+      </div>
+      <div class="container">
+        <paper-dialog id="pldpDialog">
+          <h2><paper-icon-button icon="myicons:event-note" class="blue"></paper-icon-button>My PLDP</h2>
+          <hr>
+          <paper-dialog-scrollable>
+              <p>Based on what you just read, would you like to add an Action to your PLDP (Personal Leadership Development Plan)?</p>
+          </paper-dialog-scrollable>
+          <hr>
+          <div class="buttons">
+          <paper-button dialog-dismiss>Close</paper-button>
+            <a href="my-pldp" name="name" class="pldp-link">
+              <paper-button on-tap="closePLDPDialog">Proceed</paper-button>
+            </a>
+        </div>
+        </paper-dialog>
+      </div>
+      <div class="container">
+          <paper-dialog id="videoDialog"  class="add-dailog">
+              <!-- <paper-dialog-scrollable> -->
+              <div class="container video-side">
+                <video id="videoPlayer" controls controlslist="nodownload">
+                  <source id="videoPlayer1" src="" type="video/mp4">
+                  <source id="videoPlayer2" src="" type="video/ogg">
+                  Your browser does not support video.
+                </video>
+              </div>
+              <!-- </paper-dialog-scrollable> -->
+            <div class="buttons">
+              <paper-button dialog-dismiss>Close</paper-button>
+            </div>
+          </paper-dialog>
+        </div>   
+      <div class="main-card">
+          <template is="dom-repeat" items="[[articlesData]]" as="item">
+              <div class="modal-div">
+                <div class="card-container fadeInUp" style="max-width:600px">
+                  <span class="w3-button w3-display-topright w3-red w3-medium w3-hide closer-for-modal">&times;</span>
+                  <delete-pldp user="[[user]]" item="[[item]]" itemtype="news" entityid="[[item.newsID]]"></delete-pldp>
+                  <div class="container card-header w3-row">
+                    <div class="card-avatar w3-left" style$="[[_profilePhoto(item.photoURL)]]"></div>
+                    <div class="container card-company-container">
+                      <div class="row card-postedby w3-medium">[[item.journalUserName]]</div>
+                      <div class="row card-company">[[item.companyName]]</div>
+                    </div>
+                    <div class="thought-date">
+                      [[_formate_date(item.dateRegistered)]]
+                    </div>
+                    <template is="dom-if" if="[[isEqual(item.journalUserID, user.userID)]]">
+                      <paper-icon-button indexed="add-article" caption="Edit Article" icon="create" on-tap="_loadElement1" id="edit[[item.dateRegistered]]" data="[[item.newsID]]" class="tomato"></paper-icon-button>
+                      <paper-icon-button icon="delete" on-tap="_deleteArticle" id="del[[item.dateRegistered]]" data="[[item.newsID]]"
+                      style="color: rgb(150, 150, 150)"></paper-icon-button>
+                    </template>
+                  </div>
+                
+                  <div class="container">
+                    <div class="row"><!-- No empty text node--><a href="[[articleLink(item.manualOrExternal, item.articleLink)]]" target="[[targetLink(item.manualOrExternal)]]" name="name">
+                      <div id="article[[item.dateRegistered]]" class="thought-img" style$="[[_photo(item.photos)]]" on-click="_openArticle" onmouseover="" data="[[_setArticleData(item.subtitle, item.title, item.body, item.photos)]]">
+                      <div class="thought-title">
+                        
+                      </div>
+                      <div class="thought-author">
+                      </div>
+                      </div></a><!-- No empty text node-->
+                    </div>
+                  </div>
+                  <div class="horizontal justified"><!-- No empty text node-->
+                    <a href="[[articleLink(item.manualOrExternal, item.articleLink)]]" target="[[targetLink(item.manualOrExternal)]]" name="name" style="text-decoration: none;">
+                      <div class="article-title">[[item.title]]</div>
+                      <p class="article-author">[[item.subtitle]]</p>
+                    </a><!-- No empty text node-->
+                  </div>
+                  <thought-card-attachments itemid="[[item.newsID]]" item="[[item]]" thoughtype="[[thoughtype]]" ispldp="[[ispldp]]"></thought-card-attachments>
+                  <comments-box user="[[user]]" firebaseref="news" item="[[item]]" thetype="Article" entityid="[[item.newsID]]"></comments-box>
+                </div>
+              </div>
+          </template>
+        </div>    
+  </template>
+
+  <script>
+    class PLDPArticles extends Polymer.Element {
+      static get is() { return 'pldp-articles'; }
+      static get properties() {
+        return {
+          quotes: Object,
+          _article: Object,
+          user: {
+              type: Object
+          },
+          _companyid: String,
+          articlesData: {
+            type: Object,
+            observer: '_onarticlesDataDataReceived'
+          },
+          _selected: String,
+          opened: {
+            type: Boolean,
+            reflectToAttribute: true,
+            value: false
+          },
+          lastSelected: {
+            type: String,
+            value: ''
+          },
+          ispldp: {
+            type: Boolean,
+            value: true
+          },
+        };
+      }
+      _setData(title, subtitle, id){
+        // set thought data to be rated
+        let a = {
+              Title: title,
+              Subtitle: subtitle,
+              ID: id
+          }
+        return a;
+      }
+
+      _formate_date(dt){
+        var date = new Date(dt);
+        var day = date.getDate() < 10 ? '0'+date.getDate() : date.getDate();
+        var locale = 'en-us';
+        var month = date.toLocaleString(locale, { month: "long" });
+        var year = date.getFullYear();
+
+        return day+' '+month+' '+year;
+      }
+
+      _openRate(e){
+        let rateInfo = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
+
+        sessionStorage.setItem("ID",'article'+rateInfo.ID);
+        sessionStorage.setItem("Title",rateInfo.Title);
+        sessionStorage.setItem("Subtitle",rateInfo.Subtitle);
+        sessionStorage.setItem("aID",rateInfo.ID);
+        sessionStorage.setItem("rateType",'news');
+        sessionStorage.setItem("orderRateBy",'newsID');
+      }
+      _onarticlesDataDataReceived(newData, oldData){
+        this.articlesData.sort(function(a, b) {
+        var nameA = a.dateRegistered; // ignore upper and lowercase
+        var nameB = b.dateRegistered; // ignore upper and lowercase
+        if (nameA < nameB) {
+          return 1;
+        }
+        if (nameA > nameB) {
+          return -1;
+        }
+
+        // names must be equal
+        return 0;
+        });
+          
+      }
+      _getVideoName(storageName){
+        let strName = '';
+        strName = storageName.slice(storageName.lastIndexOf('/')+1);
+        strName = strName.replace(new RegExp('_', 'g'), ' ');
+        return strName;
+      }
+      _videoClick(e){      
+        var videoClicked = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
+
+        var videoPlayer = Polymer.dom(this.root).querySelector('#videoPlayer');
+        var videoPlayer1 = Polymer.dom(this.root).querySelector('#videoPlayer1');
+        var videoPlayer2 = Polymer.dom(this.root).querySelector('#videoPlayer2');
+
+        videoPlayer1.src = videoClicked;
+        videoPlayer2.src = videoClicked;
+
+        videoPlayer.load();
+        this.$.videoDialog.open();
+      }
+      _dialogImgOpen(e){
+        var a = Polymer.dom(this.root).querySelector('#'+e.target.id).src;
+        var b = this.$.showImage;
+        b.src = a;
+        this.$.imgDialog.open();
+      }
+      _setArticleData(a, t, b, p){
+        var photo = this._photoURL(p);
+        var a = {
+              body: b,
+              photo: photo,
+              author: a,
+              title: t
+          }
+        return a;
+      }
+      _openArticle(e){
+        var a = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
+
+        sessionStorage.setItem("bookAuthor",a.author);
+        sessionStorage.setItem("bookTitle",a.title);
+        sessionStorage.setItem("bookBody",a.body);
+        sessionStorage.setItem("bookPhoto",a.photo);
+      }
+      _getPodcastName(storageName){
+        let strName = '';
+        strName = storageName.slice(storageName.lastIndexOf('/')+1);
+        strName = strName.replace(new RegExp('_', 'g'), ' ');
+        return strName;
+      }
+      _toArray(obj) {
+        if(obj != undefined){
+          return Object.keys(obj).map(function(key) {
+            return obj[key];
+        });
+        }  
+      }
+      _objLen(obj) {
+        let len = 0;
+        if(obj != undefined){
+          // console.log('Value: '+Object.keys(obj).length);
+          len = Object.keys(obj).length;
+        }
+        return len;
+      }
+      toggle(e){
+        var a = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
+
+        var selectedElem = e.target.id;
+
+        this.opened = Polymer.dom(this.root).querySelector('#collapse'+a).opened;
+            
+        var res = selectedElem.substring(0, 3);
+        
+        if(res == 'blu'){
+          this._selected = 'page-1-'+a;
+        }else if(res == 'gre'){
+          this._selected = 'page-2-'+a;
+        }else if(res == 'cam'){
+          this._selected = 'page-3-'+a;
+        }else if(res == 'red'){
+          this._selected = 'page-4-'+a;
+        }
+
+        if((this.lastSelected == this._selected) && (this.opened)){
+          Polymer.dom(this.root).querySelector('#collapse'+a).toggle();
+        }
+
+        if((this.lastSelected == this._selected) && (!this.opened)){
+          Polymer.dom(this.root).querySelector('#collapse'+a).toggle();
+        }
+
+        if((this.lastSelected != this._selected) && (!this.opened)){
+          Polymer.dom(this.root).querySelector('#collapse'+a).toggle();
+        }
+        this.lastSelected = this._selected;
+      }
+      _getURLS(urls, page, dateReg){
+        let selectedElem = page+dateReg;
+
+        var eleM = Polymer.dom(this.root).querySelector('#'+selectedElem);
+        let url = '';
+        var newElem;
+
+        for (item in urls) { 
+
+          url += '<div>'+urls[item].title+'</div>';
+        }
+
+        return Polymer.dom(eleM).innerHTML = url;
+      }
+      _photo(photos){
+        let photo_url = "background-image: url('../../data/land.jpg'); cursor: pointer;";
+
+        for (item in photos) { 
+          photo_url = 'background-image: url('+photos[item].url+'); cursor: pointer;';
+        }
+
+        return photo_url;
+      }
+      _profilePhoto(photo){
+        let photo_url = "background-image: url('../images/default-user.png');";
+
+        if(photo == undefined){
+          photo_url = "background-image: url('../images/default-user.png');";
+        }else if(photo == ""){
+          photo_url = "background-image: url('../images/default-user.png');";
+        }else{
+          photo_url = 'background-image: url('+photo+');';
+        }
+
+        return photo_url;
+      }
+      _photoURL(photos){
+        let photo_url = "../../data/land.jpg";
+
+        for (item in photos) { 
+          photo_url = photos[item].url;
+        }
+
+        return photo_url;
+      }
+      _openPLDP(e){
+        var newsID = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
+        sessionStorage.setItem("PLDP_ArticleAdd", newsID);
+        this.$.pldpDialog.open();
+      }
+      closePLDPDialog(){
+        this._addToPLDP();
+        sessionStorage.removeItem("PLDP_ArticleAdd");
+        this.$.pldpDialog.close();
+      }
+      _addToPLDP(){
+        let PLDP_ThoughtAdd = sessionStorage.getItem("PLDP_ArticleAdd");
+
+        let filteredArray = this.findObjectByKey(this.articlesData, "newsID", PLDP_ThoughtAdd);
+
+        // remove the key
+        delete filteredArray['$key'];
+
+        // add PLDP user to the thought object
+        filteredArray.PLDPUserID = this.user.userID;
+        filteredArray.PLDPUserName = this.user.firstName+" "+this.user.lastName;
+
+        // instantiate db
+        let database = firebase.database();
+
+        // create new record
+        let newThought = database.ref().child('/myPLDP/news').push().key;
+
+        // delete the thought if already exists
+        let ref = database.ref('myPLDP/news');
+        ref.orderByChild('newsID').equalTo(PLDP_ThoughtAdd)
+            .once('value').then(function(snapshot) {
+                snapshot.forEach(function(childSnapshot) {
+                if(newThought === childSnapshot.key){
+                  console.log("Got the new ID");
+                }else{
+                  // remove each old child
+                  ref.child(childSnapshot.key).remove();
+                }
+            });
+        });
+        
+        let updates = {};
+        updates['/myPLDP/news/' + newThought] = filteredArray;
+        database.ref().update(updates);
+      }
+      findObjectByKey(array, key, value) {
+          for (var i = 0; i < array.length; i++) {
+              if (array[i][key] === value) {
+                  return array[i];
+              }
+          }
+          return null;
+      }
+			_sort(a, b) {  
+				if (a.dateRegistered > b.dateRegistered) return -1;
+				if (a.dateRegistered < b.dateRegistered) return 1;
+				return 0;
+			}
+			articleLink(manualOrExternal, articleLink){
+				if((manualOrExternal !== undefined) || (manualOrExternal !== "undefined")){
+				if (manualOrExternal == "externalLink") return articleLink;
+					return "read-articles";
+				}
+				
+				return "read-articles";
+			}
+			targetLink(manualOrExternal){
+				if (manualOrExternal == "externalLink") return "_blank";
+				return "_self";
+			}
+    }
+
+    window.customElements.define(PLDPArticles.is, PLDPArticles);
+  </script>
+</dom-module>

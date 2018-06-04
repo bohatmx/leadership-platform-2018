@@ -1,0 +1,575 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="manifest" href="/manifest.json">
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-search/paper-search-bar.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/iron-autogrow-textarea/iron-autogrow-textarea.html">
+
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+
+<!-- Firebase Auth -->
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+
+<!-- Firebase Query -->
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-database-behavior.html">
+<!-- <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html"> -->
+
+<link rel="import" href="app-icons.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="w3-styles.html">
+
+<dom-module id="leadership-ebooks">
+	<template>
+		<template is="dom-if" if="[[_companyid]]">
+			<firebase-query
+				id="ebooks"
+				path="/eBooks"
+				data="{{ebooksData}}">
+			</firebase-query>
+
+			<!-- <app-indexeddb-mirror
+				session="[[user.userID]]"
+				key="keyebookdata"
+				data="{{ldpebooksData}}"
+				persisted-data="{{ebooksData}}">
+			</app-indexeddb-mirror> -->
+		</template>
+
+		<style include="w3-styles"></style>
+		<style include="shared-styles">
+		.content {
+			display: block;
+			position: relative;
+			max-width: 1000px;
+			margin: 5px auto;
+		}
+		.card-container {
+			display: inline-block;
+			width: 200px;
+			color: black;
+			text-decoration: none;
+		}
+		.red{
+				color: rgb(165, 2, 2);
+		}
+		.green{
+				color: green;
+		}
+		.blue{
+				color: rgb(74, 117, 236);
+		}
+		.pldp-text{
+			font-size: 14pt!important;
+		}
+		.pldp-link{
+			text-decoration: none;
+			text-transform: uppercase;
+			text-align: -webkit-center;
+			display: flex;
+			align-items: center;
+			color: var(--paper-dialog-button-color, var(--primary-color));
+			-webkit-user-select: none;
+			user-select: none;
+			padding: 0 8px 0 2px;
+		}
+
+		.read-article-photo {
+			display: none;
+			border-radius: 6px;
+			background-size: contain;
+		}
+
+		.delete-icon{
+			position: absolute; cursor: pointer;
+			right:0px; top: 0px; z-index: 999;
+		}
+
+		.card {
+				margin: 24px;
+				padding: 16px;
+				color: #757575;
+				border-radius: 5px;
+				background-color: #fff;
+				box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+		}
+		@media (max-width: 960px) {
+			.content {
+				max-width: 800px;
+				margin: auto;
+				display: block;
+				width: 90%;
+			}
+			.card-container {
+				width: 200px;
+			}
+		}
+
+		@media screen and (max-width: 959px) and (min-width: 519px) {
+			.content {
+					max-width: 400px;
+					margin: auto;
+					display: block;
+					position: relative;
+					padding: 0;
+				}
+				.card-container {
+					width: 200px;
+				}
+			}
+		@media screen and (max-width: 518px) and (min-width: 100px) {
+			.content {
+					max-width: 400px;
+					margin: auto;
+					display: block;
+					padding: 0;
+					width: 90%;
+				}
+				.card-container {
+					width: 200px;
+				}
+			}
+
+			@-webkit-keyframes fadeInUp{
+				0%{opacity:0;-webkit-transform:translateY(20px);transform:translateY(20px)}
+				100%{opacity:1;-webkit-transform:translateY(0);transform:translateY(0)}
+		}
+		@keyframes fadeInUp{
+				0%{opacity:0;-webkit-transform:translateY(20px);-ms-transform:translateY(20px);transform:translateY(20px)}
+				100%{opacity:1;-webkit-transform:translateY(0);-ms-transform:translateY(0);transform:translateY(0)}
+		}
+		.fadeInUp{
+				-webkit-animation-name:fadeInUp;
+				animation-name:fadeInUp;
+				opacity: 0;
+				-webkit-animation-duration: 0.5s;
+				animation-duration: 0.5s;
+				-webkit-animation-fill-mode: forwards;
+				animation-fill-mode: forwards;
+				animation-timing-function: ease-in;
+		}
+		</style>
+	
+	<!-- <div class="container search-bar">
+		<paper-search-bar hide-filter-button="true" placeholder="Search for eBooks"></paper-search-bar>
+	</div>
+	<div class="container">
+		<paper-dialog id="pldpDialog">
+			<h2><paper-icon-button icon="myicons:event-note" class="blue"></paper-icon-button>My PLDP</h2>
+			<hr>
+			<paper-dialog-scrollable>
+					<p>Based on what you just read, would you like to add an Action to your PLDP (Personal Leadership Development Plan)?</p>
+			</paper-dialog-scrollable>
+			<hr>
+			<div class="buttons">
+				<paper-button dialog-dismiss>Close</paper-button>
+					<a href="my-pldp" name="name" class="pldp-link" on-tap="closePLDPDialog">Proceed
+					</a>
+			</div>
+		</paper-dialog>
+	</div> 
+	<div class="w3-row">
+		<div class="w3-padding-large w3-right">
+			<paper-button raised class="w3-blue" data="add-ebook-modal" on-tap="_openModal" >
+				<iron-icon icon="smapp:add"></iron-icon> Add Ebook
+			</paper-button>
+		</div>
+		<div class="w3-padding-large w3-large w3-rest">
+				<paper-button><span class="w3-badge w3-dark-grey">{{ebooksData.length}}</span>&nbsp;Ebooks Available</paper-button>
+		</div>
+	</div>
+	<div id="add-ebook-modal" class="ldp-modal w3-animate-zoom">
+		<div class="ldp-modal-content w3-round max-modal-width">
+			<div>
+				<span id="close-notifications" data="add-ebook-modal" on-click="_closeModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white">&times;</span>
+				<div class="w3-large" style="padding:20px 15px">
+					<b class="w3-text-blue"><iron-icon icon="smapp:library-books"></iron-icon>&nbsp;Add an Ebook</b>
+				</div>
+				<div class="w3-row w3-padding-large">
+          <paper-input label="Enter Ebook Title" type="text" id="ebookTitle" value="{{newEbookTitle}}"></paper-input>
+          <paper-input label="Enter Ebook Link" type="text" id="ebookLink" value="{{newEbookLink}}"></paper-input>
+          <paper-textarea style="width: 100%;" id="ebookDescription" rows="10"  value="{{newEbookDescription}}" placeholder="Enter Ebook Description..."></paper-textarea>
+					<div style="width:100%;" id="hideRemoveImage" hidden>
+						<paper-button style="width:100%;" class="app-primary-text-color" raised on-tap="removeImage">Remove Image</paper-button>
+					</div>
+					<div class="horizontal justified add-thought-icons" id="loadArticleImage">
+						<label class="paper-font-body2" style="cursor: pointer; margin-top: 10px;" for="local_photo_input">
+								Load Ebook Cover Image
+							<paper-icon-button class="w3-text-red" icon="myicons:small-image" id="redImage"></paper-icon-button>
+						</label>
+						<form id="selectImageForm">
+							<input id="local_photo_input" type="file" accept="image/*" on-change="handlePhoto"/>
+						</form>
+					</div>
+					<div id="articlePhoto" class="read-article-photo w3-padding" style="background-image: url('[[photo]]'); max-height:250px"></div>
+					<div class="buttons">
+						<paper-button raised class="w3-blue" on-tap="_saveNewEbook">
+							<iron-icon icon="app:send" data="add-ebook-modal"></iron-icon>&nbsp;SUBMIT
+						</paper-button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="spinner" style="position: fixed;">
+		<paper-spinner  active="{{isloading}}"></paper-spinner>
+		<div style="width: 100%; padding-top: 10px;" class="w3-row w3-center" id="spinnerMessage">{{loadingmessage}}</div>
+	</div>
+	<div class="fadeInUp w3-row w3-margin-top">
+		<template is="dom-repeat" items="{{ebooksData}}" sort="_sort" observe="dateRegistered">
+			<div class="w3-col l6 w3-relative">
+				<template is="dom-if" if="[[isOwner(item.addedBy)]]">
+					<img src="images/close-icon.png" class="delete-icon" on-tap="deleteEbook" data="[[item.ebookID]]"/>
+				</template>
+				<div class="w3-left w3-center">
+					<a href="[[item.ebookURL]]" target="_blank" name="name">
+						<img src="[[item.coverUrl]]" style="height:200px">
+					</a>
+					<div class="horizontal">
+						<paper-button id="pldp[[item.dateRegistered]]" data="[[item.ebookID]]" class="w3-text-dark-grey pldp-text" data="[[item.ebookID]]" on-tap="_openPLDP">My PLDP</paper-button>
+					</div>
+				</div>
+				<div class="w3-rest w3-padding-small w3-text-dark-grey">
+					<div class="w3-padding-small w3-large"><b>[[item.title]]</b></div>
+					<p class="w3-padding-small w3-text-grey"><em>[[concatDes(item.description)]]</em></p>
+					<div class="w3-padding-small w3-text-grey">
+						<paper-icon-button icon="app:remove-red-eye"></paper-icon-button> 0 Views
+					</div>
+				</div>
+			</div>
+		</template>
+	</div> -->
+	<div class="fadeInUp w3-row w3-margin-top" style="height: 80vh; display: flex; align-items: flex-start;  background-color: #c9a270;">
+		<img src="../images/ebooks.jpg" alt="Soon to be launched." srcset="" style="width:100%;">
+	</div>
+	<div id="snackbar"></div>
+	</template>
+
+	<script>
+		var _ua = window.navigator.userAgent;
+		var scrollTopPosition
+		iOS = /iPad|iPhone|iPod/.test(_ua),
+		iOS11 = /OS 11_0|OS 11_1|OS 11_2|OS 11_3/.test(_ua);
+
+		class LeadershipEbooks extends Polymer.Element {
+			static get is() { return 'leadership-ebooks'; }
+			static get properties() {
+				return {
+					user: {
+						type: Object
+					},
+					newEbookTitle: String,
+					newEbookLink: String,
+					newEbookDescription: String,
+					newEbookImageDataURL: String,
+          			photo: String,
+					_companyid: String,
+					ebooksData: {
+						type: Object,
+						observer: '_onebooksDataDataReceived'
+					},
+					isloading: {
+						type: Boolean,
+						value: true,
+						notify: true
+					},
+					loadingmessage:{
+						type: String,
+						value: 'Loading...'
+					},
+				};
+			}
+
+			isOwner(user){
+				return user == this.user.userID;
+			}
+
+			deleteEbook(e){
+				var data = e.currentTarget.data;
+				if(confirm("Are you sure that you want to delete this ebook?")){
+					var database = firebase.database();
+					database.ref().child('eBooks').child(data).remove();
+				}
+			}
+
+			showSnackBar(msg){
+				var x = this.$.snackbar;
+
+				x.innerHTML = msg;
+
+				x.className = "show";
+				setTimeout(function(){
+				x.className = x.className.replace("show", "");
+				}, 3000);
+			}
+
+			_saveNewEbook(e){
+				if((this.newEbookTitle == "") || (this.newEbookTitle == undefined)){
+					this.showSnackBar("Please enter the Book Title!");
+          			return;
+				}
+
+				if((this.newEbookLink == "") || (this.newEbookLink == undefined)){
+					this.showSnackBar("Please enter the Book Link!");
+          			return;
+				}
+
+				if((this.newEbookDescription == "") || (this.newEbookDescription == undefined)){
+					this.showSnackBar("Please enter the Book Description!");
+          			return;
+				}
+				
+				var database = firebase.database();
+				var newEbookKey = database.ref().child('eBooks').push().key;
+				var newEbook = {
+					addedBy: this.user.userID,
+					title: this.newEbookTitle,
+					description: this.newEbookDescription,
+					ebookID: newEbookKey,
+					coverUrl: this.newEbookImageDataURL,
+					ebookURL: this.newEbookLink,
+					dateRegistered: new Date().getTime()
+				}
+				// console.log(newEbook)
+				database.ref().child('eBooks').child(newEbookKey).set(newEbook);
+
+				this.newEbookTitle = "";
+				this.newEbookDescription = "";
+				this.newEbookKey = "";
+				this.newEbookImageDataURL = "";
+				this.newEbookLink = "";
+				this.photo = "";
+
+				this._closeModal(e);
+			}
+
+			concatDes(str){
+				return str.split(" ").slice(0, 50).join(" ")+"...";
+			}
+
+			_openModal(e){
+				// ios 11 bug caret position
+				if ( iOS && iOS11 ) {
+					this.addIOSBugfix();
+				}
+				var modal_name = e.currentTarget.getAttribute('data');
+				var modal = Polymer.dom(this.root).querySelector('#'+modal_name);
+				modal.style.display = 'block';
+			}
+
+			_closeModal(e){
+				// ios 11 bug caret position
+				if ( iOS && iOS11 ) {
+					this.removeIOSBugfix();
+				}
+				var modal_name = e.currentTarget.getAttribute('data');
+				var modal = Polymer.dom(this.root).querySelector('#'+modal_name);
+				if(modal_name === 'add-items')this._removeLoadElement();
+
+				modal.style.display = 'none';
+			}
+
+      handlePhoto(e){
+          var photoSelected = e.target.files[0];
+
+          // compress photo ready to upload
+          this.resizeImage(photoSelected, "photo");
+
+          // compress thumbnail for upload
+          this.resizeImage(photoSelected, "thumbnail");
+
+          var selectedImage = URL.createObjectURL(photoSelected);
+					console.log(selectedImage)
+          this.photo = selectedImage;
+
+          this.$.articlePhoto.style.display = "block";
+          this.$.hideRemoveImage.style = "display: block";
+      }
+
+      resizeImage(file, imgType) {
+        var reader = new FileReader();
+				var that = this;
+        reader.onloadend = function() {
+        
+          var tempImg = new Image();
+          tempImg.src = reader.result;
+          tempImg.onload = function() {
+
+            if(imgType == "thumbnail"){
+              var MAX_WIDTH = 400;
+              var MAX_HEIGHT = 300;
+            }else{
+              var MAX_WIDTH = 800;
+              var MAX_HEIGHT = 600;
+            }
+            
+            var tempW = tempImg.width;
+            var tempH = tempImg.height;
+            if (tempW > tempH) {
+                if (tempW > MAX_WIDTH) {
+                  tempH *= MAX_WIDTH / tempW;
+                  tempW = MAX_WIDTH;
+                }
+            } else {
+                if (tempH > MAX_HEIGHT) {
+                  tempW *= MAX_HEIGHT / tempH;
+                  tempH = MAX_HEIGHT;
+                }
+            }
+    
+            var canvas = document.createElement('canvas');
+            canvas.width = tempW;
+            canvas.height = tempH;
+            var ctx = canvas.getContext("2d");
+            ctx.drawImage(this, 0, 0, tempW, tempH);
+
+            // return data url
+            var dataURL = canvas.toDataURL("image/jpeg");
+
+						that.newEbookImageDataURL = dataURL;
+
+            if(imgType == "thumbnail"){
+              sessionStorage.setItem("thumbnail_upload", dataURL);
+            }else{
+              sessionStorage.setItem("photo_upload", dataURL);
+            }
+          }
+        }
+        reader.readAsDataURL(file);
+      }
+
+      removeImage(){
+        this.$.hideRemoveImage.style = "display: none";
+        this.$.articlePhoto.style.display = "none";
+        this.photo = "";
+        var selectImageForm = Polymer.dom(this.root).querySelector('#selectImageForm');
+        selectImageForm.reset();
+        sessionStorage.removeItem("thumbnail_upload");
+        sessionStorage.removeItem("photo_upload");
+      }
+
+		_onebooksDataDataReceived(newData, oldData){
+			var that = this;
+
+			if(newData.length > 0){
+				this.isloading = false;
+				this.loadingmessage = "";
+			} 
+
+			setTimeout(function(){
+				that.isloading = false;
+
+				if(newData.length == 0) that.loadingmessage = "No posts found";
+				else that.loadingmessage = "";
+
+			},40000)
+		}
+
+		_sort(a, b) {  
+			if (a.dateRegistered > b.dateRegistered) return -1;
+			if (a.dateRegistered < b.dateRegistered) return 1;
+			return 0;
+		}
+			_photo(photos){
+				let photo_url = "background-image: url('../../data/land.jpg');";
+
+				for (item in photos) { 
+					photo_url = 'background-image: url('+photos[item].url+');';
+				}
+
+				return photo_url;
+			}
+			_openPLDP(e){
+				var thoughtID = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
+				sessionStorage.setItem("PLDP_eBookAdd", thoughtID);
+				this.$.pldpDialog.open();
+			}
+			closePLDPDialog(){
+				this._addToPLDP();
+				sessionStorage.removeItem("PLDP_eBookAdd");
+				this.$.pldpDialog.close();
+			}
+			_addToPLDP(){
+				let PLDP_eBookAdd = sessionStorage.getItem("PLDP_eBookAdd");
+
+				let filteredArray = this.findObjectByKey(this.ebooksData, "eBookID", PLDP_eBookAdd);
+
+				// remove the key
+				delete filteredArray['$key'];
+
+				// add PLDP user to the thought object
+				filteredArray.PLDPUserID = this.user.userID;
+				filteredArray.PLDPUserName = this.user.firstName+" "+this.user.lastName;
+
+				// instantiate db
+				let database = firebase.database();
+
+				// create new record
+				let neweBook = database.ref().child('/myPLDP/eBooks').push().key;
+
+				// delete the thought if already exists
+				let ref = database.ref('myPLDP/eBooks');
+				ref.orderByChild('eBookID').equalTo(PLDP_eBookAdd)
+						.once('value').then(function(snapshot) {
+								snapshot.forEach(function(childSnapshot) {
+								if(neweBook === childSnapshot.key){
+									console.log("Got the new ID");
+								}else{
+									// remove each old child
+									ref.child(childSnapshot.key).remove();
+								}
+						});
+				});
+				
+				let updates = {};
+				updates['/myPLDP/eBooks/' + neweBook] = filteredArray;
+				database.ref().update(updates);
+			}
+			findObjectByKey(array, key, value) {
+					for (var i = 0; i < array.length; i++) {
+							if (array[i][key] === value) {
+									return array[i];
+							}
+					}
+					return null;
+			}
+			addIOSBugfix(){
+				// Get scroll position before moving top
+				scrollTopPosition = $(document).scrollTop();
+				console.log('iOS device')
+				// Add CSS to body "position: fixed"
+				$("body").addClass("iosBugFixCaret");
+				// $("body").css('position: fixed!important; width: 100%!important;');
+			}
+
+			removeIOSBugfix(){
+				// Remove CSS to body "position: fixed"
+				$("body").removeClass("iosBugFixCaret");
+
+				//Go back to initial position in document
+				$(document).scrollTop(scrollTopPosition);
+			}
+		}
+
+		window.customElements.define(LeadershipEbooks.is, LeadershipEbooks);
+	</script>
+</dom-module>

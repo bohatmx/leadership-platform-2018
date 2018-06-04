@@ -1,0 +1,168 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="manifest" href="/manifest.json">
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<!-- Firebase Auth -->
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+
+<!-- Firebase Query -->
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-database-behavior.html">
+<!-- <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html"> -->
+
+<dom-module id="my-followers">
+    <template>
+    <style include="w3-styles"></style>
+    <style include="shared-styles">
+        :host {
+            display: block;
+        }
+        .selected{
+            background-color: tomato;
+            width: 100%;
+            min-height: 10px;
+        }
+        
+    </style>
+
+    <firebase-query
+        id="qryusers"
+        path="/users"
+        data="{{usersData}}">
+    </firebase-query>
+
+    <!-- <app-indexeddb-mirror
+        session="[[user.userID]]"
+        key="keyfollowersdata"
+        data="{{ldpfollowersData}}"
+        persisted-data="{{usersData}}">
+    </app-indexeddb-mirror> -->
+
+    <div class="w3-row">
+        <div id="Followers" class="w3-col s6 w3-card-2" style="cursor: pointer;" on-tap="toggleFollow">
+            <paper-ripple></paper-ripple>
+            <div class="w3-dark-grey w3-padding-large">
+                Followers
+            </div>
+        </div>
+        <div id="Following" class="w3-col s6 w3-card-2" style="cursor: pointer;" on-tap="toggleFollow">
+            <paper-ripple></paper-ripple>
+            <div class="w3-deep-orange w3-padding-large">
+                Following
+            </div>
+        </div>
+    </div>
+    <div id="selectedTab" class="w3-row selected"></div>
+    <div class="w3-container">
+        <div class="w3-large w3-center" style="padding:8px;">
+            <b class="w3-text-dark-grey"><iron-icon icon="app:group"></iron-icon>&nbsp;{{follow}}</b>
+        </div>
+        <ul class="w3-ul w3-card-2 w3-hoverable w3-margin-bottom">
+            <hr>
+            <template id="resultList" is="dom-repeat" items="[[usersData]]" as="item" filter="_filter">
+                <li class="w3-bar" style="padding: 8px 0;">
+                <img class="w3-bar-item w3-circle" style="width:48px; height: 48px;" src="[[_profilePhoto(item.photoURL)]]">
+                    <div class="w3-bar-item">
+                        <span class="w3-large w3-text-blue">[[item.firstName]] [[item.lastName]]</span><br>
+                        <span>[[item.companyName]]</span>
+                    </div>
+                </li>
+            </template>
+        </ul>
+    </div>
+    
+    </template>
+    <script>
+
+    class MyFollowers extends Polymer.Element {
+        static get is() { return 'my-followers'; }
+        ready(){
+            super.ready();
+        }
+        static get properties() {
+            return {
+                user: {
+                    type: Object
+                },
+                _companyid: String,
+                usersData: {
+                    type: Object,
+                    observer: '_usersDataChange'
+                },
+                follow: {
+                    type: String,
+                    observer: 'refreshFilter',
+                    notify: true
+                },
+                
+            };
+        }
+
+        _usersDataChange(newData, oldData) {
+            
+        }
+        _profilePhoto(photo){
+            let photo_url = "../images/default-user.png";
+
+            if(photo == undefined){
+                photo_url = "../images/default-user.png";
+            }else if(photo == ""){
+                photo_url = "../images/default-user.png";
+            }else{
+                photo_url = ''+photo+'';
+            }
+
+            return photo_url;
+        }
+        toggleFollow(e){
+            return this.follow = e.currentTarget.id;
+        }
+        refreshFilter() {
+            this.$.resultList.render();
+        }
+        _filter (person) {
+            var selectedTab = this.$.selectedTab;
+            
+            if(this.follow == 'Followers'){
+                selectedTab.style = "background-color: #616161!important;";
+                // Followers
+                if(this.user !== undefined){
+                    if(this.user.follower){
+                        let follower =  this.user.follower;
+                        let isfollower = follower[person.userID];
+                        return isfollower;
+                    }else return false;
+                }
+                
+            }else{
+                selectedTab.style = "background-color: #ff5722!important;";
+                // Following
+                if(this.user !== undefined){
+                    if(this.user.following){
+                    let following =  this.user.following;
+                    let isfollowing = following[person.userID];
+
+                        return isfollowing;
+                    }else return false;
+                }
+            }
+            return false;
+        }
+
+    }
+    window.customElements.define(MyFollowers.is, MyFollowers);
+    </script>
+</dom-module>

@@ -1,0 +1,193 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="manifest" href="/manifest.json">
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<!-- Firebase Auth -->
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+
+<!-- Firebase Query -->
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-database-behavior.html">
+
+<dom-module id="preview-profile">
+	<template>
+	<style include="w3-styles"></style>
+	<style include="shared-styles">
+		:host {
+			position: relative;
+			display: block;
+			overflow: hidden;
+		}
+
+		.ldp-logo{
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			justify-content: center;
+		}
+
+		iron-image{
+			width: 100%;
+			height: 120px;
+		}
+		.user-pic{
+			width:100px;
+			height:100px;
+			border:4px solid #c3272e;
+		}
+		.profile-text-color{
+			color: #fff;
+		}
+		.profile-theme-color{
+			background-color: #c3272e;
+		}
+		
+	</style>
+	<firebase-query
+		id="qryuser"
+		path="/users/{{userobj.journalUserID}}/analytics"
+		data="{{userData}}">
+	</firebase-query>
+
+	<div class="w3-row">
+		<div class="w3-row">
+			<!-- <section class="ldp-logo">
+				<iron-image src="../images/landing/whiteblur.jpg" preload sizing="cover"></iron-image>
+			</section> -->
+			<div class="w3-row w3-margin-top">
+				<div class="w3-center w3-mobile w3-margin-top w3-margin-bottom"><img src="{{userobj.photoURL}}" class="user-pic w3-circle" /></div>
+				<div class="w3-center w3-mobile w3-round">
+					<div class="w3-row w3-text-dark-grey" style="font-size: x-large;">[[userobj.journalUserName]]</div>
+					<div class="w3-row" style="font-size: medium; color: var(--app-primary-color);">[[userobj.companyName]]</div>
+				</div>
+				<div class="w3-row w3-center w3-mobile">
+					<div class="w3-row" style="margin-top: -100px;">
+						<div class="w3-col s6 w3-center">
+							<div class="w3-text-dark-grey" style="font-size: xx-large;">[[followers]]</div>
+							<div class="w3-text-grey" style="font-size: smaller;">Followers</div>
+						</div>
+						<div class="w3-col s6 w3-center">
+							<div class="w3-text-dark-grey" style="font-size: xx-large;">[[following]]</div>
+							<div class="w3-text-grey" style="font-size: smaller;">Follows</div>
+						</div>
+					</div>
+					<!-- <hr> -->
+					<div class="w3-row w3-padding-16 profile-theme-color profile-text-color" style="margin-top: 70px;">
+						<div class="w3-col s3 m3 l3 w3-center">
+							<div style="font-size: xx-large;">[[thoughts]]</div>
+							<div style="font-size: smaller;">Messages</div>
+						</div>
+						<div class="w3-col s3 m3 l3 w3-center">
+							<div style="font-size: xx-large;">[[articles]]</div>
+							<div style="font-size: smaller;">Articles</div>
+						</div>
+						<div class="w3-col s3 m3 l3 w3-center">
+							<div style="font-size: xx-large;">[[videos]]</div>
+							<div style="font-size: smaller;">Videos</div>
+						</div>
+						<div class="w3-col s3 m3 l3 w3-center">
+							<div style="font-size: xx-large;">[[podcasts]]</div>
+							<div style="font-size: smaller;">Podcasts</div>
+						</div>
+					</div>
+					
+				</div>
+			</div>
+			<template id="resultList" is="dom-repeat" items="[[userData]]" as="item">
+			</template>
+		</div>
+		 
+	</div>
+	</template>
+	<script>
+	class PreviewProfile extends Polymer.Element {
+		static get is() { return 'preview-profile'; }
+		ready(){
+			super.ready();
+	  }
+	  static get properties() {
+		return {
+			userData: {
+				type: Object,
+				observer: '_userDataChange',
+			},
+			userobj: {
+				type: Object,
+				notify: true
+			},
+			_userid: {
+				type: String,
+				notify: true,
+				observer: '_userChanged'
+			},
+			articles: String,
+			thoughts: String,
+			videos: String,
+			podcasts: String,
+			followers: {
+				type: String,
+				value: "0"
+			},
+			following: {
+				type: String,
+				value: "0"
+			},
+		};
+	  }
+
+		_userDataChange(newData, oldData) {    
+			for (var item in newData) {
+				if(newData[item] != undefined){
+					if(newData[item].$key == "articles") this.articles = ""+newData[item].$val;
+					if(newData[item].$key == "thoughts") this.thoughts = ""+newData[item].$val;
+					if(newData[item].$key == "videos") this.videos = ""+newData[item].$val;
+					if(newData[item].$key == "podcasts") this.podcasts = ""+newData[item].$val;
+					if(newData[item].$key == "followers") this.followers = ""+newData[item].$val;
+					if(newData[item].$key == "following") this.following = ""+newData[item].$val;
+				}
+					
+			} 
+		}
+		_userChanged(newData, oldData) {    
+			if(newData != undefined){
+				var database = firebase.database();
+					database.ref('users').child(this._userid).child('following').on('value', (data)=>{
+						var no_following = this._objLen(data.val());
+						this.following = ""+no_following;
+
+						database.ref('/users/' + this._userid).child('analytics').child('following').set(no_following);
+					})
+
+					database.ref('users').child(this._userid).child('follower').on('value', (data)=>{
+						var no_followers = this._objLen(data.val());
+						this.followers = ""+no_followers;
+						database.ref('/users/' + this._userid).child('analytics').child('followers').set(no_followers);
+					})
+			}
+		}
+
+		_objLen(obj) {
+			let len = 0;
+			if(obj != undefined){
+			len = Object.keys(obj).length;
+			}
+			return len;
+		}
+
+	}
+	window.customElements.define(PreviewProfile.is, PreviewProfile);
+	</script>
+</dom-module>

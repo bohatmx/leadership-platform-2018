@@ -1,0 +1,150 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="manifest" href="/manifest.json">
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<!-- Firebase -->
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+
+<!-- Firebase Auth -->
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+
+<!-- Firebase Query -->
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-database-behavior.html">
+
+<link rel="import" href="app-icons.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="company-profile">
+    <template>
+
+    
+        <style include="shared-styles">
+        
+        
+        </style>
+    
+        
+      <div class="cards-wrapper">
+        <!-- Thoughts -->
+          <div class="main-card-container fadeInUp">
+              <div class="container card-header">
+                  <div class="company-profile-icon">
+                      <iron-icon icon="app:message"></iron-icon>
+                  </div>
+              </div>
+              <div class="container">
+                <div class="row">
+                  <div class="thought-img" style="background: #fff;">
+                    <div class="company-profile-title blue">
+                      15
+                    </div>
+                    <div class="company-profile-text">
+                      Thoughts
+                    </div>
+                  </div>
+                </div>
+              </div>
+          </div>
+    
+          <!-- Videos -->
+          <div class="main-card-container fadeInUp">
+              <div class="container card-header">
+                  <div class="company-profile-icon">
+                      <iron-icon icon="app:videocam"></iron-icon>
+                  </div>
+              </div>
+              <div class="container">
+                <div class="row">
+                  <div class="thought-img" style="background: #fff;">
+                    <div class="company-profile-title red">
+                      6
+                    </div>
+                    <div class="company-profile-text">
+                      Videos
+                    </div>
+                  </div>
+                </div>
+              </div>
+          </div>
+    
+          <!-- Users -->
+          <div class="main-card-container fadeInUp">
+              <div class="container card-header">
+                  <div class="company-profile-icon">
+                      <iron-icon icon="app:group"></iron-icon>
+                  </div>
+              </div>
+              <div class="container">
+                <div class="row">
+                  <div class="thought-img" style="background: #fff;">
+                    <div class="company-profile-title tomato">
+                      12
+                    </div>
+                    <div class="company-profile-text">
+                      Users
+                    </div>
+                  </div>
+                </div>
+              </div>
+          </div>
+    
+          <!-- Podcasts -->
+          <div class="main-card-container fadeInUp">
+              <div class="container card-header">
+                  <div class="company-profile-icon">
+                      <iron-icon icon="app:mic"></iron-icon>
+                  </div>
+              </div>
+              <div class="container">
+                <div class="row">
+                  <div class="thought-img" style="background: #fff;">
+                    <div class="company-profile-title green">
+                      15
+                    </div>
+                    <div class="company-profile-text">
+                      Podcasts
+                    </div>
+                  </div>
+                </div>
+              </div>
+          </div>
+        </div>
+      </template>
+
+  <script>
+    class CompanyProfile extends Polymer.Element {
+      static get is() { return 'company-profile'; }
+      static get properties() {
+        return {
+          user: {
+            type: Object
+          },
+          _companyid: String,
+        };
+      }
+      
+      _photo(photos){
+        let photo_url = "background-image: url('../../data/land.jpg');";
+
+        for (item in photos) { 
+          photo_url = 'background-image: url('+photos[item].url+');';
+        }
+
+        return photo_url;
+      }
+    }
+
+    window.customElements.define(CompanyProfile.is, CompanyProfile);
+  </script>
+</dom-module>

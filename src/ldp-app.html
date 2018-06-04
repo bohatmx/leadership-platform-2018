@@ -1,0 +1,405 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="manifest" href="/manifest.json">
+
+<!-- <link rel="import" href="../bower_components/polymer/polymer-element.html"> -->
+
+<!-- <link rel="import" href="/bower_components/polymer/polymer.html"> -->
+
+<!-- <link rel="import" href="/bower_components/polymerfire/firebase-app.html"> -->
+
+<!-- Firebase Auth -->
+<!-- <link rel="import" href="/bower_components/polymerfire/firebase-auth.html"> -->
+<!-- <link rel="import" href="/bower_components/polymerfire/firebase-query.html"> -->
+
+<!-- Sign In and Main Content -->
+<link rel="import" href="my-app.html">
+<link rel="lazy-import" href="sign-in.html">
+
+<dom-module id="ldp-app">
+  <template>
+    <firebase-app
+        auth-domain="leadershipplatform-158316.firebaseapp.com"
+        database-url="https://leadershipplatform-158316.firebaseio.com"
+        api-key="AIzaSyAf_oJi6fgm6-ZrVPeOVdW2DDoeu3v5SxY"
+        storage-bucket="leadershipplatform-158316.appspot.com"
+        messaging-sender-id="438289288307">
+    </firebase-app>
+
+    <firebase-auth id="auth" user="{{user}}" provider="google" status-known="{{statusKnown}}" on-error="handleError" signed-in="{{signedIn}}">
+    </firebase-auth>
+    <style>
+      :host {
+        display: block;
+        background-color: #f6f6f6;
+      }
+
+        /* ============ Snack Bar ======================== */
+        #snackbar {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -120px;
+            background-color: var(--paper-green-400);
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 10px;
+            position: fixed;
+            z-index: 1;
+            left: 40%;
+            bottom: 30px;
+            font-size: 14px;
+            white-space: pre-wrap;
+            display: flex;
+        }
+        #snackbar.show {
+            visibility: visible;
+            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        .snacklogo {
+            background-image: url('../../images/manifest/icon-48x48.png');
+            background-repeat: no-repeat;
+            background-size: contain;
+            display: block;
+            height: 48px;
+            width: 48px;
+        }
+        .snackmsg{
+            display: flex;
+            flex-direction: column;
+            margin-left: 10px;
+            text-align: left;
+        }
+        @-webkit-keyframes fadein {
+            from {bottom: 0; opacity: 0;} 
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @-webkit-keyframes fadeout {
+            from {bottom: 30px; opacity: 1;} 
+            to {bottom: 0; opacity: 0;}
+        }
+
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+    </style>
+    <template is="dom-if" if="[[signedIn]]">
+        <firebase-query
+            id="qryuser"
+            path="/users"
+            order-by-child="uid"
+            equal-to="[[user.uid]]"
+            data="{{userData}}">
+        </firebase-query>
+
+        <my-app notcompanyadmin="{{notcompanyadmin}}" approvethoughts="[[approveThoughts]]" addthoughts = "[[addThoughts]]" addarticle = "[[addArticle]]" hidecompany = "[[hidecompany]]" mythoughts = "[[myThoughts]]" user="[[_user]]" _companyid="[[_user.companyID]]" hidemenu="[[hidemenu]]" hidesubmenu="[[hidesubmenu]]"></my-app>
+    </template>
+    <template is="dom-if" if="[[!signedIn]]">
+        <sign-in></sign-in>
+    </template>
+
+    <div id="snackbar">
+        <div id="snacklogo" class="snacklogo">
+        </div>
+        <div class="snackmsg">
+            <div id="snacktitle" class="snacktitle"></div>
+            <div id="snackbody" class="snackbody"></div>
+        </div>
+    </div>
+  </template>
+  
+
+  <script>
+        var _platform;
+        var nav = window.navigator;
+        var _ua = window.navigator.userAgent;
+
+        var plat = function() {
+			var plat = '';
+
+			if((/iphone|ipod|ipad/i).test(_ua) && (nav.platform.match(/iPhone|iPod|iPad/i))) plat = 'iOS';
+			if((/macintosh/i).test(_ua) && (nav.platform.match(/MacIntel/i))) plat = 'MacOS';
+			if((/android/i).test(_ua) && (nav.platform.match(/Linux/i))) plat = 'Android';
+			if((/windows nt/i).test(_ua) && (nav.platform.match(/Win32/i))) plat = 'Windows';
+			if((/windows phone/i).test(_ua)) plat = 'WindowsPhone';
+
+			if(nav.platform.match(/Win32/i)) plat = 'Windows';
+			else if(nav.platform.match(/MacIntel/i)) plat = 'MacOS';
+			else if(nav.platform.match(/iPhone|iPod|iPad/i)) plat = 'iOS';
+			else if(nav.platform.match(/blackberry/i)) plat = 'BlackBerry';
+
+			return plat;
+        };
+        
+		_platform = plat();
+    /**
+     * @customElement
+     * @polymer
+     */
+     Polymer({
+        is: 'ldp-app',
+        properties: { 
+           user: {
+               type: Object
+           },
+           _selected: {
+                type: Number,
+                value: 0,
+                notify: true
+            },
+           addThoughts: {
+               type: Boolean
+           },
+           hidemenu: {
+               type: Boolean,
+               value: true,
+               notify: true
+           },
+           hidesubmenu: {
+               type: Boolean,
+               value: true,
+               notify: true
+           },
+           approveThoughts: {
+               type: Boolean
+           },
+           notcompanyadmin: {
+               type: Boolean,
+               value: true,
+               notify: true
+           },
+           addArticle: {
+               type: Boolean
+           },
+           myThoughts: {
+               type: Boolean,
+               value: false
+           },
+           hidecompany: {
+               type: Boolean,
+               value: true,
+               notify: true
+           },
+           statusKnown: {
+               type: Object
+           },
+           userData: {
+                type: Object,
+                observer: '_onUserDataReceived'
+            },
+           _user: {
+               type: Object
+           },
+           _companyID: String,
+           signedIn: Boolean
+
+        },
+        ready: function(){
+            var SignedIn = localStorage.getItem("LoggedIn");
+
+            if(SignedIn === "false") this.loadPage('sign-in');
+            // else this.loadPage('leadership-app');
+
+            // set messaging
+            const messaging = firebase.messaging();
+            // Request for Permission
+            this.requestPermission();
+
+            // Generate FCM Token if it's Windows, Android or Windows Phone
+            if((/android|windows|windowsphone/i).test(_platform)){
+                // [START refresh_token]
+                // Callback fired if Instance ID token is updated.
+                messaging.onTokenRefresh(function() {
+                    messaging.getToken()
+                    .then(function(refreshedToken) {
+
+                        return messaging.getToken();
+                    })
+                    .then(function(currentToken) {
+                        if (currentToken) {
+                            setTokenSentToServer(false);
+                            setTokenToLocalStorage(currentToken);
+                            sendTokenToServer();
+                        }
+                    })
+                    .catch(function(err) {
+                        console.log('Unable to retrieve refreshed token ', err);
+                    });
+
+                    // [END request_permission]
+                    function setTokenToLocalStorage(currentToken) {
+                        window.localStorage.setItem('currentToken', currentToken);
+                    }
+                    function sendTokenToServer() {
+                        // Get a reference to the database service
+                        var database = firebase.database();
+                        console.log(this._user);
+
+                        if (!isTokenSentToServer()) {
+                            // Update user fcmToken
+                            var updates = {};
+                            updates['/users/' + this._user.userID+'/fcmToken'] = localStorage.getItem('currentToken');
+                            database.ref().update(updates);
+
+                            setTokenSentToServer(true);
+                        } 
+                    }
+                    function isTokenSentToServer() {
+                        return window.localStorage.getItem('sentToServer') == 1;
+                    }
+                    function setTokenSentToServer(sent) {
+                        window.localStorage.setItem('sentToServer', sent ? 1 : 0);
+                    }
+                    
+                });
+                // [END refresh_token]
+            }
+
+            // [START receive_message]
+            // Handle incoming messages. Called when:
+            // - a message is received while the app has focus
+            // - the user clicks on an app notification created by a sevice worker
+            //   `messaging.setBackgroundMessageHandler` handler.
+            var msg = messaging.onMessage(function(payload) {
+
+                showSnackBar(payload.notification);
+                
+                // [START_EXCLUDE]
+                // Update the UI to include the received message.
+
+                // this.appendMessage(payload);
+                // [END_EXCLUDE]
+            });
+
+            var x = Polymer.dom(this.root).querySelector('#snackbar');
+            var snacktitle = Polymer.dom(this.root).querySelector('#snacktitle');
+            var snackbody = Polymer.dom(this.root).querySelector('#snackbody');
+
+            function showSnackBar(msg){
+                // var x = this.$.snackbar;
+
+                snacktitle.innerHTML = msg.title;
+                snackbody.innerHTML = msg.body;
+                x.className = "show";
+                setTimeout(function(){ x.className = x.className.replace("show", ""); }, 10000);
+            }
+            // [END receive_message]
+        },
+        loadPage: function(page){
+            var resolvedPageUrl = this.resolveUrl(page + '.html');
+            Polymer.importHref(
+                resolvedPageUrl,
+                null,
+                'sign-in.html',
+                true);
+        },
+        requestPermission: function() {
+            // set messaging
+            const messaging = firebase.messaging();
+
+            // [START request_permission]
+            messaging.requestPermission()
+            .then(function() {
+                return messaging.getToken();
+            })
+            .then(function(currentToken) {
+                if (currentToken) {
+                    setTokenToLocalStorage(currentToken);
+                } 
+            })
+            .catch(function(err) {
+                // console.log('Unable to get permission to notify.', err);
+            });
+            // [END request_permission]
+            function setTokenToLocalStorage(currentToken) {
+                window.localStorage.setItem('currentToken', currentToken);
+            }
+        },
+        // Send the Instance ID token your application server, so that it can:
+        // - send messages back to this app
+        // - subscribe/unsubscribe the token from topics
+        sendTokenToServer: function() {
+            // Get a reference to the database service
+            var database = firebase.database();
+
+            if (!this.isTokenSentToServer()) {
+
+                // Update user fcmToken
+                var updates = {};
+                updates['/users/' + this._user.userID+'/fcmToken'] = localStorage.getItem('currentToken');
+                database.ref().update(updates);
+
+                this.setTokenSentToServer(true);
+            } 
+        },
+        isTokenSentToServer: function() {
+            return window.localStorage.getItem('sentToServer') == 1;
+        },
+        setTokenSentToServer: function(sent) {
+            window.localStorage.setItem('sentToServer', sent ? 1 : 0);
+        },
+        _onUserDataReceived: function(newData, oldData){
+          for (item in newData) { 
+            this._user = newData[item];
+            this._companyID = this._user.companyID;
+
+            this.sendTokenToServer();
+            this.approveThoughts = false;
+
+            // set user name and logo
+            localStorage.setItem("fullName", this._user.firstName+' '+this._user.lastName);
+            
+            if(this._user.photoURL != undefined || this._user.photoURL) {
+                localStorage.setItem("userLogo", this._user.photoURL);
+            }else{
+                localStorage.setItem("userLogo", "../images/default-user.png");
+            }
+
+            // rights for standard user
+            if(this._user.userType == 8){
+            this.hidemenu = true;
+            this.hidesubmenu = true;
+            }
+            else if((this._user.userType == 4) || (this._user.userType == 5) || (this._user.userType == 6) || (this._user.userType == 7) || (this._user.userType == 9)){
+            this.hidemenu = false;
+
+            if(this._user.userType === 5) this.hidesubmenu = true; 
+            else this.hidesubmenu = false;                
+            }
+            else{
+            this.hidemenu = true;  
+            this.hidesubmenu = true;
+            }
+
+            if(this._user.userType === 7) this.notcompanyadmin = false; 
+            else this.notcompanyadmin = true;
+          }
+        }
+      });
+
+      firebase.auth().onAuthStateChanged(function(user) {
+        if(user == null || user == undefined) {
+            localStorage.setItem("LoggedIn", false);
+        }else localStorage.setItem("LoggedIn", true);
+
+        // console.log('Logged User id: '+user.uid);
+        // console.log("user: "+JSON.stringify(user));
+     });
+
+  </script>
+</dom-module>

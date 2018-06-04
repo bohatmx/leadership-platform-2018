@@ -1,0 +1,337 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="manifest" href="/manifest.json">
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+
+<link rel="import" href="my-recorder.html">
+<dom-module id="voice-recorder">
+    <template>
+    <style include="w3-styles"></style>
+    <style include="shared-styles">
+        :host {
+            position: relative;
+            display: block;
+            overflow: hidden;
+        }
+        .recorder-area{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background-color: #2e2e2e;
+            border-radius: 6px;
+            color: #fff;
+            height: auto;
+            padding: 16px;
+            min-height: 410px;
+        }
+        .maroon{
+            background-color: #8a0f36;
+        }
+        .record-btns{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+
+    <div class="container">
+        <div class="recorder-area">
+            <iron-image src="../data/mic.png" style="width:auto; height:80px;" preload sizing="contain"></iron-image>
+            <pre id="log"></pre>
+            <br>
+            <div class="record-btns">
+                <paper-button id="startrecord" style="margin-right: 16px;" class="maroon" on-tap="startRecording" raised>record</paper-button>
+                <paper-button style="background:#eaeaea;" id="stoprecord" class="w3-text-red" on-tap="stopRecording" disabled raised>stop</paper-button>
+            </div>
+            <h3>Recordings</h3>
+            <div style="width:100%;" id="hideRemoveRecording" hidden>
+                <paper-button style="color:#810029; background:#eaeaea; margin-bottom: 16px;" raised on-tap="removeRecordings">Remove Recording</paper-button>
+            </div>
+            <div id="recordingslist" class="record-btns"></div>
+        </div>  
+    </div>
+    </template>
+    <script>
+    var AudioContex;
+    var context;
+    var audioBuffer = [];
+    var myArrayBuffer, nowBuffering, source;
+    var newBlob = new Blob();
+    var podcast_ID='';
+
+    var audio_context;
+    var recorder;
+    var processor;
+
+    class VoiceRecorder extends Polymer.Element {
+        static get is() { return 'voice-recorder'; }
+        ready(){
+        super.ready();
+        sessionStorage.setItem("closeElement", false);
+      }
+      static get properties() {
+        return {
+            user: {
+            type: Object
+            },
+            _companyid: String,
+            previouspage: String,
+        };
+      }
+
+    removeItems(){
+        var recordingslist = this.$.recordingslist;
+
+        audioBuffer = [];
+
+        this.$.log.innerHTML = "";
+
+        while (recordingslist.firstChild) {
+            recordingslist.removeChild(recordingslist.firstChild);
+        }
+    }
+    //   recorder js functions
+    init() {
+        try {
+        // webkit shim
+        // window.AudioContext = window.AudioContext || window.webkitAudioContext;
+        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia;
+        window.URL = window.URL || window.webkitURL;
+        
+        // audio_context = new AudioContext;
+        audio_context = null;
+        if (typeof AudioContext !== "undefined")
+        {
+            audio_context = new AudioContext();
+            console.log("Created AudioContext");
+        }
+        else if (typeof webkitAudioContext !== "undefined")
+        {
+            audio_context = new webkitAudioContext();
+            console.log("Created webkitAudioContext");
+        }
+        else
+        {
+            this.__log("No web audio support in this browser 0!");
+            // alert('No web audio support in this browser 0!');
+            return;
+        }
+            
+        processor = audio_context.createScriptProcessor(4096, 2, 2);
+        processor.connect(audio_context.destination);
+        } catch (e) {
+            this.__log('No web audio support in this browser 1! '+e);
+            // alert('No web audio support in this browser 1! '+e);
+        }
+    
+        if (navigator.getUserMedia) {
+            this.__log('Recording getUserMedia...'); 
+            navigator.getUserMedia({audio: true}, this.startUserMedia, function(e) {
+                this.__log('No live audio input: ' + e);
+            });
+        } else if (navigator.webkitGetUserMedia) {
+            this.__log('Recording webkitGetUserMedia...');    
+            navigator.webkitGetUserMedia({audio: true}, this.startUserMedia, function(e) {
+                this.__log('No live audio input: ' + e);
+            });
+        } else if (navigator.mediaDevices.getUserMedia) {
+            this.__log('Recording mediaDevices.getUserMedia...');    
+            navigator.mediaDevices.getUserMedia({audio: true}).then(this.startUserMedia).catch(function(e) {
+                this.__log('No live audio input: ' + e);
+            });
+        } else {
+            this.__log('No user media support');
+        }
+    }
+    createDownloadLink() {
+        var recordingslist = this.shadowRoot.querySelector('#recordingslist');
+        var hideRemoveRecording = this.$.hideRemoveRecording;
+        var rec = this.recording;
+        
+        recorder && recorder.exportWAV(function(blob) {
+        var url = URL.createObjectURL(blob);
+        var au = document.createElement('audio');
+
+        audioBuffer.push(blob);
+
+        au.controls = true;
+        au.src = url;
+        recordingslist.appendChild(au);
+        hideRemoveRecording.style = 'display: block;';
+        });
+    }
+    voicemail(){
+        return audioBuffer;
+    }
+
+    removeRecordings(){
+        var recordingslist = this.$.recordingslist;
+        audioBuffer = [];
+
+        this.$.log.innerHTML = "";
+
+        while (recordingslist.firstChild) {
+            recordingslist.removeChild(recordingslist.firstChild);
+        }
+
+        this.$.hideRemoveRecording.style = 'display: none;';
+    }
+
+    __log(e, data) {
+        var log = this.$.log;
+        if (typeof e == "object")
+        {
+            console.log(e, '>>>>>>>> Log Object string');
+            // e = ">>>>>>>>>>>>>>>>>>>>>>>>>>"+JSON.stringify(e);
+        }else{
+            console.log(e, 'Not Log Object string');
+        }
+
+        log.innerHTML += "\n" + e + " <<<<< " + (data || '');
+    }	
+
+    startUserMedia(stream) {
+        window.localStream = stream;
+
+        var input = audio_context.createMediaStreamSource(stream);
+        console.log('Media stream created.');
+        
+        recorder = new Recorder(input,processor);
+        // recorder = new Recorder(input);
+        console.log('Recorder initialised.');
+        
+        // this.startRecordingAftrInit();
+        audio_context.resume();
+        recorder && recorder.record();
+        console.log('Recording...');
+    }
+
+    startRecording() {
+        var button = this.$.startrecord;
+        var log = this.$.log;
+        var recordingslist = this.$.recordingslist;
+        this.$.hideRemoveRecording.style = 'display: none;';
+
+        log.innerHTML = "";
+        audioBuffer = [];
+        while (recordingslist.firstChild) {
+            recordingslist.removeChild(recordingslist.firstChild);
+        }
+
+        this.init();
+        button.disabled = true;
+        button.nextElementSibling.disabled = false;
+    }
+
+    startRecordingAftrInit() {
+        audio_context.resume();
+        recorder && recorder.record();
+        this.__log('Recording...');
+    }
+
+    stopRecording() {
+        var button = this.$.stoprecord;
+
+        recorder && recorder.stop();
+        button.disabled = true;
+
+        button.previousElementSibling.disabled = false;
+        this.__log('Stopped recording.\n');
+        
+        localStream.getAudioTracks()[0].stop();
+        
+        // create WAV download link using audio data blob
+        this.createDownloadLink();
+        
+        recorder.clear();
+        audio_context.close();
+        audio_context = null;
+        processor = null;
+    }
+
+    uploadFile(){
+        // File or Blob
+        var filename = new Date().toISOString()+'.wav';
+        var downloadURL='';
+        var database = firebase.database();
+        var updates = {};
+
+        this.__log('Uploading file...please wait.');
+
+        var file = audioBuffer[0];
+        let journalUserID = this.user.userID;
+        let journalUserName = this.user.firstName+" "+this.user.lastName;
+
+        // Create the file metadata
+        var metadata = {
+        contentType: 'audio/wav'
+        };
+        var storageRef = firebase.storage().ref();
+
+        var uploadTask = storageRef.child('podcasts/' + filename).put(audioBuffer[0], metadata);
+
+        // Listen for state changes, errors, and completion of the upload.
+        uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
+        function(snapshot) {
+            // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+            var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log('Upload is ' + progress + '% done');
+            switch (snapshot.state) {
+            case firebase.storage.TaskState.PAUSED: // or 'paused'
+                console.log('Upload is paused');
+                break;
+            case firebase.storage.TaskState.RUNNING: // or 'running'
+                console.log('Upload is running');
+                break;
+            }
+        }, function(error) {
+
+        // A full list of error codes is available at
+        // https://firebase.google.com/docs/storage/web/handle-errors
+        switch (error.code) {
+            case 'storage/unauthorized':
+            // User doesn't have permission to access the object
+            break;
+
+            case 'storage/canceled':
+            // User canceled the upload
+            break;
+
+            case 'storage/unknown':
+            // Unknown error occurred, inspect error.serverResponse
+            break;
+        }
+        }, function() {
+            // Upload completed successfully, now we can get the download URL
+            downloadURL = uploadTask.snapshot.downloadURL;
+
+            updates['/podcasts/'+podcast_ID+'/active'] = true;
+            updates['/podcasts/'+podcast_ID+'/company_status'] = "general_true";
+            updates['/podcasts/'+podcast_ID+'/userID'] = journalUserID;
+            updates['/podcasts/'+podcast_ID+'/userName'] = journalUserName;
+            updates['/podcasts/'+podcast_ID+'/podcastSize'] = 0;
+            updates['/podcasts/'+podcast_ID+'/url'] = downloadURL;
+
+            database.ref().update(updates);
+            podcast_ID = '';
+        });
+    }
+
+    }
+    window.customElements.define(VoiceRecorder.is, VoiceRecorder);
+    </script>
+</dom-module>

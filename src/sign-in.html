@@ -1,0 +1,320 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/gold-password-input/gold-password-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+
+<!-- Icons -->
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/iron-iconset/iron-iconset.html">
+<link rel="import" href="app-icons.html" async>
+
+<!-- Iron pages -->
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+
+<!-- Firebase Auth -->
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+
+<link rel="import" href="w3-styles.html">
+<link rel="import" href="theme-styles.html">
+
+<dom-module id="sign-in">
+  <template>
+    <firebase-auth id="auth" user="{{user}}" provider="google" status-known="{{statusKnown}}" on-error="handleError">
+    </firebase-auth>
+
+    <style include="theme-styles">
+        :host {
+          display: block;
+          /* background: url('/images/landing/whiteblur.jpg') no-repeat center center; */
+          -webkit-background-size: cover;
+          -moz-background-size: cover;
+          -o-background-size: cover;
+          background-size: cover!important;
+          background-color: #fff;
+          min-height: 100vh;
+          height: 100%;
+
+            /* Label and underline color when the input is not focused */
+            --paper-input-container-color: #cc0041;
+
+            /* Label and underline color when the input is focused */
+            --paper-input-container-focus-color: #cc0041;
+
+            /* Label and underline color when the input is invalid */
+            --paper-input-container-invalid-color: red;
+
+            /* Input foreground color */
+            /* --paper-input-container-input-color: #242121; */
+        }
+
+        #resetemail_input{
+          /* Label and underline color when the input is not focused */
+          --paper-input-container-color: #2196F3;
+
+          /* Label and underline color when the input is focused */
+          --paper-input-container-focus-color: #2196F3;
+        }
+
+        .w3-btn{
+            min-width: 130px;
+        }
+        .login-btn{
+            width: 80%;
+        }
+        .other-logins{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+        }
+        /* ============ Snack Bar ======================== */
+        #snackbar {visibility: hidden;min-width: 250px;margin-left: -120px;background-color: var(--paper-green-400);color: #fff;text-align: center;border-radius: 2px;padding: 10px;position: fixed;
+        z-index: 99999999999;left: 40%;bottom: 30px;font-size: 14px;white-space: pre-wrap;}
+        #snackbar.show {visibility: visible;-webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;animation: fadein 0.5s, fadeout 0.5s 2.5s;}
+        @-webkit-keyframes fadein {from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;}
+        }
+        @keyframes fadein {from {bottom: 0; opacity: 0;}to {bottom: 30px; opacity: 1;}
+        }
+        @-webkit-keyframes fadeout {from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;}
+        }
+        @keyframes fadeout {from {bottom: 30px; opacity: 1;}to {bottom: 0; opacity: 0;}
+        }
+    </style>
+
+    <style include="w3-styles">
+
+        iron-pages{
+            min-height: 100vh;
+            height: 100%;
+        }
+
+        .sign-in{
+            max-width: 400px;
+            width: 80%;
+        }
+
+        iron-image{
+            width: 100%;
+            height: 100px;
+        }
+
+        .ldp-logo{
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: center;
+        }
+
+    </style>
+
+    
+
+     <!-- list/detail pages -->
+     <iron-pages selected="{{_nextPage}}" attr-for-selected="page-name" class="w3-display-container">
+        <div page-name="options">
+          <section class="w3-display-middle sign-in w3-card w3-padding-24 w3-padding">
+              <section class="ldp-logo">
+                  <iron-image src="../images/glp-logo.png" preload sizing="contain"></iron-image>
+              </section>
+              
+              <section>
+                <section>
+                  <paper-input autofocus id="email_input" name="email_input" always-float-label label="Email" type="email" required auto-validate tabindex="0" ></paper-input>
+                  <gold-password-input class="w3-margin-bottom" id="passwordinput" name="passwordinput" always-float-label label="Password" reveal suffix required on-keypress="enterPressAlert"></gold-password-input>
+                  <div class="other-logins w3-margin-bottom">
+                      <paper-button class="w3-btn w3-ripple w3-theme w3-round-xxlarge w3-margin-bottom w3-padding-16 login-btn" on-tap="signInEmail">Login</paper-button>
+                      
+                  </div>
+                </section>
+                <section class="w3-row-padding other-logins w3-padding-24 w3-border-top">
+                  <!-- <paper-button raised on-tap="signInPhone" class="w3-btn w3-ripple w3-teal w3-round-xxlarge w3-padding-16 w3-col s4"><iron-icon icon="app:local-phone"></iron-icon> Phone
+                  </paper-button> -->
+                  <paper-button raised on-tap="signInGoogle" class="w3-btn w3-ripple w3-red w3-round-xxlarge w3-padding-16 login-btn"><iron-iconset name="mygoogle" icons="google" src="/images/google-plus.png" size="24" width="24" class="w3-margin-right">
+                  </iron-iconset>
+                  <iron-icon icon="mygoogle:google" style="background-repeat: no-repeat;"></iron-icon> Sign in with Google
+                  </paper-button>
+                </section>
+
+                <section class="w3-row-padding w3-padding-24 w3-center w3-text-blue">
+                  <a href="#" on-tap="resetPage" style="text-decoration: none;">Forgot your password?</a>
+                </section>
+              </section>
+          </section>
+        </div>
+        <div page-name="send-reset">
+          <section class="w3-display-middle sign-in w3-card w3-padding-24 w3-padding ">
+              <section class="ldp-logo">
+                <iron-image src="../images/glp-logo.png" preload sizing="contain"></iron-image>
+              </section>
+              <section class="w3-center">
+                <div class="w3-text-dark-grey w3-padding-16">
+                  <h3>Forgot your password?</h3>
+                </div>
+                <div class="w3-text-grey">
+                  <p>To reset password. enter your email, presss the button and check mail to follow instructions.</p>
+              </div>
+              </section>
+              
+              <section>
+                <paper-input autofocus id="resetemail_input" name="resetemail_input" always-float-label label="Enter your Email" type="email" required auto-validate tabindex="0" ></paper-input>
+                <div class="other-logins w3-margin-top">
+                  <paper-button class="w3-btn w3-ripple w3-blue w3-round-xxlarge w3-margin-bottom w3-padding-16 login-btn" on-tap="sendResetPassword">Reset Password</paper-button>
+                </div>
+              </section>
+
+              <section class="w3-row-padding w3-padding-24 w3-center w3-text-blue">
+                <a href="#" on-tap="optionsPage" style="text-decoration: none;">BACK</a>
+              </section>
+          </section>
+      </div>
+    </iron-pages>
+    <div id="snackbar"></div>
+  </template>
+
+  <script>
+    Polymer({
+        is: 'sign-in',
+        properties: {
+          user: {
+            type: Object
+          },
+          statusKnown: {
+              type: Object
+          },
+          _nextPage: {
+            type: String,
+            value: 'options'
+          }
+      },
+      handleError: function(e) {
+          console.log(e.detail);
+      },
+      enterPressAlert: function(e){
+        var code = (e.keyCode ? e.keyCode : e.which);
+        if(code == 13) { //Enter keycode
+          this.signInEmail();
+        }
+      },
+      setInputFocus: function(){
+        this.$.email_input.focus();
+      },
+      signInGoogle: function(){
+        let isError = false;
+        let errorMessage = "";
+        return this.$.auth.signInWithPopup().then(function(response){
+          localStorage.setItem("LoggedIn", true);
+        }).catch(function(error) {
+            localStorage.setItem("LoggedIn", false);
+            // Handle Errors here.
+            var errorCode = error.code;
+            errorMessage = error.message;
+            isError = true;
+            // ...
+        });
+
+        if(isError == true){
+          this.showSnackBar(errorMessage);
+          return;
+        }
+        this._nextPage="options";
+      },
+      signInEmail: function(){
+        var email = this.$.email_input.value;
+        var password = this.$.passwordinput.value;
+        var emailVal = this.$.email_input.validate();
+        var passVal = this.$.passwordinput.validate();
+
+        var that = this;
+
+        if(!email || !emailVal){
+          this.showSnackBar("Email is required!");
+          return;
+        }else if(!password || !passVal){
+          this.showSnackBar("Password is required!");
+          return;
+        }else{
+          sessionStorage.setItem("loginError", "");
+          sessionStorage.setItem("isError", false);
+          firebase.auth().signInWithEmailAndPassword(email, password).then(function(response){
+            localStorage.setItem("LoggedIn", true);
+          }).catch(function(error) {
+            // Handle Errors here.
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            localStorage.setItem("LoggedIn", false);
+            sessionStorage.setItem("loginError", errorMessage);
+            sessionStorage.setItem("isError", true);
+
+            that.showSnackBar(errorMessage);
+            that.$.email_input.value = "";
+            that.$.passwordinput.value = "";
+            that._nextPage="options";
+            // ...
+          });
+          
+        }  
+      },
+      resetPage: function(){
+        this._nextPage="send-reset";
+      },
+      optionsPage: function(){
+        this._nextPage="options";
+      },
+      sendResetPassword: function(){
+        var email = this.$.resetemail_input.value;
+        var emailVal = this.$.resetemail_input.validate();
+
+        var that = this;
+
+        if(!email || !emailVal){
+          this.showSnackBar("Email is required!");
+          return;
+        }
+
+        var actionCodeSettings = {
+          url: 'https://thinklead.app'
+        };
+
+        firebase.auth().sendPasswordResetEmail(email, actionCodeSettings).then(function(){
+            that.$.resetemail_input.value = "";
+            that.showSnackBar("A password reset link has been mailed to your account.");
+            
+            that.$.email_input.value = "";
+            that.$.passwordinput.value = "";
+            that._nextPage="options";
+          }).catch(function(error) {
+            // Handle Errors here.
+            var errorCode = error.code;
+            var errorMessage = error.message;
+
+            that.showSnackBar(errorMessage);
+          });
+        
+      },
+      showSnackBar: function(msg){
+        var x = this.$.snackbar;
+        x.innerHTML = msg;
+        x.className = "show";
+        setTimeout(function(){ x.className = x.className.replace("show", ""); }, 5000);
+      }
+    });
+
+    firebase.auth().onAuthStateChanged(function(user) {
+      
+      // console.log(user);
+    });
+  </script>
+</dom-module>

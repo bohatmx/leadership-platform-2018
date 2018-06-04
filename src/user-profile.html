@@ -1,0 +1,408 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="manifest" href="/manifest.json">
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
+<link rel="import" href="../bower_components/paper-search/paper-search-bar.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+
+<!-- iron elements -->
+<link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../bower_components/paper-styles/shadow.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="shared-styles.html">
+<!-- Paper items -->
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="/bower_components/gold-password-input/gold-password-input.html">
+
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+
+<!-- Firebase Auth -->
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+
+<!-- Firebase Query -->
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-database-behavior.html">
+
+<dom-module id="user-profile">
+  <template>
+    <style include="w3-styles"></style>
+    <style include="shared-styles">
+
+      paper-button.indigo {
+        background-color: var(--paper-indigo-500);
+        color: white;
+        padding-top: 10px;
+        margin: 0 auto;
+        min-width: 96px;
+        font-family: 'Roboto', 'Noto', sans-serif;
+        font-weight: normal;
+        font-size: 14px;
+        -webkit-font-smoothing: antialiased;
+      }
+      paper-icon-button{
+        margin: auto;
+      }
+      .buttons{
+        margin: 10px;
+        display: inline-block;
+      }
+      .user{
+        display: flex;
+        flex-wrap: nowrap;
+        flex-direction: row;
+      }
+      .user > .user-details{
+        flex-grow: 8;
+      }
+      .user-details > h3{
+        margin: 6px 0;
+        color: black
+      }
+      .user-details > paper-input{
+        padding: 0;
+      }
+      .user > .user-avatar{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        align-content: center;
+        flex-grow: 2;
+        margin-right: 30px;
+      }
+      .user-avatar-current {
+        background-image: url('../images/profile/default-user.png');
+        background-repeat: no-repeat;
+        background-size: cover;
+        display: block;
+        height: 120px;
+        width: 120px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        border-radius: 6px;
+        border: 1px;
+      }
+      @media screen and (max-width: 800px){
+        .user{
+          display: flex;
+          flex-wrap: nowrap;
+          flex-direction: column;
+        }
+
+        .buttons{
+          flex-direction: row;
+          margin: 10px;
+          display: inline-block;
+        }
+    }
+
+    </style>
+  <div class="add-thought">
+    <form class="new-thought card">
+      <h1>User Profile</h1>
+      <hr>
+      <section class="user">
+          <section class="user-avatar">
+            <div class="user-avatar-current" id="userAvatar" style$="[[_photo(photo)]]"></div>
+            <label class="paper-font-button w3-teal" style="cursor: pointer; color:#fff; border-radius: 6px; padding: 6px;" for="local_photo_input">
+                Account Avatar
+            </label>
+            <input id="local_photo_input" type="file" accept="image/*" on-change="handlePhoto"/>
+          </section>
+          <section class="user-details">
+              <paper-input id="firstName" name="firstName" always-float-label label="First Name" type="text" auto-validate value="[[user.firstName]]" required></paper-input>
+              <paper-input id="lastName" name="lastName" always-float-label label="Last Name" type="text" auto-validate value="[[user.lastName]]" required></paper-input>
+              <paper-input id="emailAddress" name="emailAddress" always-float-label label="Email Address (readonly)" type="email" auto-validate value="[[user.email]]" readonly>
+              </paper-input>
+              <h3>Password</h3>
+              <gold-password-input id="currentPassword" name="currentPassword" always-float-label label="Current Password (readonly)" reveal suffix required value="[[user.password]]" strength-meter readonly>
+              </gold-password-input>
+              <gold-password-input id="passwordinput" name="passwordinput" always-float-label label="New Password" reveal suffix required strength-meter minlength="6" error-message="The password must contain at least 6 characters"></gold-password-input>
+              <gold-password-input id="confirmPassword" name="confirmPassword" always-float-label label="Confirm Password" reveal suffix required strength-meter minlength="6" error-message="The password must contain at least 6 characters"></gold-password-input>
+              <div class="buttons">
+                  <!-- <paper-button raised class="w3-deep-orange" on-tap="_closeParentModal">CANCEL</paper-button> -->
+                  <paper-button raised on-tap="updateProfile" class="indigo">UPDATE</paper-button>
+                </div>
+          </section>
+      </section>      
+    </form>
+  </div>
+
+  
+    <div id="snackbar"></div>
+  </template>
+
+  <script>
+    class UserProfile extends Polymer.Element {
+      static get is() { return 'user-profile'; }
+
+      static get properties() {
+        return {
+          quotes: Object,
+          user: {
+              type: Object
+          },
+          _companyid: String,
+          photo: {
+            type: String
+          }
+        };
+      }
+      handlePhoto(e){
+          var photoSelected = e.target.files[0];
+
+          // compress photo ready to upload
+          this.resizeImage(photoSelected, "photo");
+          
+          // compress thumbnail for upload
+          this.resizeImage(photoSelected, "thumbnail");
+
+          var selectedImage = URL.createObjectURL(photoSelected);
+
+          this.photo = selectedImage;
+
+          // this.$.userAvatar.style.display = "block";
+      }
+
+      _closeParentModal(e){
+        var parentNode = Polymer.dom(this).parentNode;
+        // ios 11 bug caret position
+				// if ( iOS && iOS11 ) {
+					parentNode.removeIOSBugfix();
+				// }
+        $(parentNode).parents('.ldp-modal').css('display', 'none');
+      }
+
+      updateProfile(){
+        let firstName = this.$.firstName.value;
+        let lastName = this.$.lastName.value;
+        // var email = this.$.emailAddress.value;
+        let password = this.$.passwordinput.value;
+        let confirmPassword = this.$.confirmPassword.value;
+        var that = this;
+
+        let firstNameVal = this.$.firstName.validate();
+        let lastNameVal = this.$.lastName.validate();
+        // var emailVal = this.$.emailAddress.validate();
+
+        let photo = this.$.local_photo_input.files[0];
+        let photoDownloadURL = "";
+        let thumbnailURL = "";
+        let photo_upload, thumbnail_upload;
+        let timeInMs = Date.now();
+
+        // validate names
+        if(!firstName || !firstNameVal){
+          this.showSnackBar("Firstname is required!");
+          return;
+        }
+        if(!lastName || !lastNameVal){
+          this.showSnackBar("Lastname is required!");
+          return;
+        }
+        // if(!email || !emailVal){
+        //   this.showSnackBar("Email is required!");
+        //   return;
+        // }
+        let passVal, confirmVal;
+        if(password){
+          passVal = this.$.passwordinput.validate();
+          confirmVal = this.$.confirmPassword.validate();
+
+          if(!passVal){
+            this.showSnackBar("Password is required!");
+            return;
+          }
+
+          if(!confirmVal){
+            this.showSnackBar("Confirm Password is required!");
+            return;
+          }
+
+          if(password !== confirmPassword){
+            this.showSnackBar("Password and Confirm Password are not matching!");
+            return;
+          }
+
+        }
+
+        // Get a reference to the database service
+        let database = firebase.database();
+        let storage = firebase.storage();
+
+        let userID = this.user.userID;
+
+        // Update user data 
+        let updates = {};
+        updates['/users/' + userID+'/firstName'] = firstName;
+        updates['/users/' + userID+'/lastName'] = lastName;
+
+        if(password && passVal){
+          updates['/users/' + userID+'/password'] = password;
+
+          var user = firebase.auth().currentUser;
+
+          user.updatePassword(password).then(function() {
+            // Update successful.
+          }).catch(function(error) {
+            // An error happened.
+          });
+        }
+
+        database.ref().update(updates).then(function (){
+          that.showSnackBar("User updated Successfully!");
+        }).catch(function(error) {
+          console.log(error);
+          // An error happened.
+          return;
+        });
+
+        // check if the media has been uploaded
+        if(photo != undefined){
+          // ref for photo and thubnails
+          let refPhotos = storage.ref('photos/'+photo.name+timeInMs);
+          let refThumbnail = storage.ref('thumbnails/thumbnail'+photo.name+timeInMs);
+
+          // get compressed photo and thumbnail ready to upload
+          photo_upload = sessionStorage.getItem("userphoto");
+          thumbnail_upload = sessionStorage.getItem("userthumbnail");
+
+          //upload thumbNail
+          // Data URL string
+          var thumbnailTask = refThumbnail.putString(thumbnail_upload, 'data_url');
+
+          // var thumbnailTask = refThumbnail.put(photo);
+          thumbnailTask.on('state_changed', 
+            function progress(snapshot){
+              var percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            },
+            function error(err){
+              that.showSnackBar("Error updating user profile picture!");
+              return;
+            },
+            function complete(){
+              thumbnailURL = thumbnailTask.snapshot.downloadURL;
+
+              // Update user thumbnail 
+              let thumbnailupdate = {};
+              thumbnailupdate['/users/' + userID+'/thumbnailURL'] = thumbnailURL;
+              database.ref().update(thumbnailupdate);
+            }
+          );
+
+          //upload Photo
+          // Data URL string
+          let photoTask = refPhotos.putString(photo_upload, 'data_url');
+
+          photoTask.on('state_changed', 
+            function progress(snapshot){
+              let percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              // this.showSnackBar("Uploading Photo...");
+            },
+            function error(err){
+              that.showSnackBar("Error updating user profile picture!");
+              return;
+            },
+            function complete(){
+              // get download url for photo
+              photoDownloadURL = photoTask.snapshot.downloadURL;
+              // Update user thumbnail 
+              let photoupdate = {};
+              photoupdate['/users/' + userID+'/photoURL'] = photoDownloadURL;
+              database.ref().update(photoupdate);
+            }
+          );
+        }
+
+        this.showSnackBar("User updated Successfully!");
+
+        this.$.passwordinput.value = "";
+        this.$.confirmPassword.value = "";
+
+        if(password && passVal){
+          this.$.currentPassword.value = password;
+        }
+        
+      }
+      showSnackBar(msg){
+        var x = this.$.snackbar;
+
+        x.innerHTML = msg;
+
+        x.className = "show";
+        setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+      }
+      _photo(photo){
+        let photo_url = "background-image: url('../images/profile/default-user.png');";
+
+        if (photo) { 
+          photo_url = "background-image: url('"+photo+"');";
+        }
+
+        return photo_url;
+      }
+      resizeImage(file, imgType) {
+        var reader = new FileReader();
+        reader.onloadend = function() {
+        
+          var tempImg = new Image();
+          tempImg.src = reader.result;
+          tempImg.onload = function() {
+
+            if(imgType == "thumbnail"){
+              var MAX_WIDTH = 400;
+              var MAX_HEIGHT = 300;
+            }else{
+              var MAX_WIDTH = 800;
+              var MAX_HEIGHT = 600;
+            }
+            
+            var tempW = tempImg.width;
+            var tempH = tempImg.height;
+            if (tempW > tempH) {
+                if (tempW > MAX_WIDTH) {
+                  tempH *= MAX_WIDTH / tempW;
+                  tempW = MAX_WIDTH;
+                }
+            } else {
+                if (tempH > MAX_HEIGHT) {
+                  tempW *= MAX_HEIGHT / tempH;
+                  tempH = MAX_HEIGHT;
+                }
+            }
+    
+            var canvas = document.createElement('canvas');
+            canvas.width = tempW;
+            canvas.height = tempH;
+            var ctx = canvas.getContext("2d");
+            ctx.drawImage(this, 0, 0, tempW, tempH);
+
+            // return data url
+            var dataURL = canvas.toDataURL("image/jpeg");
+
+            if(imgType == "thumbnail"){
+              sessionStorage.setItem("userthumbnail", dataURL);
+            }else{
+              sessionStorage.setItem("userphoto", dataURL);
+            }
+          }
+        }
+        reader.readAsDataURL(file);
+      }
+    }
+
+    window.customElements.define(UserProfile.is, UserProfile);
+  </script>
+</dom-module>

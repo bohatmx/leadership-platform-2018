@@ -1,0 +1,141 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="manifest" href="/manifest.json">
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
+<dom-module id="follow-button">
+    <template>
+    <style include="w3-styles"></style>
+    <style include="shared-styles">
+        :host {
+            display: block;
+        }
+    </style>
+
+    <paper-button on-tap="followUser" data="{{_journaluser}}" class$="followBTN {{isFollowingStyle(_journaluser)}}">{{isFollowing(_journaluser)}}</paper-button>
+    </template>
+    <script>
+
+    class FollowButton extends Polymer.Element {
+        static get is() { return 'follow-button'; }
+        ready(){
+            super.ready();
+        }
+      static get properties() {
+        return {
+            user: {
+                type: Object,
+                notify: true
+            },
+            _journaluser:{
+                type: String
+            }
+        };
+      }
+        // updateFollowBTN(){
+        //     console.log('user changed');
+        //     var that = this;
+        //     var parent = this.parentNode;
+        //     var elem = document.querySelector('#thoughts-Holder');
+        //     console.log('>>>>', elem);
+        //     console.log(parent);
+        //     var thoughtCard = Polymer.dom(parent.root).querySelector("#thoughts-Holder");
+        //     console.log(thoughtCard);
+        //     $(thoughtCard).find('.modal-div').each(function(i, e){
+        //         var followBTN = $(e).find('.followBTN')[0];
+        //         var thoughtUserID = $(followBTN).prop('data');
+
+        //         if(thoughtUserID === _journaluser){
+        //             if(following == "Follow"){
+        //                 $(followBTN).addClass('following');
+        //                 followBTN.innerHTML = "Following";
+        //             }else{
+        //                 that.isFollowingStyle(journalUserID);
+        //                 $(followBTN).removeClass('following');
+        //                 followBTN.innerHTML = "Follow";
+        //             }
+        //         }
+        //     });
+        // }
+
+        isFollowing(journalUserID){
+            if(this.user.following){
+            let following =  this.user.following;
+            let isfollowing = following[journalUserID];
+
+            return isfollowing ? 'Following' : 'Follow';
+            }else return "Follow";
+        }
+
+        isFollowingStyle(journalUserID){
+            let userID = this.user.userID;
+
+            if(userID === journalUserID){
+                return "w3-hide";
+            }
+            else{
+                if(this.user.following){
+                    let following =  this.user.following;
+                    let isfollowing = following[journalUserID];
+
+                    return isfollowing ? 'following' : '';
+                }
+                else {return "";}
+
+            }
+            
+        }
+
+        followUser(e){
+            let database = firebase.database();
+
+            let journalUserID = e.target.data;
+            let following = e.target.innerHTML;
+            let userID = this.user.userID;
+
+            if(following == "Follow"){
+                var followingdata = {}
+                followingdata[journalUserID]=true;
+
+                var followerdata = {}
+                followerdata[userID]=true;
+
+                // set following data
+                var followingupdates = {};
+                database.ref('/users/' + userID + '/following').child(journalUserID).set(true);
+
+                // set follower data
+                var followerupdates = {};
+                database.ref('/users/' + journalUserID + '/follower').child(userID).set(true);
+
+                $(e.target).addClass('following');
+
+                e.target.innerHTML = "Following";
+            }else{
+                database.ref('users/'+ userID + '/following/'+journalUserID).remove();
+                database.ref('users/'+ journalUserID + '/follower/'+userID).remove();
+
+                this.isFollowingStyle(journalUserID);
+
+                $(e.target).removeClass('following');
+
+                e.target.innerHTML = "Follow";
+            }
+
+            // this.updateFollowBTN();
+        }
+
+    }
+    window.customElements.define(FollowButton.is, FollowButton);
+    </script>
+</dom-module>

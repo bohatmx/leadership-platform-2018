@@ -1,0 +1,98 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="manifest" href="/manifest.json">
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<!-- Firebase -->
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+
+<!-- Firebase Auth -->
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+
+<!-- Firebase Query -->
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-database-behavior.html">
+
+<link rel="import" href="app-icons.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="edit-post">
+  <template>
+      <style include="w3-styles">
+        .icon-part .drop-down{
+          position:absolute; z-index:12;
+          width:150px;
+          display: none;
+          top:24px; right:0px;
+          background-color: #fff; border:1px solid #ccc; 
+          box-shadow: 0px 0px 10px #c9c9c9; 
+        }
+
+        .item{
+          padding: 10px 6px;
+          font-size: 11pt;
+          color:#454545;
+          border-bottom:1px solid #545454;
+        }
+
+        .icon-part:hover .item{
+          cursor:pointer;
+          color:#353535;
+          background-color: rgba(0,0,0,0.03);
+        }
+
+        .item:last-child{
+          border-bottom: unset;
+        }
+
+        .icon-part:hover .drop-down{
+          display: block;
+        }
+      </style>
+    <div class="icon-part">
+      <div class="w3-right">
+        <iron-icon icon="myicons:settings" class="w3-right"></iron-icon>        
+      </div>
+      <div class="drop-down">
+        <div class="item w3-center" on-tap="_deleteItem"> <iron-icon icon="myicons:delete"></iron-icon> Delete</div>
+      </div>
+    </div>
+    
+  </template>
+
+  <script>
+    class EditPost extends Polymer.Element {
+      static get is() { return 'edit-post'; }
+      static get properties() {
+        return {
+          user: {
+            type: Object
+          },
+          ref: {type: String},
+          itemid: {
+            type: Object
+          }
+        };
+      }
+      _deleteItem(){
+        if (confirm('Delete selected item?')){
+          var database = firebase.database();
+          var items = database.ref(this.ref);
+          items.child(this.itemid).remove();
+        }
+        
+      }
+    }
+
+    window.customElements.define(EditPost.is, EditPost);
+  </script>
+</dom-module>

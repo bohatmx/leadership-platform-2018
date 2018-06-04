@@ -1,0 +1,431 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="manifest" href="/manifest.json">
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
+<link rel="import" href="../bower_components/paper-search/paper-search-bar.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+
+<!-- iron elements  -->
+<link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../bower_components/paper-styles/shadow.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+
+<!-- Firebase Auth -->
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+
+<!-- Firebase Query -->
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-database-behavior.html">
+<!-- <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html"> -->
+
+<link rel="import" href="thought-card-attachments.html">
+<link rel="import" href="comments-box.html">
+<link rel="import" href="app-icons.html">
+<link rel="import" href="delete-pldp.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="w3-styles.html">
+
+<dom-module id="pldp-masterclass">
+  <template>
+    <firebase-query
+      id="weeklyMasterClass"
+      path="/myPLDP/weeklyMasterClasses"
+      order-by-child="PLDPUserID"
+      equal-to="[[user.userID]]"
+      data="{{ldpmasterClassData}}">
+    </firebase-query>
+
+    <app-indexeddb-mirror
+      session="[[user.userID]]"
+      key="keypldpmasterClassData"
+      data="{{ldpmasterClassData}}"
+      persisted-data="{{masterClassData}}">
+    </app-indexeddb-mirror>
+
+    <style include="w3-styles"></style>
+    <style include="shared-styles">
+      @media screen and (max-width: 1010px){
+        #videoPlayer{
+          width: 100%;
+          height: auto;
+          left: 0px;
+          top: 0px;
+          opacity: 1;
+        }
+        .video-side{
+          display: block;
+          margin: 10px auto;
+          max-height: 200px;
+        }
+      }
+    
+      @media screen and (max-width: 500px){
+        #videoPlayer{
+          width: 100%;
+          height: auto;
+          left: 0px;
+          top: 0px;
+          opacity: 1;
+        }
+        .video-side{
+          display: block;
+          margin: 10px auto;
+          height: auto;
+        }
+      }
+    </style>
+    
+    <div class="container search-bar">
+        <paper-search-bar hide-filter-button="true" placeholder="Search for Master Classes"></paper-search-bar>
+    </div> 
+    <div class="container">
+        <paper-dialog id="imgDialog"  class="image-dailog">
+          <!-- <h2>Scrollable</h2> -->
+          <paper-dialog-scrollable>
+              <iron-image class="thought-expand-img" sizing="cover" src="" id="showImage"></iron-image>
+          </paper-dialog-scrollable>
+          <div class="buttons">
+            <paper-button dialog-dismiss>Close</paper-button>
+          </div>
+        </paper-dialog>
+      </div>
+      <div class="container">
+        <paper-dialog id="pldpDialog">
+          <h2><paper-icon-button icon="myicons:event-note" class="blue"></paper-icon-button>My PLDP</h2>
+          <hr>
+          <paper-dialog-scrollable>
+              <p>Based on what you just read, would you like to add an Action to your PLDP (Personal Leadership Development Plan)?</p>
+          </paper-dialog-scrollable>
+          <hr>
+          <div class="buttons">
+          <paper-button dialog-dismiss>Close</paper-button>
+            <a href="my-pldp" name="name" class="pldp-link">
+              <paper-button on-tap="closePLDPDialog">Proceed</paper-button>
+            </a>
+        </div>
+        </paper-dialog>
+      </div>
+      <div class="container">
+          <paper-dialog id="videoDialog"  class="add-dailog">
+              <!-- <paper-dialog-scrollable> -->
+              <div class="container video-side">
+                <iframe id="videoPlayer" width="100%" height="315"
+                src="" autoplay="false" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen>
+                </iframe>
+                <!-- <video id="videoPlayer" controls controlslist="nodownload">
+                  <source id="videoPlayer1" src="" type="video/mp4">
+                  <source id="videoPlayer2" src="" type="video/ogg">
+                  Your browser does not support video.
+                </video> -->
+              </div>
+              <!-- </paper-dialog-scrollable> -->
+            <div class="buttons">
+              <paper-button dialog-dismiss>Close</paper-button>
+            </div>
+          </paper-dialog>
+        </div>
+      <div class="cards-wrapper">
+          <template is="dom-repeat" items="[[masterClassData]]" as="item">
+          <div class="modal-div">
+              <span class="w3-button ldp-modal-close w3-red w3-xxlarge w3-hide closer-for-modal">&times;</span>
+              <div class="card-container fadeInUp" style="max-width:600px">
+                <div class="container card-header">
+                  <div class="card-avatar" style$="[[_profilePhoto(item.photoURL)]]"></div>
+                  <div class="container card-company-container">
+                    <!-- <div class="row card-company">[[item.companyName]]</div> -->
+                    <div class="row card-postedby">[[item.journalUserName]]</div>
+                  </div>
+                  <div class="thought-date">
+                    [[_formate_date(item.stringDateRegistered)]]
+                  </div>
+                </div>
+              
+                <div class="container">
+                  <div class="row">
+                    <div class="thought-img" style$="[[_photo(item.photos)]]">
+                      <div class="thought-mask"></div>
+                      <div class="thought-title">
+                      </div>
+                      <div class="thought-author">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+        
+                <thought-card-attachments itemid="[[item.weeklyMasterClassID]]" item="[[item]]" thoughtype="[[thoughtype]]"></thought-card-attachments>
+                <comments-box user="[[user]]" item="[[item]]" thetype="Master Class" entityid="[[item.weeklyMasterClassID]]" firebaseref="weeklyMasterClasses"></comments-box>
+              </div>
+            </div>
+          </template>
+        </div>    
+  </template>
+
+  <script>
+    class PLDPMasterClass extends Polymer.Element {
+      static get is() { return 'pldp-masterclass'; }
+      static get properties() {
+        return {
+          user: {
+            type: Object
+          },
+          _companyid: String,
+          masterClassData: {
+            type: Object,
+            observer: '_onmasterClassDataDataReceived'
+          },
+          _selected: String,
+          opened: {
+            type: Boolean,
+            reflectToAttribute: true,
+            value: false
+          },
+          lastSelected: {
+            type: String,
+            value: ''
+          }
+        };
+      }
+      _setData(title, subtitle, id){
+        // set thought data to be rated
+        let a = {
+              Title: title,
+              Subtitle: subtitle,
+              ID: id
+          }
+        return a;
+      }
+      _openRate(e){
+        let rateInfo = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
+
+        sessionStorage.setItem("ID",'master'+rateInfo.ID);
+        sessionStorage.setItem("Title",rateInfo.Title);
+        sessionStorage.setItem("Subtitle",rateInfo.Subtitle);
+        sessionStorage.setItem("aID",rateInfo.ID);
+        sessionStorage.setItem("rateType",'weeklyMasterClasses');
+        sessionStorage.setItem("orderRateBy",'weeklyMasterClassID');
+      }
+
+      _formate_date(dt){
+        var date = new Date(dt);
+        var day = date.getDate() < 10 ? '0'+date.getDate() : date.getDate();
+        var locale = 'en-us';
+        var month = date.toLocaleString(locale, { month: "long" });
+        var year = date.getFullYear();
+
+        return day+' '+month+' '+year;
+      }
+
+      _onmasterClassDataDataReceived(newData, oldData){
+        this.masterClassData.sort(function(a, b) {
+        var nameA = a.dateRegistered; // ignore upper and lowercase
+        var nameB = b.dateRegistered; // ignore upper and lowercase
+        if (nameA < nameB) {
+          return 1;
+        }
+        if (nameA > nameB) {
+          return -1;
+        }
+
+        // names must be equal
+        return 0;
+        });
+      }
+      _getVideoName(storageName){
+        let strName = '';
+        strName = storageName.slice(storageName.lastIndexOf('/')+1);
+        strName = strName.replace(new RegExp('_', 'g'), ' ');
+        return strName;
+      }
+      _videoClick(e){      
+        var videoClicked = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
+        
+        var youtubeID = this.getYoutubeID(videoClicked);
+
+        var src = "https://www.youtube.com/embed/"+youtubeID;
+
+        var videoPlayer = Polymer.dom(this.root).querySelector('#videoPlayer');
+        videoPlayer.src = src;
+        // var videoPlayer1 = Polymer.dom(this.root).querySelector('#videoPlayer1');
+        // var videoPlayer2 = Polymer.dom(this.root).querySelector('#videoPlayer2');
+        // videoPlayer1.src = videoClicked;
+        // videoPlayer2.src = videoClicked;
+        // videoPlayer.load();
+        this.$.videoDialog.open();
+      }
+      _dialogImgOpen(e){
+        var a = Polymer.dom(this.root).querySelector('#'+e.target.id).src;
+        var b = this.$.showImage;
+        b.src = a;
+        this.$.imgDialog.open();
+      }
+      _getPodcastName(storageName){
+        let strName = '';
+        strName = storageName.slice(storageName.lastIndexOf('/')+1);
+        strName = strName.replace(new RegExp('_', 'g'), ' ');
+        return strName;
+      }
+      _toArray(obj) {
+        if(obj != undefined){
+          return Object.keys(obj).map(function(key) {
+            return obj[key];
+        });
+        }
+      }
+      _objLen(obj) {
+        let len = 0;
+        if(obj != undefined){
+          // console.log('Value: '+Object.keys(obj).length);
+          len = Object.keys(obj).length;
+        }
+        return len;
+      }
+      toggle(e){
+        var a = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
+
+        var selectedElem = e.target.id;
+
+        this.opened = Polymer.dom(this.root).querySelector('#collapse'+a).opened;
+            
+        var res = selectedElem.substring(0, 3);
+        
+        if(res == 'blu'){
+          this._selected = 'page-1-'+a;
+        }else if(res == 'gre'){
+          this._selected = 'page-2-'+a;
+        }else if(res == 'cam'){
+          this._selected = 'page-3-'+a;
+        }else if(res == 'red'){
+          this._selected = 'page-4-'+a;
+        }
+
+        if((this.lastSelected == this._selected) && (this.opened)){
+          Polymer.dom(this.root).querySelector('#collapse'+a).toggle();
+        }
+
+        if((this.lastSelected == this._selected) && (!this.opened)){
+          Polymer.dom(this.root).querySelector('#collapse'+a).toggle();
+        }
+
+        if((this.lastSelected != this._selected) && (!this.opened)){
+          Polymer.dom(this.root).querySelector('#collapse'+a).toggle();
+        }
+        this.lastSelected = this._selected;
+      }
+      _photo(photos){
+        let photo_url = "background-image: url('../../data/land.jpg');";
+
+        for (item in photos) { 
+          photo_url = 'background-image: url('+photos[item].url+');';
+        }
+
+        return photo_url;
+      }
+      _profilePhoto(photo){
+        let photo_url = "background-image: url('../images/profile/default-user.png');";
+
+        if(photo == undefined){
+          photo_url = "background-image: url('../images/profile/default-user.png');";
+        }else if(photo == ""){
+          photo_url = "background-image: url('../images/profile/default-user.png');";
+        }else{
+          photo_url = 'background-image: url('+photo+');';
+        }
+
+        return photo_url;
+      }
+      _openPLDP(e){
+        var thoughtID = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
+        sessionStorage.setItem("PLDP_MasterClassAdd", thoughtID);
+        this.$.pldpDialog.open();
+      }
+      closePLDPDialog(){
+        this._addToPLDP();
+        sessionStorage.removeItem("PLDP_MasterClassAdd");
+        this.$.pldpDialog.close();
+      }
+      _addToPLDP(){
+        let PLDP_ThoughtAdd = sessionStorage.getItem("PLDP_MasterClassAdd");
+
+        let filteredArray = this.findObjectByKey(this.masterClassData, "weeklyMasterClassID", PLDP_ThoughtAdd);
+
+        // remove the key
+        delete filteredArray['$key'];
+
+        // add PLDP user to the thought object
+        filteredArray.PLDPUserID = this.user.userID;
+        filteredArray.PLDPUserName = this.user.firstName+" "+this.user.lastName;
+
+        // instantiate db
+        let database = firebase.database();
+
+        // create new record
+        let newThought = database.ref().child('/myPLDP/weeklyMasterClasses').push().key;
+
+        // delete the thought if already exists
+        let ref = database.ref('myPLDP/weeklyMasterClasses');
+        ref.orderByChild('dailyThoughtID').equalTo(PLDP_ThoughtAdd)
+            .once('value').then(function(snapshot) {
+                snapshot.forEach(function(childSnapshot) {
+                if(newThought === childSnapshot.key){
+                  console.log("Got the new ID");
+                }else{
+                  // remove each old child
+                  ref.child(childSnapshot.key).remove();
+                }
+            });
+        });
+        
+        let updates = {};
+        updates['/myPLDP/weeklyMasterClasses/' + newThought] = filteredArray;
+        database.ref().update(updates);
+      }
+      getYoutubeID(youtubeURL) {
+        var str = youtubeURL;
+        var n = str.indexOf("=");
+        var x = str.indexOf("&");
+        var res = "";
+    
+        if(n == -1){
+          n = str.indexOf("youtu.be");
+          if(x == -1) res = str.substring(n+9);
+          else res = str.substring(n+9, x);
+        }else{
+          if(x == -1) res = str.substring(n+1);
+          else res = str.substring(n+1, x);
+        }
+          return res;
+      }
+      getYoutubeThumbnail(youtubeURL) {
+        var res = this.getYoutubeID(youtubeURL);
+        return "https://img.youtube.com/vi/"+res+"/0.jpg";
+      }
+      findObjectByKey(array, key, value) {
+          for (var i = 0; i < array.length; i++) {
+              if (array[i][key] === value) {
+                  return array[i];
+              }
+          }
+          return null;
+      }
+    }
+
+    window.customElements.define(PLDPMasterClass.is, PLDPMasterClass);
+  </script>
+</dom-module>
