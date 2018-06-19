@@ -38,22 +38,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				margin-top: 5px;
 				border-top: 1px solid rgb(158, 160, 167);
 			}
-
 			.w3-app-text{
 				color: var(--app-primary-color);
 			}
-
 			.comments-bar .bar-item {
 				cursor: pointer;
 				font-size: 12px;
 				color: #656565;
 			}
-
 			.comments-bar .bar-item.selected {
 				background-color: #e1e8f7;
 				color: #1298f1;
 			}
-
 			.comments-ratings-holder {
 				height: 175px;
 				max-height: 175px;
@@ -76,7 +72,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				cursor: pointer;
 				background: linear-gradient(rgba(250,250,250, 0),rgba(250,250,250, 0.47),rgba(250,250,250, 0.8));
 			}
-
 			.comments-ratings-holder .mask .text {
 				position: absolute;
 				right: 0px;
@@ -86,7 +81,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				text-align: center;
 				cursor: pointer;
 			}
-
 			.comments-ratings-holder.opened {
 				height: unset;
 				max-height: unset;
@@ -94,15 +88,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				padding-bottom: 10px;
 				border-bottom:6px solid #ebeaea;
 			}
-
 			.w3-darker {
 				background-color: rgba(0, 0, 0, 0.1);
 			}
-
 			.comments-ratings-holder.opened .mask {
 				display: none;
 			}
-
 			.commentor-photo{
 				background-repeat: no-repeat;
 				background-size: cover;
@@ -148,8 +139,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				border-bottom:1px solid rgba(0,0,0,0.035);
 			}
 
-
-			
 			.loader {
 				border: 4px solid #f3f3f3;
 				border-radius: 50%;
@@ -174,33 +163,41 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				cursor: pointer!important;
 			}
 			paper-fab {
-				/* position: absolute;
-				top: -28px;
-				right: 40px; */
-				--paper-fab-background: #EF5458;
-				--paper-fab-keyboard-focus-background: #DF4448;
+				height: 18px;
+				width: 18px;
+				padding: 12px;
+				--paper-fab-background: #1298f1;
+				--paper-fab-keyboard-focus-background: #1298f1;
 			}
 		</style> 
-		<div class="comments-box" on-tap="_openModal">
-			<div class="comments-bar w3-row w3-darker">
-				<!-- <paper-fab icon="{{__computeFavIcon(__favorite)}}" on-tap="__toggleFavorite"></paper-fab> -->
-				<paper-button class="bar-item w3-left selected" on-tap="_toggleCRHItem" crhType="comments">
-					<paper-ripple></paper-ripple>
-					<iron-icon icon="app:forum" class="w3-margin-right"></iron-icon>
-					<span class="w3-new-badge w3-small w3-blue">[[_getCount(item.comments)]]</span>
-				</paper-button>
-				<paper-button class="bar-item w3-left" on-tap="_toggleCRHItem" crhType="ratings">
+		<div class="comments-box">
+			<div class="comments-bar w3-row w3-darker w3-padding">
+				<div class="w3-left" style="display: inline-flex;
+				flex-direction: row;
+				align-items: center;
+				justify-content: center;">
+					<paper-fab data="{{item.likes}}" icon="{{__computeFavIcon(item.likes)}}" on-tap="__toggleFavorite" class="w3-left" style="margin-right: 8px;"></paper-fab>
+					<span class="w3-new-badge w3-small w3-left w3-blue">[[_getLikesCount(item.countLikes)]]</span>
+				</div>
+				<div class="w3-right">
+					<paper-button class="bar-item w3-left selected" on-tap="_toggleCRHItem" crhType="comments">
+						<paper-ripple></paper-ripple>
+						<iron-icon icon="app:forum" style="margin-right: 8px;"></iron-icon>
+						<span class="w3-new-badge w3-small w3-blue">[[_getCount(item.comments)]]</span>
+					</paper-button>
+				</div>
+				
+				<!-- <paper-button class="bar-item w3-left" on-tap="_toggleCRHItem" crhType="ratings">
 					<paper-ripple></paper-ripple>
 					<iron-icon icon="app:star" class="w3-margin-right"></iron-icon>
 					<span class="w3-new-badge w3-small w3-blue">[[_getCount(item.ratings)]]</span>
-				</paper-button>
-				
+				</paper-button> -->
 			</div>
 			<div class="w3-padding w3-center comment-message w3-hide">west</div>
-			<div class="comments-ratings-holder w3-row">
+			<div class="comments-ratings-holder w3-row" on-tap="_openModal">
 				<template is="dom-if" if="[[_hasComments(item.comments, item.ratings)]]">
 					<div class="mask" on-tap="_openAllComments">
-						<div class="text w3-text-blue w3-hover-text-green">View all </div>
+						<div class="text w3-text-blue w3-hover-text-green">View all comments </div>
 					</div>
 				</template>
 				<div class="crh-item w3-animate-left comments">
@@ -327,6 +324,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 			_getCount(itms) {
 				return itms == undefined ? 0 : Object.keys(itms).length;
+			}
+
+			_getLikesCount(itms) {
+				return itms == undefined ? 0 : itms;
 			}
 
 			_showAllComments(nData, oData){
@@ -458,20 +459,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				$(elem).addClass('selected').siblings().removeClass('selected');
 				var crhItem = $(elem).parents('.comments-bar').siblings('.comments-ratings-holder').children('.crh-item.' + crhType);
 				crhItem.removeClass('w3-hide').siblings('.crh-item').addClass('w3-hide');
-				this.opened = true;
+				this.opened = !this.opened;
 			}
 
 			onCRHDataChanged(newData, oldData) {
 				if(this.thetype == 'Video'){
 					this.videoChanged = true;
 					this.entityid = newData.videoID;
-					this.itemrating = this.getUserRating(newData.ratings);
-					this.itemDate = this.getUserDateRating(newData.ratings);
+					// this.itemrating = this.getUserRating(newData.ratings);
+					// this.itemDate = this.getUserDateRating(newData.ratings);
 				}
 				if(this.thetype != 'Video'){
 					if(newData.ratings){
-						this.itemrating = this.getUserRating(newData.ratings);
-						this.itemDate = this.getUserDateRating(newData.ratings);
+						// this.itemrating = this.getUserRating(newData.ratings);
+						// this.itemDate = this.getUserDateRating(newData.ratings);
 					}	
 				}
 			}
@@ -531,6 +532,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				});
 				if(result.length > 0)
 					return result[0].rating == undefined ? 0 : result[0].rating;
+			}
+
+			_saveLike(state){
+				let dailyThought_ID = this.entityid;
+				var journalUserID = this.user.userID;
+				// Get a reference to the database service
+				var database = firebase.database();
+
+				if(state == false){
+					database.ref(this.firebaseref).child(dailyThought_ID).child('likes').child(journalUserID).set(true);
+					let countLikes = database.ref(this.firebaseref).child(dailyThought_ID).child('countLikes');
+					let currentCount = countLikes.transaction(function(current) {
+						return (current || 0) + 1;
+					});
+
+					this._showCommentBoxMessage("<span class='w3-text-red'>You liked the post!</span>", 2000);
+
+				}else{
+					database.ref(this.firebaseref).child(dailyThought_ID).child('likes').child(journalUserID).remove();
+					let countLikes = database.ref(this.firebaseref).child(dailyThought_ID).child('countLikes');
+					let currentCount = countLikes.transaction(function(current) {
+						return (current || 0) - 1;
+					});
+				}
+				
 			}
 
 			_saveRateValue(){
@@ -769,9 +795,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			}
 			__toggleFavorite(event, detail) {
 				this.__favorite = !this.__favorite;
+				var likes = event.currentTarget.data;
+				var journalUserID = this.user.userID;
+
+				var youLiked;
+
+				if(likes != undefined){
+					youLiked = likes[journalUserID];
+					if(youLiked == undefined) youLiked = false;
+				}else { youLiked = false};
+				
+				this._saveLike(youLiked);
 			}
 			__computeFavIcon(favorite) {
-				return favorite ? 'app:favorite' : 'app:favorite-border';
+				if(favorite == undefined){
+					return 'app:favorite-border';
+				}else{
+					var journalUserID = this.user.userID;
+					let youLiked = favorite[journalUserID];
+					return youLiked ? 'app:favorite' : 'app:favorite-border';
+				}
+				// return favorite ? 'app:favorite' : 'app:favorite-border';
 			}
 		}
 

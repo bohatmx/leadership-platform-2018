@@ -24,8 +24,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-ripple/paper-ripple.html">
-<link rel="import" href="/bower_components/polymerfire/firebase-app.html">
-<link rel="import" href="/bower_components/polymerfire/firebase-query.html">
+
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 
 <link rel="import" href="../bower_components/paper-fab-speed-dial/paper-fab-speed-dial.html">
 <link rel="import" href="../bower_components/paper-fab-speed-dial/paper-fab-speed-dial-action.html">
@@ -42,6 +44,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="lazy-import" href="daily-thoughts.html">
 <link rel="lazy-import" href="company-thoughts.html">
+<link rel="lazy-import" href="i-lead.html">
 <link rel="lazy-import" href="ldp-companies.html">
 <link rel="lazy-import" href="leadership-thoughts.html">
 <link rel="lazy-import" href="leadership-articles.html">
@@ -80,6 +83,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				--app-primary-color: #4285f4;
 				--app-theme-color: #c3272e;
 				--app-secondary-color: black;
+				--app-topbar-color: #c3272e;
+				--app-topbar-text: #ffffff;
 				--app-menu-text: #fff;
 				display: block;
 			}
@@ -227,6 +232,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				#main-header{
 					left: 0px;
 					height: 81px;
+					background-color: var(--app-topbar-color);
+					color: var(--app-topbar-text);
 				}
 
 				#main-content{
@@ -381,9 +388,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					<iron-icon icon="smapp:arrow-back"></iron-icon>
 				</span>
 				<!-- <div style$="background-image: url('/images/app-sidebar.png'); height:130px; {{companyBgColor}}" class="w3-padding"> -->
-				<div class="w3-padding-small" style="height:160px; background-color:#fff;display: flex;
+				<div class="w3-padding-small" style="height:160px; background-color:#fff;
 				flex-direction: column;justify-content: center;align-items: center;">
-				<img src$="{{companyLogo}}" style="width: 100%" class="w3-padding-top">
+				<img src$="{{companyLogo}}" style="width: 100%" class="w3-padding-top w3-margin-top">
 				</div>
 				<div id="user-identity" class="w3-text-white">
 					<div class="w3-row w3-padding-top">
@@ -394,7 +401,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 							</div>
 						</div>
 						<div class="w3-margin-top w3-padding-small w3-rest">
-							<div class="user-name w3-medium" style$="{{menuTextColor}}">{{fullName}}</div>
+							<div class="user-name w3-medium" style="color: #fff;">{{fullName}}</div>
 							<!-- <div class="user-email">[[user.email]]</div> -->
 						</div>
 					</div>
@@ -422,8 +429,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				</div>
 			</div>
 			<div class="w3-rest" id="main-content" on-click="_closeSidebarFromBody">
-				<div class="w3-row" id="main-header" style$="{{companyBgColor}}; {{menuTextColor}}">
-					<!-- <div class="w3-padding w3-right w3-relative" on-click="unshortedURL">
+				<div class="w3-row" id="main-header">
+					<!--style$="{{companyBgColor}}; {{menuTextColor}}" <div class="w3-padding w3-right w3-relative" on-click="unshortedURL">
 						<iron-icon icon="app:message"></iron-icon>
 						<span class="w3-hide-small">UnShorten URL</span>
 					</div> -->
@@ -487,7 +494,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					<add-podcast name="add-podcast" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]"></add-podcast>
 					<add-video name="add-video" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]"></add-video>
 					<add-voicemail name="add-voicemail" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]"></add-voicemail>
+					<i-lead name="i-lead" _companyid="[[_companyid]]" user="[[user]]"></i-lead>
 				</iron-pages>
+				<!-- <div class="w3-display-container w3-text-blue" style="height: 20px; bottom: 0px;">
+					<div class="w3-display-bottommiddle">
+						<a href="../terms-conditions.html" target="_blank">Terms & Conditions</a>
+					</div>
+				</div> -->
 			</div>
 		</div>
 		<div id="send-feedback" class="w3-modal w3-animate-zoom">
@@ -796,7 +809,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					companyLogo: {type: String, value: ""},
 					companyBgColor: {type: String, value: "background-color:#c3272e"},
 					menuTextColor: {type: String, value: "color:#fff"},
-					_companyid: String,
+					_companyid: {
+						type: String,
+						notify: true
+					},
 					bookAuthor: String,
 					bookTitle: String,
 					bookBody: String,
@@ -1009,7 +1025,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				console.log(b, a);
 				//(a !=="-LDVbbRyIMhukVtTVQ0n")
 				if((b == "12345" && a !=="-KgsUcgfo7z1U9MXgd9i") && (b == "12345" && a !=="-LDVbbRyIMhukVtTVQ0n")){
-					console.log("true here");
 					return true;
 				}else return a === b;
 			}
@@ -1079,8 +1094,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				window.scrollTo(0, 0);
 
 				if(page == 'leadership-platform' || page == 'components'){
-				 this.page = 'company-thoughts';
-				 this._selected = 0;
+					// public app
+					if(this._companyid == "-LEiZPT-C2PyLu_YLKNU"){
+						this.page = 'i-lead';
+				 		this._selected = 0;
+					}else{
+						this.page = 'company-thoughts';
+				 		this._selected = 0;
+					}
+				 
 				}else{
 				 this.page = page || 'company-thoughts';
 				}
@@ -1220,6 +1242,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					  this.previousPage = "company-thoughts";
 					this._selected = 21;
 				 }
+				 else if(page == 'i-lead'){
+					this._selected = 22;
+				 }
 
 				 // sessionStorage.setItem("_companyid", this._companyid);
 			}
@@ -1341,7 +1366,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			}
 
 			_userDataChange(newData, oldData) {
-				for (item in newData) {
+				for (var item in newData) {
 					if(newData[item] != undefined){
 						this._user = newData[item];
 						this._userID = newData[item].userID;
@@ -1421,17 +1446,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			}
 
 			_setAccountDefaults(){
-				var primaryColor, companyLogo, menuTextColor;
+				var primaryColor, companyLogo, menuTextColor, topBarColor, topBarColorText;
 
 				primaryColor = localStorage.getItem("primaryColor");
 				companyLogo = localStorage.getItem("companyLogo");
 				menuTextColor = localStorage.getItem("menuTextColor");
+
 				this.fullName = localStorage.getItem("fullName");
 				this.userLogo = localStorage.getItem("userLogo");
 
-				this.companyBgColor = "background-color: "+primaryColor;
+				topBarColor = localStorage.getItem("topBarColor");
+				topBarColorText = localStorage.getItem("topBarColorText");
+
 				this.updateStyles({'--app-theme-color': primaryColor});
-				// this.updateStyles({'--app-menu-text': this.getContrastYIQ(primaryColor)});
+
+				if(topBarColor != null || topBarColor != undefined){
+					this.updateStyles({'--app-topbar-color': topBarColor});
+					this.updateStyles({'--app-topbar-text': topBarColorText});
+
+					menuTextColor = "color: "+topBarColorText;
+					this.companyBgColor = "background-color: "+topBarColor;
+				}else{
+					this.companyBgColor = "background-color: "+primaryColor;
+				}
+				
 				this.companyLogo = companyLogo;
 				this.menuTextColor = menuTextColor;
 			}
@@ -1474,7 +1512,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			}
 
 			_onCompanyDataReceived(newData, oldData) {
-				for (item in newData) { 
+				for (var item in newData) { 
 					this.company = newData[item];
 					this.companyPhotos = newData[item].photos;
 				}
@@ -1495,15 +1533,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 					var primaryColor = newData[0].primaryColor;
 
-					this.companyBgColor = "background-color: "+primaryColor;
+					if(newData[0].topBarColor != undefined) var topBarColor = newData[0].topBarColor;
+					else var topBarColor = newData[0].primaryColor;
+
 					this.updateStyles({'--app-theme-color': primaryColor});
+
+					this.updateStyles({'--app-topbar-color': topBarColor});
+
 					this.companyLogo = newData[0].logo;
-					this.menuTextColor = "color: "+this.getContrastYIQ(newData[0].primaryColor);
-					// this.updateStyles({'--app-menu-text': this.getContrastYIQ(newData[0].primaryColor)});
+
+					var topBarColorText = this.getContrastYIQ(topBarColor);
+					if(topBarColorText == undefined) topBarColorText = "#000";
+
+					this.updateStyles({'--app-topbar-text': topBarColorText});
+					
+					if(topBarColor != null || topBarColor != undefined){
+						this.menuTextColor = "color: "+topBarColorText;
+						this.companyBgColor = "background-color: "+topBarColor;
+					}else{
+						this.menuTextColor = "color: "+this.getContrastYIQ(newData[0].primaryColor);
+						this.companyBgColor = "background-color: "+primaryColor;
+					}
+					
 
 					localStorage.setItem("primaryColor", newData[0].primaryColor);
 					localStorage.setItem("menuTextColor", this.menuTextColor);
 					localStorage.setItem("companyLogo", this.companyLogo);
+					localStorage.setItem("topBarColorText", topBarColorText);
+					localStorage.setItem("topBarColor", this.topBarColor);
 
 					var pendingMsgRef = database.ref('dailyThoughts').orderByChild("companyID_status").equalTo(newData[0].companyID+"_pending");
 					var unread = 0;
@@ -1558,7 +1615,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				return;
 			}
 			_onCompanyPhotoChange(newData, oldData){
-				for (item in newData) { 
+				for (var item in newData) { 
 					this._companyPhoto = newData[item];
 				}
 			}

@@ -22,10 +22,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 
-<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="/bower_components/polymerfire/firebase-app.html">
 
 <!-- Firebase Auth -->
-<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="/bower_components/polymerfire/firebase-auth.html">
 
 <link rel="import" href="w3-styles.html">
 <link rel="import" href="theme-styles.html">
@@ -58,6 +58,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             /* Input foreground color */
             /* --paper-input-container-input-color: #242121; */
+        }
+
+        .sign-up-controls{
+          /* Label and underline color when the input is not focused */
+          --paper-input-container-color: #2196F3;
+
+          /* Label and underline color when the input is focused */
+          --paper-input-container-focus-color: #2196F3;
+
+          /* Label and underline color when the input is invalid */
+          --paper-input-container-invalid-color: #cc0041;
         }
 
         #resetemail_input{
@@ -103,7 +114,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         .sign-in{
             max-width: 400px;
-            width: 80%;
+            width: 100%;
         }
 
         iron-image{
@@ -123,63 +134,94 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     
 
      <!-- list/detail pages -->
-     <iron-pages selected="{{_nextPage}}" attr-for-selected="page-name" class="w3-display-container">
+     <iron-pages selected="{{_nextPage}}" attr-for-selected="page-name">
         <div page-name="options">
-          <section class="w3-display-middle sign-in w3-card w3-padding-24 w3-padding">
+          <section style="min-width: 300px;" class="w3-display-middle w3-card w3-padding-24 w3-padding">
               <section class="ldp-logo">
                   <iron-image src="../images/glp-logo.png" preload sizing="contain"></iron-image>
               </section>
-              
               <section>
                 <section>
                   <paper-input autofocus id="email_input" name="email_input" always-float-label label="Email" type="email" required auto-validate tabindex="0" ></paper-input>
-                  <gold-password-input class="w3-margin-bottom" id="passwordinput" name="passwordinput" always-float-label label="Password" reveal suffix required on-keypress="enterPressAlert"></gold-password-input>
+                  <gold-password-input class="w3-margin-bottom" id="passwordinput" name="passwordinput" always-float-label label="Password" reveal suffix required on-keypress="enterPressAlert" tabindex="1"></gold-password-input>
                   <div class="other-logins w3-margin-bottom">
-                      <paper-button class="w3-btn w3-ripple w3-theme w3-round-xxlarge w3-margin-bottom w3-padding-16 login-btn" on-tap="signInEmail">Login</paper-button>
-                      
+                    <paper-button style="min-width: 205px;" class="w3-btn w3-ripple w3-theme w3-round-large w3-padding-16" on-tap="signInEmail">Login</paper-button>
                   </div>
                 </section>
-                <section class="w3-row-padding other-logins w3-padding-24 w3-border-top">
-                  <!-- <paper-button raised on-tap="signInPhone" class="w3-btn w3-ripple w3-teal w3-round-xxlarge w3-padding-16 w3-col s4"><iron-icon icon="app:local-phone"></iron-icon> Phone
-                  </paper-button> -->
-                  <paper-button raised on-tap="signInGoogle" class="w3-btn w3-ripple w3-red w3-round-xxlarge w3-padding-16 login-btn"><iron-iconset name="mygoogle" icons="google" src="/images/google-plus.png" size="24" width="24" class="w3-margin-right">
+                <section class="w3-row-padding other-logins w3-padding">
+                  <paper-button style="min-width: 205px;" raised on-tap="signInGoogle" class="w3-btn w3-ripple w3-red w3-round-large w3-padding-16"><iron-iconset name="mygoogle" icons="google" src="/images/google-plus.png" size="24" width="24" class="w3-margin-right">
                   </iron-iconset>
                   <iron-icon icon="mygoogle:google" style="background-repeat: no-repeat;"></iron-icon> Sign in with Google
                   </paper-button>
                 </section>
-
                 <section class="w3-row-padding w3-padding-24 w3-center w3-text-blue">
-                  <a href="#" on-tap="resetPage" style="text-decoration: none;">Forgot your password?</a>
+                  <div class="w3-row other-logins w3-margin-bottom w3-rest">
+                    <div class="w3-text-grey">
+                      <p class="w3-small">You don't have an account?</p>
+                    </div>
+                    <paper-button class="w3-ripple w3-round-large" on-tap="signUpPage">Sign Up</paper-button>
+                  </div>
+                  <div class="w3-row">
+                    <a href="#" on-tap="resetPage" style="text-decoration: none;">Forgot your password?</a>
+                  </div>
                 </section>
               </section>
           </section>
         </div>
         <div page-name="send-reset">
-          <section class="w3-display-middle sign-in w3-card w3-padding-24 w3-padding ">
-              <section class="ldp-logo">
-                <iron-image src="../images/glp-logo.png" preload sizing="contain"></iron-image>
-              </section>
-              <section class="w3-center">
-                <div class="w3-text-dark-grey w3-padding-16">
-                  <h3>Forgot your password?</h3>
-                </div>
-                <div class="w3-text-grey">
-                  <p>To reset password. enter your email, presss the button and check mail to follow instructions.</p>
+          <section style="min-width: 300px;" class="w3-display-middle w3-card w3-padding-24 w3-padding ">
+            <section class="ldp-logo">
+              <iron-image src="../images/glp-logo.png" preload sizing="contain"></iron-image>
+            </section>
+            <section class="w3-center">
+              <div class="w3-text-dark-grey w3-padding-16">
+                <h3>Forgot your password?</h3>
               </div>
-              </section>
-              
-              <section>
-                <paper-input autofocus id="resetemail_input" name="resetemail_input" always-float-label label="Enter your Email" type="email" required auto-validate tabindex="0" ></paper-input>
-                <div class="other-logins w3-margin-top">
-                  <paper-button class="w3-btn w3-ripple w3-blue w3-round-xxlarge w3-margin-bottom w3-padding-16 login-btn" on-tap="sendResetPassword">Reset Password</paper-button>
-                </div>
-              </section>
+              <div class="w3-text-grey">
+                <p>To reset password. enter your email, presss the button and check mail to follow instructions.</p>
+              </div>
+            </section>
+            <section>
+              <paper-input autofocus id="resetemail_input" name="resetemail_input" always-float-label label="Enter your Email" type="email" required auto-validate tabindex="0" ></paper-input>
+              <div class="other-logins w3-margin-top">
+                <paper-button style="min-width: 205px;" class="w3-btn w3-ripple w3-blue w3-round-large w3-padding-16" on-tap="sendResetPassword">Reset Password</paper-button>
+              </div>
+            </section>
 
-              <section class="w3-row-padding w3-padding-24 w3-center w3-text-blue">
-                <a href="#" on-tap="optionsPage" style="text-decoration: none;">BACK</a>
+            <section class="w3-row-padding w3-padding-24 w3-center w3-text-blue">
+              <a href="#" on-tap="optionsPage" style="text-decoration: none;">BACK</a>
+            </section>
+          </section>
+        </div>
+        <div page-name="sign-up">
+          <section style="min-width: 300px;" class="w3-display-middle w3-card w3-padding-24 w3-padding">
+              <section class="ldp-logo">
+                  <iron-image src="../images/glp-logo.png" preload sizing="contain"></iron-image>
+              </section>
+              <section>
+                <section class="w3-center">
+                  <div class="w3-text-dark-grey w3-padding-8">
+                    <h3>Sign Up</h3>
+                  </div>
+                </section>
+                <section>
+                  <paper-input class="sign-up-controls" autofocus id="firstname" name="firstname" always-float-label label="First Name" type="text" required auto-validate tabindex="0" ></paper-input>
+                  <paper-input class="sign-up-controls" autofocus id="lastname" name="lastname" always-float-label label="Last Name" type="text" required auto-validate tabindex="1" ></paper-input>
+                  <paper-input class="sign-up-controls" autofocus id="email" name="email" always-float-label label="Email" type="email" required auto-validate tabindex="2" ></paper-input>
+                  <gold-password-input class="sign-up-controls w3-margin-bottom" id="newpassword" name="newpassword" always-float-label label="Password" reveal suffix required on-keypress="enterPressAlert" tabindex="3"></gold-password-input>
+                  <div class="w3-text-grey w3-small">
+                    <p>By clicking Sign Up, you agree to GLP's Terms and Conditions.</p>
+                  </div>
+                  <div class="other-logins w3-margin-top">
+                    <paper-button style="min-width: 205px;" class="w3-btn w3-ripple w3-blue w3-round-large w3-padding-16" on-tap="signUp">Sign Up</paper-button>
+                  </div>
+                </section>
+                <section class="w3-row-padding w3-padding-24 w3-center w3-text-blue">
+                  <a href="#" on-tap="optionsPage" style="text-decoration: none;">BACK</a>
+                </section>
               </section>
           </section>
-      </div>
+        </div>
     </iron-pages>
     <div id="snackbar"></div>
   </template>
@@ -273,6 +315,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       optionsPage: function(){
         this._nextPage="options";
       },
+      signUpPage: function(){
+        this._nextPage="sign-up";
+      },
       sendResetPassword: function(){
         var email = this.$.resetemail_input.value;
         var emailVal = this.$.resetemail_input.validate();
@@ -304,12 +349,108 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           });
         
       },
+      signUp: function(){
+        var firstname = this.$.firstname.value;
+        var lastname = this.$.lastname.value;
+        var email = this.$.email.value;
+        var emailVal = this.$.email.validate();
+
+        var password = this.$.newpassword.value;
+        var passVal = this.$.newpassword.validate();
+
+        var that = this;
+
+        // Validate firstname
+        if ((firstname == undefined) || (firstname.trim() == "")){
+          this.showSnackBar("Please enter the First name!");
+          return;
+        }
+
+        // Validate lastname
+        if ((lastname == undefined) || (lastname.trim() == "")){
+          this.showSnackBar("Please enter the Last name!");
+          return;
+        }
+
+        if(!email || !emailVal){
+          this.showSnackBar("Email is required!");
+          return;
+        }else if(!password || !passVal){
+          this.showSnackBar("Password is required!");
+          return;
+        }else{
+          firebase.auth().createUserWithEmailAndPassword(email, password).then(function(user){
+            var uid = user.uid;
+            // get date and time
+            var timeInMs = Date.now();
+            var datetime = new Date(timeInMs);
+            // format date
+            datetime = that._formate_date(datetime);
+
+            var database = firebase.database();
+            var userID = database.ref().child('users').push().key;
+
+            console.log("userID", userID);
+
+            var data = {
+              "companyID" : "-LEiZPT-C2PyLu_YLKNU",
+              "companyName" : "Global Leadership Platform",
+              "dateRegistered" : timeInMs,
+              "email" : email,
+              "firstName" : firstname,
+              "lastName" : lastname,
+              "password" : password,
+              "stringDateRegistered" : datetime,
+              "userDescription" : "Standard User",
+              "uid" : uid,
+              "userID" : userID,
+              "userType" : 8,
+              "inviteSent": true,
+              "companyID_userType" : "-LEiZPT-C2PyLu_YLKNU_"+8
+            }
+
+            // Write the new rating data
+            var updates = {};
+            updates['/users/' + userID] = data;
+            database.ref().update(updates).catch(function(error) {
+            // Handle Errors here.
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            console.log(errorMessage);
+          });
+
+            that.showSnackBar("New account created successfully.");
+              console.log('everything went fine');
+              console.log('user object:' + user);
+              //you can save the user data here.
+          }).catch(function(error) {
+            // Handle Errors here.
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            that.showSnackBar(errorMessage);
+          });
+          
+        }
+        
+      },
       showSnackBar: function(msg){
         var x = this.$.snackbar;
         x.innerHTML = msg;
         x.className = "show";
         setTimeout(function(){ x.className = x.className.replace("show", ""); }, 5000);
-      }
+      },
+      _formate_date: function(dt){
+				var date = new Date(dt);
+				var day = date.getDate() < 10 ? '0'+date.getDate() : date.getDate();
+				var hours = date.getHours() < 10 ? '0'+date.getHours() : date.getHours();
+				var minutes = date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes();
+				var locale = 'en-us';
+				var month = date.toLocaleString(locale, { month: "long" });
+				var year = date.getFullYear();
+				var am_pm = date.getHours() >= 12 ? "PM" : "AM"
+
+				return day+' '+month+' '+year+' '+hours+':'+minutes+" "+am_pm;
+			}
     });
 
     firebase.auth().onAuthStateChanged(function(user) {

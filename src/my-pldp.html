@@ -406,8 +406,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var reminderOn = filteredArray.reminderOn;
           var notificationID = filteredArray.notificationID;
 
+          console.log("pldpID ",pldpID);
+          console.log("notificationID ",notificationID);
+
           // Get a reference to the database service
           var database = firebase.database();
+
+          var userID = this.user.userID;
+
+          var notifications = database.ref("users/"+this.user.userID+"/notifications").orderByChild("newNotificationID").limitToLast(20).on("child_added", function(snapshot) {
+            var key = snapshot.key;
+            var notificationItemID = snapshot.val().notificationItemID;
+            var newNotificationID = snapshot.val().newNotificationID;
+
+            if(notificationItemID == notificationID){
+              database.ref("users/"+userID+"/notifications/"+ newNotificationID).remove();
+            }
+
+          });
 
           // if reminder notification exists
           if(reminderOn == true) database.ref('pldpNotifications/'+ notificationID).remove();

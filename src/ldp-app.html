@@ -9,14 +9,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 <link rel="manifest" href="/manifest.json">
 
-<!-- <link rel="import" href="../bower_components/polymer/polymer-element.html"> -->
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
 
 <!-- <link rel="import" href="/bower_components/polymer/polymer.html"> -->
 
-<!-- <link rel="import" href="/bower_components/polymerfire/firebase-app.html"> -->
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 
 <!-- Firebase Auth -->
-<!-- <link rel="import" href="/bower_components/polymerfire/firebase-auth.html"> -->
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <!-- <link rel="import" href="/bower_components/polymerfire/firebase-query.html"> -->
 
 <!-- Sign In and Main Content -->
@@ -210,9 +210,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         },
         ready: function(){
-            var SignedIn = localStorage.getItem("LoggedIn");
+            var that = this;
 
-            if(SignedIn === "false") this.loadPage('sign-in');
+            setTimeout(function(){ 
+                if(that.signedIn === false) that.loadPage('sign-in');
+             }, 2000);
             // else this.loadPage('leadership-app');
 
             // set messaging
@@ -354,52 +356,47 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             window.localStorage.setItem('sentToServer', sent ? 1 : 0);
         },
         _onUserDataReceived: function(newData, oldData){
-          for (item in newData) { 
-            this._user = newData[item];
-            this._companyID = this._user.companyID;
-
-            this.sendTokenToServer();
-            this.approveThoughts = false;
-
-            // set user name and logo
-            localStorage.setItem("fullName", this._user.firstName+' '+this._user.lastName);
+          for (var item in newData) { 
             
-            if(this._user.photoURL != undefined || this._user.photoURL) {
-                localStorage.setItem("userLogo", this._user.photoURL);
-            }else{
-                localStorage.setItem("userLogo", "../images/default-user.png");
-            }
+            if(newData[item] != undefined){
+                this._user = newData[item];
+                this._companyID = this._user.companyID;
 
-            // rights for standard user
-            if(this._user.userType == 8){
-            this.hidemenu = true;
-            this.hidesubmenu = true;
-            }
-            else if((this._user.userType == 4) || (this._user.userType == 5) || (this._user.userType == 6) || (this._user.userType == 7) || (this._user.userType == 9)){
-            this.hidemenu = false;
+                this.sendTokenToServer();
+                this.approveThoughts = false;
 
-            if(this._user.userType === 5) this.hidesubmenu = true; 
-            else this.hidesubmenu = false;                
-            }
-            else{
-            this.hidemenu = true;  
-            this.hidesubmenu = true;
-            }
+                // set user name and logo
+                localStorage.setItem("fullName", this._user.firstName+' '+this._user.lastName);
+                
+                if(this._user.photoURL != undefined || this._user.photoURL) {
+                    localStorage.setItem("userLogo", this._user.photoURL);
+                }else{
+                    localStorage.setItem("userLogo", "../images/default-user.png");
+                }
 
-            if(this._user.userType === 7) this.notcompanyadmin = false; 
-            else this.notcompanyadmin = true;
+                // rights for standard user
+                if(this._user.userType == 8){
+                this.hidemenu = true;
+                this.hidesubmenu = true;
+                }
+                else if((this._user.userType == 4) || (this._user.userType == 5) || (this._user.userType == 6) || (this._user.userType == 7) || (this._user.userType == 9)){
+                this.hidemenu = false;
+
+                if(this._user.userType === 5) this.hidesubmenu = true; 
+                else this.hidesubmenu = false;                
+                }
+                else{
+                this.hidemenu = true;  
+                this.hidesubmenu = true;
+                }
+
+                if(this._user.userType === 7) this.notcompanyadmin = false; 
+                else this.notcompanyadmin = true;
+            }
+            
           }
         }
       });
-
-      firebase.auth().onAuthStateChanged(function(user) {
-        if(user == null || user == undefined) {
-            localStorage.setItem("LoggedIn", false);
-        }else localStorage.setItem("LoggedIn", true);
-
-        // console.log('Logged User id: '+user.uid);
-        // console.log("user: "+JSON.stringify(user));
-     });
 
   </script>
 </dom-module>

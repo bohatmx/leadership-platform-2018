@@ -331,7 +331,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _photo(photos){
         let photo_url = "background-image: url('../../data/land.jpg');";
 
-        for (item in photos) { 
+        for (var item in photos) { 
           photo_url = 'background-image: url('+photos[item].url+');';
         }
 

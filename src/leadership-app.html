@@ -818,7 +818,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.paperSpeed.close();
       }
       _userDataChange(newData, oldData) {
-        for (item in newData) {
+        for (var item in newData) {
             if(newData[item].photoURL != undefined || newData[item].photoURL) {
               this.photo = newData[item].photoURL;
             }else{
@@ -833,7 +833,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this._close();
       }
        _onCompanyDataReceived(newData, oldData) {
-          for (item in newData) { 
+          for (var item in newData) { 
               this.company = newData[item];
               this.companyPhotos = newData[item].photos;
           }
@@ -859,7 +859,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       }
       _onCompanyPhotoChange(newData, oldData){
-        for (item in newData) { 
+        for (var item in newData) { 
               this._companyPhoto = newData[item];
           }
       }
