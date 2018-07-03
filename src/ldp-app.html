@@ -98,21 +98,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             to {bottom: 0; opacity: 0;}
         }
     </style>
-    <template is="dom-if" if="[[signedIn]]">
-        <firebase-query
-            id="qryuser"
-            path="/users"
-            order-by-child="uid"
-            equal-to="[[user.uid]]"
-            data="{{userData}}">
-        </firebase-query>
-
-        <my-app notcompanyadmin="{{notcompanyadmin}}" approvethoughts="[[approveThoughts]]" addthoughts = "[[addThoughts]]" addarticle = "[[addArticle]]" hidecompany = "[[hidecompany]]" mythoughts = "[[myThoughts]]" user="[[_user]]" _companyid="[[_user.companyID]]" hidemenu="[[hidemenu]]" hidesubmenu="[[hidesubmenu]]"></my-app>
-    </template>
-    <template is="dom-if" if="[[!signedIn]]">
-        <sign-in></sign-in>
-    </template>
-
+    
+        <template is="dom-if" if="[[signedIn]]">
+            <firebase-query
+                id="qryuser"
+                path="/users"
+                order-by-child="uid"
+                equal-to="[[user.uid]]"
+                data="{{userData}}">
+            </firebase-query>
+    
+            <my-app notcompanyadmin="{{notcompanyadmin}}" approvethoughts="[[approveThoughts]]" addthoughts = "[[addThoughts]]" addarticle = "[[addArticle]]" hidecompany = "[[hidecompany]]" mythoughts = "[[myThoughts]]" user="[[_user]]" _companyid="[[_user.companyID]]" hidemenu="[[hidemenu]]" hidesubmenu="[[hidesubmenu]]"></my-app>
+        </template>
+        <template is="dom-if" if="[[!signedIn]]">
+            <sign-in></sign-in>
+        </template>
+        
     <div id="snackbar">
         <div id="snacklogo" class="snacklogo">
         </div>
@@ -123,7 +124,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </div>
   </template>
   
-
   <script>
         var _platform;
         var nav = window.navigator;
@@ -206,7 +206,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                type: Object
            },
            _companyID: String,
-           signedIn: Boolean
+           signedIn: Boolean,
+           
 
         },
         ready: function(){
@@ -376,18 +377,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                 // rights for standard user
                 if(this._user.userType == 8){
-                this.hidemenu = true;
-                this.hidesubmenu = true;
+                    this.hidemenu = true;
+                    this.hidesubmenu = true;
                 }
-                else if((this._user.userType == 4) || (this._user.userType == 5) || (this._user.userType == 6) || (this._user.userType == 7) || (this._user.userType == 9)){
-                this.hidemenu = false;
+                else if((this._user.userType == 4) || (this._user.userType == 5) || (this._user.userType == 6) || (this._user.userType == 7) || (this._user.userType == 9) || (this._user.userType == 3)){
+                    this.hidemenu = false;
 
-                if(this._user.userType === 5) this.hidesubmenu = true; 
-                else this.hidesubmenu = false;                
+                    if(this._user.userType === 5 || this._user.userType === 3) this.hidesubmenu = true; 
+                    else this.hidesubmenu = false;                
                 }
                 else{
-                this.hidemenu = true;  
-                this.hidesubmenu = true;
+                    this.hidemenu = true;  
+                    this.hidesubmenu = true;
                 }
 
                 if(this._user.userType === 7) this.notcompanyadmin = false; 
@@ -395,7 +396,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
             
           }
-        }
+        },
       });
 
   </script>

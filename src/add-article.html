@@ -129,11 +129,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </div>
           <div id="articlePhoto" class="read-article-photo" style="background-image: url('[[photo]]');">
           </div>
-          <paper-input label="Enter Article Title" type="text" id="articleTitle">
+          <paper-input label="Enter Article Title" type="text" id="articleTitle" maxlength="240" char-counter autocapitalize tabindex="0">
           </paper-input>
-          <paper-input label="Enter Author Name" type="text" id="articleAuthor">
+          <paper-input label="Enter Author Name" type="text" id="articleAuthor" maxlength="100" char-counter autocapitalize tabindex="1">
           </paper-input>
-          <paper-input type="url" name="articleLink" id="articleLink" label="Enter Article Link"></paper-input>
+          <paper-input type="url" name="articleLink" id="articleLink" label="Enter Article Link" tabindex="2"></paper-input>
           <br>
           <label><small>Schedule Date & TIme</small></label><br>
           <div class="datetime">

@@ -155,7 +155,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <iron-icon icon="myicons:delete"></iron-icon>
               </div>
             </template>
-            <div class="w3-rest w3-padding-small">
+            <div class="w3-rest w3-padding-small" style="max-width: 280px;">
               <a class="more-links" target="_blank" href="[[item1.url]]">
                 <iron-icon icon="myicons:small-link" class="w3-text-blue"></iron-icon>[[item1.title]]
               </a>
@@ -171,7 +171,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <iron-icon icon="myicons:delete"></iron-icon>
               </div>
             </template>
-            <div id="podcast[[item1.dateRegistered]]" title="[[item1.storageName]]" class="w3-rest w3-padding-small" on-tap="_openPodcast" data="[[item1.url]]">
+            <div id="podcast[[item1.dateRegistered]]" title="[[item1.storageName]]" class="w3-rest w3-padding-small" on-tap="_openPodcast" data="[[item1.url]]" style="max-width: 280px;">
               <iron-icon icon="myicons:small-mic" class="w3-text-green"></iron-icon>[[item1.storageName]]
             </div>
           </div>
@@ -211,9 +211,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <span class="w3-display-topright w3-padding w3-red w3-text-white" on-tap="_closeVideo">&times;</span>
         <div class="w3-white w3-card-2 w3-round">
           <div class="w3-row" style="padding:3px">
-            <iframe src="[[videourl]]" frameborder="0" height="400" width="100%"></iframe>
+            <iframe src="{{videourl}}" frameborder="0" height="400" width="100%"></iframe>
           </div>
-          <div class="w3-padding-large w3-large w3-text-dark-grey">[[videoname]]</div>
+          <div class="w3-padding-large w3-large w3-text-dark-grey">{{videoname}}</div>
         </div>
       </div>
     </div>
@@ -281,6 +281,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _closeVideo(e){
         var modal = Polymer.dom(this.root).querySelectorAll('.ldp-modal');
         var modalCloser = Polymer.dom(this.root).querySelectorAll('.ldp-modal-close');
+				this.videourl = "";
+				this.videoname = "";
         $(modalCloser).addClass('w3-hide');
         $(modal).css('display', 'none');
       }

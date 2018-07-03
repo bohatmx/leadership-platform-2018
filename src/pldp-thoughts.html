@@ -123,7 +123,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </div>
             </div>
             <div class="header-actions">
-              
               <template is="dom-if" if="[[isEqual(thoughtype, 'mythoughts')]]">
                 <!-- <a id="addThoughts" href="add-thoughts" class="add-thought-link"> -->
                   <paper-icon-button indexed="add-thoughts" caption="Edit Thoughts" icon="create" on-tap="_loadElement1" id="edit[[item.dateRegistered]]" data="[[item.dailyThoughtID]]" class="tomato"></paper-icon-button>
@@ -384,15 +383,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         return Polymer.dom(eleM).innerHTML = url;
       }
-      _photo(photos){
-        let photo_url = "background-image: url('../../data/land.jpg');";
+      _photo(photos, textColor){
+				if(textColor == undefined){
+					var color = '#ffffff';
+				}else{
+					var color = textColor;
+				}
+				let photo_url = "background-image: url('../data/land.jpg'); color: "+color+";";
 
-        for (var item in photos) { 
-          photo_url = 'background-image: url('+photos[item].url+');';
-        }
+				for (var item in photos) { 
+					photo_url = "background-image: url('"+photos[item].url+"'); color: "+color+";";
+				}
 
-        return photo_url;
-      }
+				return photo_url;
+			}
       _profilePhoto(photo){
         let photo_url = "background-image: url('../images/default-user.png');";
 

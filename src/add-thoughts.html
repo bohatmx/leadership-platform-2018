@@ -271,20 +271,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <div class="container">
       <div class="add-thought">
         <form>
-          <paper-textarea rows="2" multiple always-float-label label="Enter thought" type="text" id="thoughtInput" name="thoughtInput" auto-validate value="{{thoughtTitle::input}}">
+          <paper-textarea autocapitalize maxlength="240" char-counter rows="2" multiple always-float-label label="Enter thought" type="text" id="thoughtInput" name="thoughtInput" auto-validate value="{{thoughtTitle::input}}" tabindex="0">
           </paper-textarea>
-          <paper-input id="authorInput" name="authorInput" always-float-label label="Enter thought author" type="text" auto-validate value="{{thoughtSubtitle::input}}"></paper-input>
+          <paper-input id="authorInput" name="authorInput" maxlength="60" char-counter always-float-label label="Enter thought author" type="text" auto-validate value="{{thoughtSubtitle::input}}" autocapitalize tabindex="1"></paper-input>
           <br>
           <label><small>Schedule Date & TIme</small></label><br>
           <div class="datetime">
-            <paper-input class="dateScheduled" id="dateScheduled" name="dateScheduled" always-float-label label="Date" type="date" auto-validate value$="[[_defaultDate()]]"></paper-input>
-            <paper-input class="timeScheduled" id="timeScheduled" name="timeScheduled" always-float-label label="Time" type="time" auto-validate value$="[[_defaultTime()]]"></paper-input>
+            <paper-input class="dateScheduled" id="dateScheduled" name="dateScheduled" always-float-label label="Date" type="date" auto-validate value$="[[_defaultDate()]]" tabindex="2"></paper-input>
+            <paper-input class="timeScheduled" id="timeScheduled" name="timeScheduled" always-float-label label="Time" type="time" auto-validate value$="[[_defaultTime()]]" tabindex="3"></paper-input>
           </div>
           <br>
-          <paper-radio-group selected="postInternal" id="postInternalGlobal" name="postInternalGlobal">
-            <paper-radio-button id="postInternal" name="postInternal">Post Internal</paper-radio-button>
-            <paper-radio-button id="postGlobally" name="postGlobally">Post Globally</paper-radio-button>
-          </paper-radio-group>
+            <paper-radio-group hidden="[[isEqual(user.userType, 3)]]" selected="postInternal" id="postInternalGlobal" name="postInternalGlobal">
+              <paper-radio-button id="postInternal" name="postInternal">Post Internal</paper-radio-button>
+              <paper-radio-button id="postGlobally" name="postGlobally">Post Globally</paper-radio-button>
+            </paper-radio-group>
           <hr>
           <label class="paper-font-caption">Attach</label>
           <div class="horizontal justified add-thought-icons">
@@ -976,6 +976,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       isEqual(a, b) {
         return a === b;
       }
+      isNotILeader() {
+        var userType = this.user.userType;
+
+        console.log("user type", userType);
+
+        if(userType != 3 || userType == undefined){
+          return true;
+        }
+
+        return false;
+      }
       uploadVideo() {
         Polymer.dom(this.root).querySelector('#fs').upload(Polymer.dom(this.root).querySelector('#video_input').files)
       }
@@ -1499,7 +1510,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var textColor = this.$.textColor.value;
         var website = this.$.website.value;
         var slogan = this.$.slogan.value;
-        var logo = this.company.companyLogo;
+        var logo = this.company.companyLogo || '';
 
         if(textColor == undefined){
           textColor = "#ffffff";
@@ -1591,8 +1602,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var DailyThoughtType = 2;
         }
         
-        // Platinum User,  Platinum Admin, Company Admin, Daily Thoughts
-        if ((user_type == 'user4') || (user_type == 'user7') || (user_type == 'user6') || (user_type == 'user9')) {
+        // Platinum User,  Platinum Admin, Company Admin, Daily Thoughts, I-Leader
+        if ((user_type == 'user4') || (user_type == 'user7') || (user_type == 'user6') || (user_type == 'user9') || (user_type == 'user3')) {
             var DailyThoughtType_status = DailyThoughtType +"_"+status;
             // var status = sessionStorage.getItem("APPROVED");
             var companyID_status = this.user.companyID+"_"+status;
@@ -1637,8 +1648,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           // status here can approved or unpublished
           publish_status = this.user.companyID+"_"+status;
         }
-        // company admin or platinum admin
-        else if((user_type == 'user7') || (user_type == 'user6')){
+        // company admin or platinum admin or i-leader
+        else if((user_type == 'user7') || (user_type == 'user6') || (user_type == 'user3')){
           // status here can approved or unpublished
           publish_status = this.user.companyID+"_"+status;
         }

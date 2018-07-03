@@ -273,9 +273,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 									</div>
 								</div>
 								<div class="w3-row w3-relative" id="modal-content-[[item.podcastID]]">
-									<!-- <template is="dom-if" if="[[isEqual(item.userID, user.userID)]]"> -->
+									<template is="dom-if" if="[[isEqual(item.userID, user.userID)]]">
 										<edit-post user="[[user]]" itemid="[[item.podcastID]]" ref="podcasts"></edit-post>
-									<!-- </template> -->
+									</template>
 									<div title="[[_getPodcastName(item.storageName)]]" class="w3-left w3-padding-small" id="listen[[item.dateRegistered]]" on-tap="_handleClick" data="[[item.url]]">
 										<img src="/images/[[item.podcastDescription]].png" style="width: 60px">
 									</div>

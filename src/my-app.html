@@ -70,7 +70,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="my-followers.html">
 <link rel="import" href="my-notifications.html">
 <link rel="import" href="sidebar-menus.html">
-
+<link rel="import" href="terms-conditions.html">
 
 <dom-module id="my-app">
 	<template>
@@ -172,6 +172,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 			.user-pic{
 				width:60px;
+				height:60px;
 				border:4px solid var(--app-theme-color);
 			}
 
@@ -381,128 +382,144 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			</firebase-query>
 
 		</template>
-		<div class="w3-row" fullbleed>
-			<div class="w3-animate-left w3-display-container" id="sidebar">
-				<span class="w3-display-topright w3-padding-small w3-text-grey" on-click="_sideBarClose" id="close-side-bar">
-					<paper-ripple></paper-ripple>
-					<iron-icon icon="smapp:arrow-back"></iron-icon>
-				</span>
-				<!-- <div style$="background-image: url('/images/app-sidebar.png'); height:130px; {{companyBgColor}}" class="w3-padding"> -->
-				<div class="w3-padding-small" style="height:160px; background-color:#fff;
-				flex-direction: column;justify-content: center;align-items: center;">
-				<img src$="{{companyLogo}}" style="width: 100%" class="w3-padding-top w3-margin-top">
-				</div>
-				<div id="user-identity" class="w3-text-white">
-					<div class="w3-row w3-padding-top">
-						<div class="w3-left w3-padding-small w3-editable" on-tap="_openUserProfile">
-							<img src="{{userLogo}}" class="user-pic w3-circle" />
-							<div class="editable">
-								<iron-icon icon="smapp:create"></iron-icon>
+
+		<iron-pages selected="{{currentpage}}" attr-for-selected="pages-name">
+			<div pages-name="mainapp">
+					<div class="w3-row" fullbleed>
+							<div class="w3-animate-left w3-display-container" id="sidebar">
+								<span class="w3-display-topright w3-padding-small w3-text-grey" on-click="_sideBarClose" id="close-side-bar">
+									<paper-ripple></paper-ripple>
+									<iron-icon icon="smapp:arrow-back"></iron-icon>
+								</span>
+								<!-- <div style$="background-image: url('/images/app-sidebar.png'); height:130px; {{companyBgColor}}" class="w3-padding"> -->
+								<div class="w3-padding-small" style="height:160px; background-color:#fff;
+								flex-direction: column;justify-content: center;align-items: center;">
+								<img src$="{{companyLogo}}" style="width: 100%" class="w3-padding-top w3-margin-top">
+								</div>
+								<div id="user-identity" class="w3-text-white">
+									<div class="w3-row w3-padding-top">
+										<div class="w3-left w3-padding-small w3-editable" on-tap="_openUserProfile">
+											<img src$="{{_photo(userLogo)}}" class="user-pic w3-circle" />
+											<div class="editable">
+												<iron-icon icon="smapp:create"></iron-icon>
+											</div>
+										</div>
+										<div class="w3-margin-top w3-padding-small w3-rest">
+											<div class="user-name w3-medium" style="color: #fff;">{{fullName}}</div>
+											<!-- <div class="user-email">[[user.email]]</div> -->
+										</div>
+									</div>
+									<div class="w3-row w3-padding w3-sb-title follow w3-hover-dark-grey" style="position:relative;">
+										<div id="openFollowers" class="w3-col s6 w3-center" on-tap="_openModal" data="my-followers" style="position:relative; cursor: pointer;">
+											<span class="w3-badge w3-small w3-light-grey">{{no_followers}}</span> Followers
+										</div>
+										<div id="openFollowing" class="w3-col s6 w3-center" on-tap="_openModal" data="my-followers" style="cursor: pointer;">
+											<span class="w3-badge w3-small w3-light-grey">{{no_following}}</span> Following
+										</div>
+										<paper-ripple></paper-ripple>
+									</div>
+								</div>
+								<sidebar-menus id="sidebarMenu" hidecompany="[[hidecompany]]" notcompanyadmin="[[notcompanyadmin]]" pendingstring="{{pending_string}}" leadershipapp="[[leadershipapp]]" publicapp="[[publicapp]]" salesapp="[[salesapp]]" hrapp="[[hrapp]]" on-tap="_sideBarClicked"></sidebar-menus>
+								<div class="w3-text-white">
+									<br>
+									<div class="w3-row w3-padding-16">
+										<a on-tap="logout" href="[[rootPath]]" style="display: block; text-decoration: none; width:100%" class="w3-left a-border-top">
+											<paper-button class="w3-text-light-grey w3-hover-deep-orange w3-center" style="min-width:92% !important">
+												<iron-icon icon="smapp:input"></iron-icon>
+												Sign Out
+											</paper-button>
+										</a>
+									</div>
+								</div>
+								<div class="w3-row w3-text-white a-border-top" style="padding-bottom: 20px;">
+									<paper-button style="width: 100%;font-size: 10px;" on-tap="loadTerms">Terms and Conditions</paper-button>
+								</div>
+							</div>
+							<div class="w3-rest" id="main-content" on-click="_closeSidebarFromBody">
+								<div class="w3-row" id="main-header">
+									<!--style$="{{companyBgColor}}; {{menuTextColor}}" <div class="w3-padding w3-right w3-relative" on-click="unshortedURL">
+										<iron-icon icon="app:message"></iron-icon>
+										<span class="w3-hide-small">UnShorten URL</span>
+									</div> -->
+									<div data="send-feedback" class="w3-padding-small w3-right w3-relative" on-click="_openModal">
+										<paper-ripple></paper-ripple>
+										<iron-icon icon="app:message"></iron-icon>
+										<span class="w3-hide-small">FeedBack</span>
+									</div>
+									<div id="open-notifications" data="my-notifications" class="w3-padding-small w3-right w3-relative" on-click="_openModal">
+										<paper-ripple></paper-ripple>
+										<iron-icon on-click="_openModal" data="my-notifications" id="notificationIcon" icon="app:notifications"></iron-icon>
+										<div class="w3-new-badge nt"
+											style="left:22px!important; top:2px!important; z-index:222; position:absolute;background-color: #0085a5;">
+											{{unread_string}}
+										</div>
+										<span class="w3-padding-small w3-hide-small">Notifications</span>
+									</div>
+									<div class="w3-padding-small w3-left w3-relative w3-relative" id="sidebar-menu" on-click="_sideBarOpen" style="z-index: 999;">
+										<paper-ripple></paper-ripple>
+										<iron-icon icon="app:menu"></iron-icon>
+									</div>
+									<div class="w3-padding-small w3-center" id="mobile-logo">
+										<!-- OneConnect -->
+										<template is="dom-if" if="[[isEqual(_companyid, '-LDVbbRyIMhukVtTVQ0n')]]">
+											<img class="oneconnectlogo" src$="{{companyLogo}}">
+										</template>
+										<!-- Global Leadership Platform - Corporate -->
+										<template is="dom-if" if="[[isEqual(_companyid, '-KgsUcgfo7z1U9MXgd9i')]]">
+											<div style="background-image: url('{{companyLogo}}');" class="mobilelogo"></div>
+										</template>
+										<!-- Global Leadership Platform - Public -->
+										<template is="dom-if" if="[[isEqual(_companyid, '-LEiZPT-C2PyLu_YLKNU')]]">
+											<div style="background-image: url('{{companyLogo}}');" class="mobilelogo"></div>
+										</template>
+										<!-- Other Companies -->
+										<template is="dom-if" if="[[isEqual(_companyid, '12345')]]">
+											<img class="oneconnectlogo" src$="{{companyLogo}}">
+										</template>
+										
+									</div>
+								</div>
+								<iron-pages
+										selected="{{page}}"
+										attr-for-selected="name"
+										fallback-selection="not-found"
+										role="main">
+									<company-thoughts name="company-thoughts" _companyid="[[_companyid]]" user="[[user]]"></company-thoughts>
+									<daily-thoughts name="daily-thoughts" _companyid="[[_companyid]]" user="[[user]]"></daily-thoughts>
+									<leadership-thoughts company="[[company]]" name="leadership-thoughts" _companyid="[[_companyid]]" user="[[user]]"></leadership-thoughts>
+									<leadership-articles name="leadership-articles" _companyid="[[_companyid]]" user="[[user]]"></leadership-articles>
+									<!-- <master-class name="master-class" _companyid="[[_companyid]]" user="[[user]]"></master-class> -->
+									<ldp-companies name="ldp-companies" user="[[user]]"></ldp-companies>
+									<topleader-thoughts name="topleader-thoughts" _companyid="[[_companyid]]" user="[[user]]"></topleader-thoughts>
+									<leadership-podcasts name="leadership-podcasts" _companyid="[[_companyid]]" user="[[user]]"></leadership-podcasts>
+									<leadership-videos name="leadership-videos" _companyid="[[_companyid]]" user="[[user]]"></leadership-videos>
+									<leadership-ebooks name="leadership-ebooks" _companyid="[[_companyid]]" user="[[user]]"></leadership-ebooks>
+									<company-profile name="company-profile" _companyid="[[_companyid]]" user="[[user]]"></company-profile>
+									<company-staff name="company-staff" _companyid="[[_companyid]]" user="[[user]]"></company-staff>
+									<thoughts-management name="thoughts-management" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]"></thoughts-management>
+									<my-pldp name="my-pldp" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]"></my-pldp>
+									<about-pldp name="about-pldp" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]"></about-pldp>
+									<add-thoughts name="add-thoughts" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]" addedit="[[addedit]]" company="[[company]]"></add-thoughts>
+									<add-article name="add-article" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]"></add-article>
+									<read-articles name="read-articles" _companyid="[[_companyid]]" user="[[user]]" author="[[bookAuthor]]" title="[[bookTitle]]" body="[[bookBody]]" photo="[[bookPhoto]]"></read-articles>
+									<add-podcast name="add-podcast" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]"></add-podcast>
+									<add-video name="add-video" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]"></add-video>
+									<add-voicemail name="add-voicemail" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]"></add-voicemail>
+									<i-lead name="i-lead" _companyid="[[_companyid]]" user="[[user]]"></i-lead>
+								</iron-pages>
+								<!-- <div class="w3-display-container w3-text-blue" style="height: 20px; bottom: 0px;">
+									<div class="w3-display-bottommiddle">
+										<a href="../terms-conditions.html" target="_blank">Terms & Conditions</a>
+									</div>
+								</div> -->
 							</div>
 						</div>
-						<div class="w3-margin-top w3-padding-small w3-rest">
-							<div class="user-name w3-medium" style="color: #fff;">{{fullName}}</div>
-							<!-- <div class="user-email">[[user.email]]</div> -->
-						</div>
-					</div>
-					<div class="w3-row w3-padding w3-sb-title follow w3-hover-dark-grey" style="position:relative;">
-						<div id="openFollowers" class="w3-col s6 w3-center" on-tap="_openModal" data="my-followers" style="position:relative; cursor: pointer;">
-							<span class="w3-badge w3-small w3-light-grey">{{no_followers}}</span> Followers
-						</div>
-						<div id="openFollowing" class="w3-col s6 w3-center" on-tap="_openModal" data="my-followers" style="cursor: pointer;">
-							<span class="w3-badge w3-small w3-light-grey">{{no_following}}</span> Following
-						</div>
-						<paper-ripple></paper-ripple>
-					</div>
-				</div>
-				<sidebar-menus id="sidebarMenu" hidecompany="[[hidecompany]]" notcompanyadmin="[[notcompanyadmin]]" pendingstring="{{pending_string}}" leadershipapp="[[leadershipapp]]" publicapp="[[publicapp]]" salesapp="[[salesapp]]" hrapp="[[hrapp]]" on-tap="_sideBarClicked"></sidebar-menus>
-				<div class="w3-text-white">
-					<br>
-					<div class="w3-row">
-						<a on-tap="logout" href="[[rootPath]]" style="display: block; text-decoration: none; width:100%" class="w3-left a-border-top">
-							<paper-button class="w3-text-light-grey w3-hover-deep-orange w3-center" style="min-width:92% !important">
-								<iron-icon icon="smapp:input"></iron-icon>
-								Sign Out
-							</paper-button>
-						</a>
-					</div>
-				</div>
 			</div>
-			<div class="w3-rest" id="main-content" on-click="_closeSidebarFromBody">
-				<div class="w3-row" id="main-header">
-					<!--style$="{{companyBgColor}}; {{menuTextColor}}" <div class="w3-padding w3-right w3-relative" on-click="unshortedURL">
-						<iron-icon icon="app:message"></iron-icon>
-						<span class="w3-hide-small">UnShorten URL</span>
-					</div> -->
-					<div data="send-feedback" class="w3-padding-small w3-right w3-relative" on-click="_openModal">
-						<paper-ripple></paper-ripple>
-						<iron-icon icon="app:message"></iron-icon>
-						<span class="w3-hide-small">FeedBack</span>
-					</div>
-					<div id="open-notifications" data="my-notifications" class="w3-padding-small w3-right w3-relative" on-click="_openModal">
-						<paper-ripple></paper-ripple>
-						<iron-icon on-click="_openModal" data="my-notifications" id="notificationIcon" icon="app:notifications"></iron-icon>
-						<div class="w3-new-badge nt"
-							style="left:22px!important; top:2px!important; z-index:222; position:absolute;background-color: #0085a5;">
-							{{unread_string}}
-						</div>
-						<span class="w3-padding-small w3-hide-small">Notifications</span>
-					</div>
-					<div class="w3-padding-small w3-left w3-relative w3-relative" id="sidebar-menu" on-click="_sideBarOpen" style="z-index: 999;">
-						<paper-ripple></paper-ripple>
-						<iron-icon icon="app:menu"></iron-icon>
-					</div>
-					<div class="w3-padding-small w3-center" id="mobile-logo">
-						<!-- OneConnect -->
-						<template is="dom-if" if="[[isEqual(_companyid, '-LDVbbRyIMhukVtTVQ0n')]]">
-							<img class="oneconnectlogo" src$="{{companyLogo}}">
-						</template>
-						<!-- Global Leadership Platform -->
-						<template is="dom-if" if="[[isEqual(_companyid, '-KgsUcgfo7z1U9MXgd9i')]]">
-							<div style="background-image: url('{{companyLogo}}');" class="mobilelogo"></div>
-						</template>
-						<!-- Other Companies -->
-						<template is="dom-if" if="[[isEqual(_companyid, '12345')]]">
-							<img class="oneconnectlogo" src$="{{companyLogo}}">
-						</template>
-						
-					</div>
-				</div>
-				<iron-pages
-						selected="{{page}}"
-						attr-for-selected="name"
-						fallback-selection="not-found"
-						role="main">
-					<company-thoughts name="company-thoughts" _companyid="[[_companyid]]" user="[[user]]"></company-thoughts>
-					<daily-thoughts name="daily-thoughts" _companyid="[[_companyid]]" user="[[user]]"></daily-thoughts>
-					<leadership-thoughts company="[[company]]" name="leadership-thoughts" _companyid="[[_companyid]]" user="[[user]]"></leadership-thoughts>
-					<leadership-articles name="leadership-articles" _companyid="[[_companyid]]" user="[[user]]"></leadership-articles>
-					<!-- <master-class name="master-class" _companyid="[[_companyid]]" user="[[user]]"></master-class> -->
-					<ldp-companies name="ldp-companies" user="[[user]]"></ldp-companies>
-					<topleader-thoughts name="topleader-thoughts" _companyid="[[_companyid]]" user="[[user]]"></topleader-thoughts>
-					<leadership-podcasts name="leadership-podcasts" _companyid="[[_companyid]]" user="[[user]]"></leadership-podcasts>
-					<leadership-videos name="leadership-videos" _companyid="[[_companyid]]" user="[[user]]"></leadership-videos>
-					<leadership-ebooks name="leadership-ebooks" _companyid="[[_companyid]]" user="[[user]]"></leadership-ebooks>
-					<company-profile name="company-profile" _companyid="[[_companyid]]" user="[[user]]"></company-profile>
-					<company-staff name="company-staff" _companyid="[[_companyid]]" user="[[user]]"></company-staff>
-					<thoughts-management name="thoughts-management" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]"></thoughts-management>
-					<my-pldp name="my-pldp" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]"></my-pldp>
-					<about-pldp name="about-pldp" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]"></about-pldp>
-					<add-thoughts name="add-thoughts" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]" addedit="[[addedit]]" company="[[company]]"></add-thoughts>
-					<add-article name="add-article" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]"></add-article>
-					<read-articles name="read-articles" _companyid="[[_companyid]]" user="[[user]]" author="[[bookAuthor]]" title="[[bookTitle]]" body="[[bookBody]]" photo="[[bookPhoto]]"></read-articles>
-					<add-podcast name="add-podcast" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]"></add-podcast>
-					<add-video name="add-video" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]"></add-video>
-					<add-voicemail name="add-voicemail" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]"></add-voicemail>
-					<i-lead name="i-lead" _companyid="[[_companyid]]" user="[[user]]"></i-lead>
-				</iron-pages>
-				<!-- <div class="w3-display-container w3-text-blue" style="height: 20px; bottom: 0px;">
-					<div class="w3-display-bottommiddle">
-						<a href="../terms-conditions.html" target="_blank">Terms & Conditions</a>
-					</div>
-				</div> -->
+			<div pages-name="terms">
+				<terms-conditions currentpage="{{currentpage}}"></terms-conditions>
 			</div>
-		</div>
+    </iron-pages>
+		
 		<div id="send-feedback" class="w3-modal w3-animate-zoom">
 			<div class="w3-modal-content w3-round max-modal-width" >
 				<div class="w3-container">
@@ -827,6 +844,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					commentType: String,
 					orderCommentBy: String,
 					addedit: Number,
+					currentpage: {
+            type: String,
+            value: 'mainapp',
+						notify: true
+          }
 				};
 			}
 
@@ -1022,9 +1044,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			}
 
 			isEqual(a, b) {
-				console.log(b, a);
 				//(a !=="-LDVbbRyIMhukVtTVQ0n")
-				if((b == "12345" && a !=="-KgsUcgfo7z1U9MXgd9i") && (b == "12345" && a !=="-LDVbbRyIMhukVtTVQ0n")){
+				if((b == "12345" && a !=="-KgsUcgfo7z1U9MXgd9i") && (b == "12345" && a !=="-LDVbbRyIMhukVtTVQ0n") && (b == "12345" && a !=="-LEiZPT-C2PyLu_YLKNU") ){
 					return true;
 				}else return a === b;
 			}
@@ -1097,20 +1118,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					// public app
 					if(this._companyid == "-LEiZPT-C2PyLu_YLKNU"){
 						this.page = 'i-lead';
-				 		this._selected = 0;
+				 		this._selected = 22;
 					}else{
 						this.page = 'company-thoughts';
 				 		this._selected = 0;
 					}
 				 
 				}else{
-				 this.page = page || 'company-thoughts';
+					// public app
+					if(this._companyid == "-LEiZPT-C2PyLu_YLKNU"){
+						this.page = page || 'i-lead';
+				 		this._selected = 22;
+					}else{
+						this.page = page || 'company-thoughts';
+				 		this._selected = 0;
+					}
 				}
-
-				// Close a non-persistent drawer when the page & route are changed.
-				// if (!this.$.drawer.persistent) {
-				//  this.$.drawer.close();
-				// }
 
 				 this._selected = page;
 				 var modselect = 0;
@@ -1265,10 +1288,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			}
 
 			_photo(photo){
-				let photo_url = "background-image: url('../images/default-user.png');";
+
+				let photo_url = "../images/default-user.png";
 
 				if (photo != "" || photo != undefined) { 
-					photo_url = 'background-image: url('+photo+');';
+					photo_url = photo;
+				}
+
+				if(photo == null){
+					photo_url = "../images/default-user.png";	
 				}
 
 				return photo_url;
@@ -1390,6 +1418,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 							this.no_followers = this._objLen(data.val());
 							database.ref('/users/' + this._user.userID).child('analytics').child('followers').set(this.no_followers);
 						})
+
+						var follow_id = localStorage.getItem("follow_id");
+						if(follow_id === null){
+							// console.log("its null");
+						}else{
+							database.ref('/users/' + this._user.userID + '/following').child(follow_id).set(true);
+							database.ref('/users/' + follow_id + '/follower').child(this._user.userID).set(true);
+
+							localStorage.removeItem("follow_id");
+						}
 
 						if(_platform != 'undefined') this.setDeviceType(_platform);
 
@@ -1583,7 +1621,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				sessionStorage.setItem("user1", "Subscriber");
 				sessionStorage.setItem("user2", "Company Staff");
-				sessionStorage.setItem("user3", "Leader");
+				sessionStorage.setItem("user3", "I-Leader");
 				sessionStorage.setItem("user4", "Global Contributor");
 				sessionStorage.setItem("user5", "Master Contributor");
 				sessionStorage.setItem("user6", "Company Admin");
@@ -1633,6 +1671,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				//Go back to initial position in document
 				$(document).scrollTop(scrollTopPosition);
+			}
+
+			loadTerms(){
+				this.currentpage = "terms";
 			}
 		}
 

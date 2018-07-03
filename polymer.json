@@ -12,14 +12,14 @@
 		"src/theme-styles.html","src/thought-card-attachments.html","src/thoughts-management.html",
 		"src/topleader-thoughts.html","src/user-profile.html","src/view-articles.html",
 		"src/view-masterclass.html","src/view-podcasts.html","src/view-sidebar.html",
-		"src/view-thoughts.html","src/w3-styles.html"
+		"src/view-thoughts.html","src/w3-styles.html", "src/terms-conditions.html", "src/term-condition.html"
 	],
 	"sources": [
 		"src/**/*","images/**/*","data/**/*","bower.json"
 	],
 	"extraDependencies": ["manifest.json","firebase-messaging-sw.js",
     "bower_components/webcomponentsjs/custom-elements-es5-adapter.js",
-    "bower_components/webcomponentsjs/*","bower_components/zxcvbn/dist/zxcvbn.js","src/terms-conditions.html"
+    "bower_components/webcomponentsjs/*","bower_components/zxcvbn/dist/zxcvbn.js"
   ],
 	"lint": {
 		"rules": ["polymer-2"],
@@ -33,7 +33,7 @@
 		{
 			"name": "es5-bundled",
 			"bundle": true,
-			"js": {"minify": {"exclude": ["src/recorderv2.js"]}, "compile": {"exclude": ["src/recorderv2.js"]}},
+			"js": {"minify": {"exclude": ["src/recorderv2.js"]}, "compile": {"exclude": ["src/recorderv2.js"] }},
 			"css": {"minify": true},
 			"html": {"minify": {"exclude": ["src/my-recorder.html"]}},
 			"addServiceWorker": true,

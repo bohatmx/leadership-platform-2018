@@ -22,7 +22,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-styles/shadow.html">
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
-<link rel="import" href="shared-styles.html">
+
 <!-- Paper items -->
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="/bower_components/gold-password-input/gold-password-input.html">
@@ -35,6 +35,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <!-- Firebase Query -->
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-database-behavior.html">
+
+<link rel="import" href="app-icons.html">
+<link rel="import" href="shared-styles.html">
 
 <dom-module id="user-profile">
   <template>
@@ -126,6 +129,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <paper-input id="lastName" name="lastName" always-float-label label="Last Name" type="text" auto-validate value="[[user.lastName]]" required></paper-input>
               <paper-input id="emailAddress" name="emailAddress" always-float-label label="Email Address (readonly)" type="email" auto-validate value="[[user.email]]" readonly>
               </paper-input>
+              <paper-input id="userurl" name="userurl" always-float-label label="Personalized Invite Link" value="[[user.userURL]]" type="text" readonly>
+              </paper-input>
               <h3>Password</h3>
               <gold-password-input id="currentPassword" name="currentPassword" always-float-label label="Current Password (readonly)" reveal suffix required value="[[user.password]]" strength-meter readonly>
               </gold-password-input>
@@ -174,6 +179,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.photo = selectedImage;
 
           // this.$.userAvatar.style.display = "block";
+      }
+
+      copyLink(){
+        var userurl = Polymer.dom(this.root).querySelector('#userurl');
+        var res = this.copy(userurl.value);
+
+        if(res){
+          this.showSnackBar("Link copied to clipboard!");
+        }
+      }
+
+      copy(text) {
+        var input = document.createElement('input');
+        input.setAttribute('value', text);
+        document.body.appendChild(input);
+        input.select();
+        var result = document.execCommand('copy');
+        document.body.removeChild(input)
+        return result;
       }
 
       _closeParentModal(e){
@@ -342,7 +366,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         x.innerHTML = msg;
 
         x.className = "show";
-        setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+        setTimeout(function(){ x.className = x.className.replace("show", ""); }, 4000);
       }
       _photo(photo){
         let photo_url = "background-image: url('../images/profile/default-user.png');";

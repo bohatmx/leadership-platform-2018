@@ -1,0 +1,103 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="manifest" href="/manifest.json">
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+
+<dom-module id="who-liked">
+    <template>
+    <style include="w3-styles"></style>
+    <style include="shared-styles">
+        :host {
+            display: block;
+        }
+    </style>
+    <div class="w3-container">
+        <div class="w3-large w3-center" style="padding:8px;">
+            <b class="w3-text-blue"><iron-icon icon="app:favorite"></iron-icon>&nbsp;Liked By</b>
+        </div>
+        <ul class="w3-ul w3-card-2 w3-hoverable w3-margin-bottom">
+            <hr>
+            <template id="resultList" is="dom-repeat" items="[[likes]]" as="item">
+                <li class="w3-bar" style="padding: 8px 0;">
+                <img class="w3-bar-item w3-circle" style="width:48px; height: 48px;" src="[[item.photoURL]]">
+                    <div class="w3-bar-item">
+                        <span class="w3-large w3-text-blue">[[item.journalUserName]]</span><br>
+                        <span>[[item.companyName]]</span>
+                    </div>
+                </li>
+            </template>
+        </ul>
+    </div>
+    
+    </template>
+    <script>
+
+    class WhoLiked extends Polymer.Element {
+        static get is() { return 'who-liked'; }
+        ready(){
+            super.ready();
+        }
+        static get properties() {
+            return {
+                likesdata: {
+                    type: Object,
+                    notify: true,
+                    observer: "_likesDataChanged"
+                },
+                likes: {
+                    type: Object,
+                    observer: "refreshFilter",
+                    notify: true
+                }
+            };
+        }
+        _likesDataChanged(){
+            if(this.likesdata != undefined){
+                this.likes = this._toArray(this.likesdata);
+            }
+        }
+        refreshFilter() {
+            this.$.resultList.render();
+        }
+        _profilePhoto(photo){
+            let photo_url = "../images/default-user.png";
+
+            if(photo == undefined){
+                photo_url = "../images/default-user.png";
+            }else if(photo == ""){
+                photo_url = "../images/default-user.png";
+            }else{
+                photo_url = ''+photo+'';
+            }
+
+            return photo_url;
+        }
+        _toArray(obj) {
+            if(obj != undefined){
+                return Object.keys(obj).map(function(key) {
+                    var retObj = {};
+                    retObj = obj[key];
+                    return retObj;
+                    // return obj[key];
+            });
+            }
+        }
+        
+
+    }
+    window.customElements.define(WhoLiked.is, WhoLiked);
+    </script>
+</dom-module>

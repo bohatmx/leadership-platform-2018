@@ -21,7 +21,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <!-- Firebase Query -->
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-database-behavior.html">
-<!-- <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html"> -->
 
 <dom-module id="my-followers">
     <template>
@@ -44,23 +43,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         data="{{usersData}}">
     </firebase-query>
 
-    <!-- <app-indexeddb-mirror
-        session="[[user.userID]]"
-        key="keyfollowersdata"
-        data="{{ldpfollowersData}}"
-        persisted-data="{{usersData}}">
-    </app-indexeddb-mirror> -->
-
-    <div class="w3-row">
+    <div class="w3-row w3-text-white">
         <div id="Followers" class="w3-col s6 w3-card-2" style="cursor: pointer;" on-tap="toggleFollow">
             <paper-ripple></paper-ripple>
-            <div class="w3-dark-grey w3-padding-large">
+            <div id="followersTab" class="w3-padding-large">
                 Followers
             </div>
         </div>
         <div id="Following" class="w3-col s6 w3-card-2" style="cursor: pointer;" on-tap="toggleFollow">
             <paper-ripple></paper-ripple>
-            <div class="w3-deep-orange w3-padding-large">
+            <div id="followingTab" class="w3-padding-large">
                 Following
             </div>
         </div>
@@ -135,9 +127,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
         _filter (person) {
             var selectedTab = this.$.selectedTab;
+            var followersTab = this.$.followersTab;
+            var followingTab = this.$.followingTab;
             
             if(this.follow == 'Followers'){
-                selectedTab.style = "background-color: #616161!important;";
+                // selectedTab.style = "background-color: #616161!important;";
+                selectedTab.style = "background-color: #ff5722!important;";
+                followersTab.style = "background-color: #ff5722!important;";
+                followingTab.style = "background-color: #616161!important;";
                 // Followers
                 if(this.user !== undefined){
                     if(this.user.follower){
@@ -149,6 +146,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 
             }else{
                 selectedTab.style = "background-color: #ff5722!important;";
+                followersTab.style = "background-color: #616161!important;";
+                followingTab.style = "background-color: #ff5722!important;";
                 // Following
                 if(this.user !== undefined){
                     if(this.user.following){

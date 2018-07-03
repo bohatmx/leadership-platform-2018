@@ -295,11 +295,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 									</div></a><!-- No empty text node-->
 								</div>
 							</div>
-							<div class="horizontal justified"><!-- No empty text node-->
-								<a href="[[articleLink(item.manualOrExternal, item.articleLink)]]" target="[[targetLink(item.manualOrExternal)]]" name="name" style="text-decoration: none;">
-									<div class="article-title">[[item.title]]</div>
-									<p class="article-author">[[item.subtitle]]</p>
-								</a><!-- No empty text node-->
+							<div class="horizontal justified w3-padding-small"><!-- No empty text node-->
+								<div class="w3-row"><a id="article1[[item.dateRegistered]]" href="[[articleLink(item.manualOrExternal, item.articleLink)]]" target="[[targetLink(item.manualOrExternal)]]" name="name" style="text-decoration: none;" class="article-title" on-click="_openArticle" data="[[_setArticleData(item.subtitle, item.title, item.body, item.photos)]]">[[item.title]]</a><!-- No empty text node--></div>
+								<div class="w3-row"><a id="article2[[item.dateRegistered]]" href="[[articleLink(item.manualOrExternal, item.articleLink)]]" target="[[targetLink(item.manualOrExternal)]]" name="name" style="text-decoration: none;" class="article-author" on-click="_openArticle" data="[[_setArticleData(item.subtitle, item.title, item.body, item.photos)]]">[[item.subtitle]]</a><!-- No empty text node--></div>
 							</div>
 							<thought-card-attachments itemid="[[item.newsID]]" item="[[item]]" user="[[user]]" thetype="news" thoughtype="[[thoughtype]]"></thought-card-attachments>
 							<comments-box user="[[user]]" firebaseref="news" item="[[item]]" thetype="Article" entityid="[[item.newsID]]"></comments-box>

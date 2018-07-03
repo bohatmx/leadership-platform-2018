@@ -472,6 +472,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			updateFollowBTN(journalUserID, following){
 				var that = this;
 				var thoughtCard = Polymer.dom(that.root).querySelector("#thoughts-Holder");
+
 				$(thoughtCard).find('.modal-div').each(function(i, e){
 					var followBTN = $(e).find('.followBTN')[0];
 					var thoughtUserID = $(followBTN).prop('data');
@@ -536,6 +537,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				let journalUserID = e.target.data;
 				let following = e.target.innerHTML;
 				let userID = this.user.userID;
+				var that = this;
 				// let journalUserName = e.target.parentNode.firstChild.nextSibling.innerText;
 
 				var userRef = database.ref('users/' + journalUserID);
@@ -562,20 +564,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						$(e.target).addClass('following');
 
 						e.target.innerHTML = "Following";
-						this.updateFollowBTN(journalUserID, following);
+						that.updateFollowBTN(journalUserID, following);
 					}else{
-						if (confirm('Unfollow '+journalUserName+'?')){
-							database.ref('users/'+ userID + '/following/'+journalUserID).remove();
-							database.ref('users/'+ journalUserID + '/follower/'+userID).remove();
+						database.ref('users/'+ userID + '/following/'+journalUserID).remove();
+						database.ref('users/'+ journalUserID + '/follower/'+userID).remove();
 
-							this.isFollowingStyle(journalUserID);
+						that.isFollowingStyle(journalUserID);
 
-							$(e.target).removeClass('following');
-
-							e.target.innerHTML = "Follow";
-
-							this.updateFollowBTN(journalUserID, following);
-						}
+						$(e.target).removeClass('following');
+						e.target.innerHTML = "Follow";
+						that.updateFollowBTN(journalUserID, following);
 					}
 					
 				});

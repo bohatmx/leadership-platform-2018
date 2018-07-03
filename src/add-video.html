@@ -107,15 +107,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
       <div class="container">
         <div class="add-thought">
-          <paper-input label="Enter Video Title" type="text" id="videoTitle">
+          <paper-input label="Enter Video Title" type="text" id="videoTitle" maxlength="240" char-counter autocapitalize tabindex="0">
           </paper-input>
-          <paper-input label="Enter Video Author" type="text" id="videoAuthor">
+          <paper-input label="Enter Video Author" type="text" id="videoAuthor" maxlength="100" char-counter autocapitalize tabindex="1">
           </paper-input>
           <br>
           <label><small>Schedule Date & TIme</small></label><br>
           <div class="datetime">
-            <paper-input class="dateScheduled" id="dateScheduled" name="dateScheduled" always-float-label label="Date" type="date" auto-validate value$="[[_defaultDate()]]"></paper-input>
-            <paper-input class="timeScheduled" id="timeScheduled" name="timeScheduled" always-float-label label="Time" type="time" auto-validate value$="[[_defaultTime()]]"></paper-input>
+            <paper-input class="dateScheduled" id="dateScheduled" name="dateScheduled" always-float-label label="Date" type="date" auto-validate value$="[[_defaultDate()]]" tabindex="2"></paper-input>
+            <paper-input class="timeScheduled" id="timeScheduled" name="timeScheduled" always-float-label label="Time" type="time" auto-validate value$="[[_defaultTime()]]" tabindex="3"></paper-input>
           </div>
           <br>
           <paper-radio-group selected="postInternal" id="postInternalGlobal" name="postInternalGlobal">

@@ -28,12 +28,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/l2t-paper-rating/l2t-paper-rating.html">
 <link rel="import" href="app-icons.html">
+<link rel="import" href="who-liked.html">
 
 <dom-module id="comments-box">
 	<template>
 		<link rel="import" href="shared-styles.html">
 		<style include="w3-styles">
-			
 			.comment-box .comments-bar {
 				margin-top: 5px;
 				border-top: 1px solid rgb(158, 160, 167);
@@ -56,7 +56,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				overflow: hidden;
 				position: relative;
 			}
-
+			.max-modal-width {max-width: 600px!important;}
 			.comments-ratings-holder .mask {
 				position: absolute;
 				top: 60px;
@@ -170,6 +170,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				--paper-fab-keyboard-focus-background: #1298f1;
 			}
 		</style> 
+		
 		<div class="comments-box">
 			<div class="comments-bar w3-row w3-darker w3-padding">
 				<div class="w3-left" style="display: inline-flex;
@@ -177,7 +178,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				align-items: center;
 				justify-content: center;">
 					<paper-fab data="{{item.likes}}" icon="{{__computeFavIcon(item.likes)}}" on-tap="__toggleFavorite" class="w3-left" style="margin-right: 8px;"></paper-fab>
-					<span class="w3-new-badge w3-small w3-left w3-blue">[[_getLikesCount(item.countLikes)]]</span>
+					<span class="w3-new-badge w3-small w3-left w3-blue" style$="[[hideSpan(item.countLikes)]]" data="{{item.likesData}}" on-tap="_openWhoLiked">[[_getLikesCount(item.countLikes)]]</span>
 				</div>
 				<div class="w3-right">
 					<paper-button class="bar-item w3-left selected" on-tap="_toggleCRHItem" crhType="comments">
@@ -275,6 +276,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				</div>
 			</div>
 		</div>
+		<div id="who-liked" class="w3-modal w3-animate-zoom" style="z-index: 9999;">
+			<div class="w3-modal-content w3-round max-modal-width">
+				<div>
+					<span id="spanCloseItemModal" on-click="_closeItemsModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white">&times;</span>
+					<div class="w3-row">
+						<who-liked likesdata="{{likesdata}}"></who-liked>
+					</div>
+					<div id="item-holder" class="w3-row w3-padding w3-border w3-round-small w3-margin-bottom"></div>
+				</div>
+			</div>
+		</div>
 	</template>
 
 	<script>
@@ -314,6 +326,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					__favorite: {
 						type: Boolean,
 						value: false
+					},
+					likesdata: {
+						type: Object,
+						notify: true
 					}
 				};
 			}
@@ -326,8 +342,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				return itms == undefined ? 0 : Object.keys(itms).length;
 			}
 
+			hideSpan(itms) {
+				if(itms == 0) return "display: none";
+
+				return itms == undefined ? "display: none" : "display: block;";
+			}
+
 			_getLikesCount(itms) {
-				return itms == undefined ? 0 : itms;
+				if(itms == 1) return "1 Like";
+
+				return itms == undefined ? "" : itms + " Likes";
 			}
 
 			_showAllComments(nData, oData){
@@ -338,6 +362,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				else{
 					$(crh).removeClass('opened');
 				}
+			}
+
+			_openWhoLiked(e){
+				// console.log(e.currentTarget.data);
+				this.likesdata = e.currentTarget.data;
+
+				if(this.likesdata != undefined){
+					var modal = Polymer.dom(this.root).querySelector('#who-liked');
+					modal.style.display = 'block';
+				}
+			}
+
+			_closeItemsModal(e){
+				var modal = Polymer.dom(this.root).querySelector('#who-liked');
+				modal.style.display = 'none';
 			}
 
 			_openModal(e){
@@ -537,26 +576,70 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			_saveLike(state){
 				let dailyThought_ID = this.entityid;
 				var journalUserID = this.user.userID;
+				
 				// Get a reference to the database service
 				var database = firebase.database();
 
 				if(state == false){
 					database.ref(this.firebaseref).child(dailyThought_ID).child('likes').child(journalUserID).set(true);
+
 					let countLikes = database.ref(this.firebaseref).child(dailyThought_ID).child('countLikes');
 					let currentCount = countLikes.transaction(function(current) {
 						return (current || 0) + 1;
 					});
 
+					var journalUserName = this.user.firstName+" "+this.user.lastName;
+					var companyID = this.user.companyID;
+					var companyName = this.user.companyName;
+					// get date and time
+					var timeInMs = Date.now();
+					var likesStringDate = this._formate_date(timeInMs);
+					var photoURL = "";
+
+					if(this.user.photoURL != undefined || this.user.photoURL != ""){
+						photoURL = this.user.photoURL;
+					}else{
+						photoURL = "";
+					}
+
+					var data = {
+						companyID: companyID,
+						companyName: companyName,
+						journalUserID: journalUserID,
+						journalUserName: journalUserName,
+						likesDate: timeInMs,
+						likesStringDate: likesStringDate,
+						photoURL: photoURL
+					}
+
+					database.ref(this.firebaseref).child(dailyThought_ID).child('likesData').child(journalUserID).set(data);
+
 					this._showCommentBoxMessage("<span class='w3-text-red'>You liked the post!</span>", 2000);
 
 				}else{
 					database.ref(this.firebaseref).child(dailyThought_ID).child('likes').child(journalUserID).remove();
+
+					database.ref(this.firebaseref).child(dailyThought_ID).child('likesData').child(journalUserID).remove();
+
 					let countLikes = database.ref(this.firebaseref).child(dailyThought_ID).child('countLikes');
 					let currentCount = countLikes.transaction(function(current) {
 						return (current || 0) - 1;
 					});
 				}
 				
+			}
+
+			_formate_date(dt){
+				var date = new Date(dt);
+				var day = date.getDate() < 10 ? '0'+date.getDate() : date.getDate();
+				var hours = date.getHours() < 10 ? '0'+date.getHours() : date.getHours();
+				var minutes = date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes();
+				var locale = 'en-us';
+				var month = date.toLocaleString(locale, { month: "long" });
+				var year = date.getFullYear();
+				var am_pm = date.getHours() >= 12 ? "PM" : "AM"
+
+				return day+' '+month+' '+year+' '+hours+':'+minutes+" "+am_pm;
 			}
 
 			_saveRateValue(){
