@@ -44,9 +44,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 							id="videos"
 							path="/videos"
 							order-by-child="company_status"
-							start-at="general_true"
-							end-at="general_true"
+							equal-to="general_true"
+							limit-to-last="6"
 							data="{{videosData}}">
+						</firebase-query>
+
+						<firebase-query
+							path="/videos"
+							order-by-child="company_status"
+							equal-to="general_true"
+							limit-to-last="{{minData}}"
+							data="{{videosData1}}">
 						</firebase-query>
 
 					</template>
@@ -170,7 +178,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			<div class="video-cards-wrapper w3-margin-top">
 				
 				<div class="container list-side fadeInUp w3-row">
-					<template is="dom-repeat" items="[[videosData]]" as="item" sort="_sort" observe="dateScheduled">
+					<template id="videosList" is="dom-repeat" items="[[videosData]]" as="item" sort="_sort" observe="dateScheduled">
 						<div class="video-item">
 							<div class="vid-item w3-animate-zoom" data="[[item]]">
 								<div class="w3-card w3-white" style="border-radius:2px; border:1px solid #bbb">
@@ -189,14 +197,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 									<div class="w3-center" style="width:auto; height: 220px">
 										<template is="dom-if" if="[[isEqual(item.UploadExternal, 'external')]]">
 											<img id="img[[item.dateRegistered]]" src$="[[getYoutubeThumbnail(item.url)]]" alt="LP" 
-												style="width:auto; max-height: 220px; cursor: pointer;" data="[[item.url]]" on-click="_handleClick">
+												style="width:auto; max-height: 220px; cursor: pointer;" data="[[item.url]]" on-click="_handleClick" uploadtype="[[item.UploadExternal]]">
 										</template>
 										<template is="dom-if" if="[[isEqual(item.UploadExternal, 'upload')]]">
 											<video id="thumb[[item.dateRegistered]]" style="width:auto; max-height: 120px;  cursor: pointer;" data="[[item.url]]" on-click="_handleClick" uploadtype="[[item.UploadExternal]]">
-													<source src="[[item.url]]" type="video/mp4">
-													<source src="[[item.url]]" type="video/ogg">
-													Your browser does not support video.
-												</video>
+												<source src="[[item.url]]" type="video/mp4">
+												<source src="[[item.url]]" type="video/ogg">
+												Your browser does not support video.
+											</video>
 										</template>
 										<!--  -->
 									</div>
@@ -229,11 +237,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						</div> 
 						<div class="ldp-modal" id="video-modal">
 							<div class="ldp-modal-content" style="max-width:600px">
-								<span on-tap="_closeModal" class="w3-button w3-display-topright w3-red w3-text-white w3-medium">&times;</span>
+								<span on-tap="_closeModal" class="w3-button w3-display-topright w3-red w3-text-white w3-medium" style="z-index: 999;">&times;</span>
 								<div class="w3-white w3-card-2 w3-round">
 									<iframe id="videoPlayer" width="100%" height="315"
 										src="" autoplay="false" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen>
 									</iframe>
+									<video src="" id="videoPlayerUpload" controls autoplay>
+										<source id="videoPlayerUpload1" src="" type="video/mp4">
+										<source id="videoPlayerUpload2" src="" type="video/ogg">
+										Your browser does not support video.
+									</video>
 									<div class="w3-large w3-text-dark-grey w3-row">
 										<div class="w3-padding w3-right w3-medium">
 											<paper-icon-button icon="app:remove-red-eye"></paper-icon-button> 0 Views
@@ -247,6 +260,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 							</div>
 						</div> 
 					</template>
+
+					<div class="w3-row w3-center" style="width: 100%">
+						<div class="w3-row w3-text-green" style="width: 100%"><paper-button hidden="{{loadmore}}" on-tap="_loadMorePosts">Watch More Videos</paper-button></div>
+						<div class="w3-row" style="width: 100%"><paper-spinner  active="{{isloadingmore}}"></paper-spinner></div>
+					</div>
 				</div>
 			</div>
 	</template>
@@ -258,13 +276,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				super.ready();
 				this.filterID = window.location.hash.split('#')[1];
 				$(window).on('hashchange', ()=>{
-				this.filterID = window.location.hash.split('#')[1];
+					this.filterID = window.location.hash.split('#')[1];
 				});
+
+				var that = this;
+
+				// window.onscroll = function() {
+				// 	var pageHeight=document.documentElement.offsetHeight,
+				// 	windowHeight=window.innerHeight,
+				// 	scrollPosition=window.scrollY || window.pageYOffset || document.body.scrollTop + (document.documentElement && document.documentElement.scrollTop || 0);
+
+				// 	if (pageHeight <= windowHeight+scrollPosition) {
+				// 		that.minData += 3;
+				// 	}
+				// };
 			}
 			static get properties() {
 				return {
 					user: {
 						type: Object
+					},
+					minData: {
+						type: Number,
+						value: 6
 					},
 					_userid: {
 						type: String,
@@ -293,6 +327,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					videosData: {
 						type: Object,
 						observer: '_onvideosDataDataReceived'
+					},
+					videosData1: {
+						type: Object,
+						observer: '_onvideosData1DataReceived'
+					},
+					loadmore: {
+						type: Boolean,
+						value: true
+					},
+					isloadingmore: {
+						type: Boolean,
+						value: false
 					}
 				};
 			}
@@ -301,11 +347,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				this.hasNoFilter = this.filterID.length > 0 ? false : true;
 			}
 
+			_loadMorePosts(){
+				this.isloadingmore = true;
+				this.minData += 6;
+			}
+
+			_onvideosData1DataReceived(newData, oldData){
+				var objLen = this._objLen(newData);
+				if(objLen > 6){
+					this.videosData = newData;
+					// this.videosData = Object.assign(this.videosData, newData);
+					this.$.videosList.render();
+				}
+			}
+
 			_onvideosDataDataReceived(newData, oldData){
 				var that = this;
 				if(newData.length > 0){
 					this.isloading = false;
 					this.loadingmessage = "";
+					this.loadmore = false;
+					this.isloadingmore = false;
 				} 
 
 				setTimeout(function(){
@@ -315,6 +377,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					else that.loadingmessage = "";
 
 				},20000)
+			}
+			_objLen(obj) {
+				let len = 0;
+				if(obj != undefined){
+					len = Object.keys(obj).length;
+				}
+				return len;
 			}
 			_setProfileInfo(journalUserName, journalUserID, companyName, companyID, photoURL){
 				if(photoURL == "" || photoURL == undefined) photoURL = "../images/default-user.png";
@@ -365,6 +434,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			_closeModal(e){
 				var videoPlayer = Polymer.dom(this.root).querySelector('#videoPlayer');
 				videoPlayer.src = "";
+
+				var videoPlayerUpload = Polymer.dom(this.root).querySelector('#videoPlayerUpload');
+				var videoPlayerUpload1 = Polymer.dom(this.root).querySelector('#videoPlayerUpload1');
+				var videoPlayerUpload2 = Polymer.dom(this.root).querySelector('#videoPlayerUpload2');
+				
+				videoPlayerUpload.src = "";
+				videoPlayerUpload1.src = "";
+				videoPlayerUpload2.src = "";
+
 				this.modalVideoName = "";
 				var modal = Polymer.dom(this.root).querySelector('#video-modal');
 				modal.style.display = 'none';
@@ -383,13 +461,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				if(uploadtype == "external"){
 					var src = this.getMediaURL(videoClicked);
-
 					var videoPlayer = Polymer.dom(this.root).querySelector('#videoPlayer');
+					videoPlayer.style = "display: block;";
+
+					var videoPlayerUpload = Polymer.dom(this.root).querySelector('#videoPlayerUpload');
+					var videoPlayerUpload1 = Polymer.dom(this.root).querySelector('#videoPlayerUpload1');
+					var videoPlayerUpload2 = Polymer.dom(this.root).querySelector('#videoPlayerUpload2');
+
+					videoPlayerUpload.src = "";
+					videoPlayerUpload1.src = "";
+					videoPlayerUpload2.src = "";
+
+					videoPlayerUpload.style = "display: none;";
+
 					videoPlayer.src = src;
 				}else{
 					var videoPlayer = Polymer.dom(this.root).querySelector('#videoPlayer');
+					videoPlayer.style = "display: none;";
+					videoPlayer.src = "";
+
+					var videoPlayerUpload = Polymer.dom(this.root).querySelector('#videoPlayerUpload');
+					videoPlayerUpload.style = "display: block; width:100%; max-height: 315px;";
+
+					var videoPlayerUpload1 = Polymer.dom(this.root).querySelector('#videoPlayerUpload1');
+					var videoPlayerUpload2 = Polymer.dom(this.root).querySelector('#videoPlayerUpload2');
+					
 					var src = this.getMediaURL(videoClicked);
-					videoPlayer.src = src;
+					videoPlayerUpload.src = src;
+					videoPlayerUpload1.src = src;
+					videoPlayerUpload2.src = src;
 				}
 
 				var modal = Polymer.dom(this.root).querySelector('#video-modal');
@@ -508,7 +608,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				}else if(photo == ""){
 					photo_url = "background-image: url('../images/default-user.png');";
 				}else{
-					photo_url = 'background-image: url('+photo+');';
+					photo_url = "background-image: url('"+photo+"');";
 				}
 
 				return photo_url;

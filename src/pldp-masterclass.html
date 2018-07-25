@@ -346,7 +346,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }else if(photo == ""){
           photo_url = "background-image: url('../images/profile/default-user.png');";
         }else{
-          photo_url = 'background-image: url('+photo+');';
+          photo_url = "background-image: url('"+photo+"');";
         }
 
         return photo_url;

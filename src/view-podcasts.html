@@ -41,7 +41,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="comments-box.html">
 <link rel="import" href="edit-post.html">
 <link rel="import" href="app-icons.html">
-<link rel="import" href="view-sidebar.html">
 <link rel="import" href="play-media.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="w3-styles.html">
@@ -58,8 +57,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					path="/podcasts"
 					order-by-child="company_status"
 					equal-to="general_true"
-					limit-to-last="30"
+					limit-to-last="6"
 					data="{{podcastsData}}">
+				</firebase-query>
+
+				<firebase-query
+					path="/podcasts"
+					order-by-child="company_status"
+					equal-to="general_true"
+					limit-to-last="{{minData}}"
+					data="{{podcastsData1}}">
 				</firebase-query>
 
 			</template>
@@ -257,7 +264,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					<div style="width: 100%; padding-top: 10px;" class="w3-row w3-center" id="spinnerMessage">{{loadingmessage}}</div>
 				</div>
 			<div class="main-card">
-				<template is="dom-repeat" items="[[podcastsData]]" as="item" sort="_sort" observe="dateScheduled">
+				<template id="podcastsList" is="dom-repeat" items="[[podcastsData]]" as="item" sort="_sort" observe="dateScheduled">
 					<div class="podcast-item" id="modal-[[item.podcastID]]">
 						<div class="modal-div w3-animate-zoom">
 							<div class="w3-card w3-white" style="border-radius:2px; border:1px solid #bbb">
@@ -294,6 +301,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						</div>
 					</div>
 				</template>
+				<div class="w3-row w3-center" style="width: 100%">
+					<div class="w3-row w3-text-green" style="width: 100%"><paper-button hidden="{{loadmore}}" on-tap="_loadMorePosts">Listen to More Podcasts</paper-button></div>
+					<div class="w3-row" style="width: 100%"><paper-spinner  active="{{isloadingmore}}"></paper-spinner></div>
+				</div>
 			</div>
 		</section>
 		<div id="snackbar"></div>
@@ -306,8 +317,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				super.ready();
 				this.filterID = window.location.hash.split('#')[1];
 				$(window).on('hashchange', ()=>{
-				this.filterID = window.location.hash.split('#')[1];
+					this.filterID = window.location.hash.split('#')[1];
 				});
+
+				// var that = this;
+
+				// window.onscroll = function() {
+				// 	var pageHeight=document.documentElement.offsetHeight,
+				// 	windowHeight=window.innerHeight,
+				// 	scrollPosition=window.scrollY || window.pageYOffset || document.body.scrollTop + (document.documentElement && document.documentElement.scrollTop || 0);
+
+				// 	if (pageHeight <= windowHeight+scrollPosition) {
+				// 		that.minData += 6;
+				// 	}
+				// };
 			}
 			static get properties() {
 				return {
@@ -317,6 +340,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					_userid: {
 						type: String,
 						notify: true
+					},
+					minData: {
+						type: Number,
+						value: 6
 					},
 					hasNoFilter: {
 						type:Boolean,
@@ -329,6 +356,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					podcastsData: {
 						type: Object,
 						observer: '_onpodcastsDataReceived'
+					},
+					podcastsData1: {
+						type: Object,
+						observer: '_onpodcastsData1Received'
 					},
 					isloading: {
 						type: Boolean,
@@ -369,6 +400,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					lastSelectedComRate: {
 						type: String,
 						value: ''
+					},
+					loadmore: {
+						type: Boolean,
+						value: true
+					},
+					isloadingmore: {
+						type: Boolean,
+						value: false
 					}
 				};
 			}
@@ -381,12 +420,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				this.hasNoFilter = this.filterID.length > 0 ? false : true;
 			}
 
+			_loadMorePosts(){
+				this.isloadingmore = true;
+				this.minData += 6;
+			}
+
+			_onpodcastsData1Received(newData, oldData){
+				var objLen = this._objLen(newData);
+				if(objLen > 6){
+					this.podcastsData = newData;
+					// this.podcastsData = Object.assign(this.podcastsData, newData);
+					this.$.podcastsList.render();
+				}
+			}
 			_onpodcastsDataReceived(newData, oldData){
 				var that = this;
 
 				if(newData.length > 0){
 					this.isloading = false;
 					this.loadingmessage = "";
+					this.loadmore = false;
+					this.isloadingmore = false;
 				} 
 
 				setTimeout(function(){
@@ -776,7 +830,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				}else if(photo == ""){
 					photo_url = "background-image: url('../images/default-user.png');";
 				}else{
-					photo_url = 'background-image: url('+photo+');';
+					photo_url = "background-image: url('"+photo+"');";
 				}
 
 				return photo_url;

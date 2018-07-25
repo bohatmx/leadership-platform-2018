@@ -25,9 +25,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-ripple/paper-ripple.html">
 
-<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+<!-- <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html"> -->
+
+<!-- <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html"> -->
 
 <link rel="import" href="../bower_components/paper-fab-speed-dial/paper-fab-speed-dial.html">
 <link rel="import" href="../bower_components/paper-fab-speed-dial/paper-fab-speed-dial-action.html">
@@ -36,11 +38,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
 <link rel="import" href="../bower_components/iron-iconset/iron-iconset.html">
-<link rel="import" href="app-icons.html">
-
-<link rel="import" href="w3-styles.html">
-<link rel="import" href="shared-styles.html">
-<link rel="import" href="theme-styles.html">
 
 <link rel="lazy-import" href="daily-thoughts.html">
 <link rel="lazy-import" href="company-thoughts.html">
@@ -66,18 +63,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="lazy-import" href="sign-in.html">
 <link rel="lazy-import" href="my-pldp.html"> 
 <link rel="lazy-import" href="about-pldp.html"> 
-<link rel="import" href="user-profile.html">
-<link rel="import" href="my-followers.html">
-<link rel="import" href="my-notifications.html">
+<link rel="lazy-import" href="user-profile.html">
+<link rel="lazy-import" href="my-followers.html">
+<link rel="lazy-import" href="my-notifications.html">
 <link rel="import" href="sidebar-menus.html">
-<link rel="import" href="terms-conditions.html">
+<link rel="lazy-import" href="terms-conditions.html">
+
+<link rel="import" href="app-icons.html" async>
+<link rel="import" href="w3-styles.html" async>
+<link rel="import" href="shared-styles.html" async>
 
 <dom-module id="my-app">
 	<template>
-		<firebase-auth id="auth" user="{{_user}}" provider="google" status-known="{{statusKnown}}" on-error="handleError">
-		</firebase-auth>
+		<!-- <firebase-auth id="auth" user="{{user}}" provider="google" status-known="{{statusKnown}}" on-error="handleError">
+		</firebase-auth> -->
 		<style include="shared-styles"></style>
-		<style include="theme-styles"></style>
 		<style include="w3-styles">
 			:host {
 				--app-primary-color: #4285f4;
@@ -94,7 +94,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				left:280px; top:0px; right:0px;
 				z-index:10;
 				height:50px;
-				background-color: #c3272e;
+				background-color: var(--app-theme-color);
 				color: #fff;
 				/* background-image: url(/images/header.png); */
 				background-position: right;
@@ -356,170 +356,142 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			tail="{{subroute}}">
 		</app-route>
 
-		<template is="dom-if" if="[[_companyid]]">
-			<firebase-query
-				id="qrycompany"
-				path="/companies"
-				order-by-child="companyID"
-				start-at="[[_companyid]]"
-				limit-to-first="1"
-				data="{{companyData}}">
-			</firebase-query>
-
-			<firebase-query
-				id="qryuser"
-				path="/users"
-				order-by-child="uid"
-				equal-to="[[_user.uid]]"
-				data="{{userData}}">
-			</firebase-query>
-
-			<firebase-query
-				id="qryusernotifications"
-				path="/users/[[_userID]]/notifications"
-				limit-to-last="20"
-				data="{{userNotificationData}}">
-			</firebase-query>
-
-		</template>
-
-		<iron-pages selected="{{currentpage}}" attr-for-selected="pages-name">
-			<div pages-name="mainapp">
-					<div class="w3-row" fullbleed>
-							<div class="w3-animate-left w3-display-container" id="sidebar">
-								<span class="w3-display-topright w3-padding-small w3-text-grey" on-click="_sideBarClose" id="close-side-bar">
-									<paper-ripple></paper-ripple>
-									<iron-icon icon="smapp:arrow-back"></iron-icon>
-								</span>
-								<!-- <div style$="background-image: url('/images/app-sidebar.png'); height:130px; {{companyBgColor}}" class="w3-padding"> -->
-								<div class="w3-padding-small" style="height:160px; background-color:#fff;
-								flex-direction: column;justify-content: center;align-items: center;">
-								<img src$="{{companyLogo}}" style="width: 100%" class="w3-padding-top w3-margin-top">
-								</div>
-								<div id="user-identity" class="w3-text-white">
-									<div class="w3-row w3-padding-top">
-										<div class="w3-left w3-padding-small w3-editable" on-tap="_openUserProfile">
-											<img src$="{{_photo(userLogo)}}" class="user-pic w3-circle" />
-											<div class="editable">
-												<iron-icon icon="smapp:create"></iron-icon>
-											</div>
-										</div>
-										<div class="w3-margin-top w3-padding-small w3-rest">
-											<div class="user-name w3-medium" style="color: #fff;">{{fullName}}</div>
-											<!-- <div class="user-email">[[user.email]]</div> -->
-										</div>
-									</div>
-									<div class="w3-row w3-padding w3-sb-title follow w3-hover-dark-grey" style="position:relative;">
-										<div id="openFollowers" class="w3-col s6 w3-center" on-tap="_openModal" data="my-followers" style="position:relative; cursor: pointer;">
-											<span class="w3-badge w3-small w3-light-grey">{{no_followers}}</span> Followers
-										</div>
-										<div id="openFollowing" class="w3-col s6 w3-center" on-tap="_openModal" data="my-followers" style="cursor: pointer;">
-											<span class="w3-badge w3-small w3-light-grey">{{no_following}}</span> Following
-										</div>
-										<paper-ripple></paper-ripple>
+	<iron-pages selected="{{currentpage}}" attr-for-selected="pages-name">
+		<div pages-name="mainapp">
+			<div class="w3-row" fullbleed>
+					<div class="w3-animate-left w3-display-container" id="sidebar">
+						<span class="w3-display-topright w3-padding-small w3-text-grey" on-click="_sideBarClose" id="close-side-bar">
+							<paper-ripple></paper-ripple>
+							<iron-icon icon="smapp:arrow-back"></iron-icon>
+						</span>
+						<div class="w3-padding-small" style="height:160px; background-color:#fff;
+						flex-direction: column;justify-content: center;align-items: center;">
+						<a href=".">
+							<img src$="{{companyLogo}}" style="width: 100%" class="w3-padding-top w3-margin-top">
+						</a>
+						</div>
+						<div id="user-identity" class="w3-text-white">
+							<div class="w3-row w3-padding-top">
+								<div class="w3-left w3-padding-small w3-editable" on-tap="_openUserProfile">
+									<img src$="{{_photo(_user.photoURL)}}" class="user-pic w3-circle" />
+									<div class="editable">
+										<iron-icon icon="smapp:create"></iron-icon>
 									</div>
 								</div>
-								<sidebar-menus id="sidebarMenu" hidecompany="[[hidecompany]]" notcompanyadmin="[[notcompanyadmin]]" pendingstring="{{pending_string}}" leadershipapp="[[leadershipapp]]" publicapp="[[publicapp]]" salesapp="[[salesapp]]" hrapp="[[hrapp]]" on-tap="_sideBarClicked"></sidebar-menus>
-								<div class="w3-text-white">
-									<br>
-									<div class="w3-row w3-padding-16">
-										<a on-tap="logout" href="[[rootPath]]" style="display: block; text-decoration: none; width:100%" class="w3-left a-border-top">
-											<paper-button class="w3-text-light-grey w3-hover-deep-orange w3-center" style="min-width:92% !important">
-												<iron-icon icon="smapp:input"></iron-icon>
-												Sign Out
-											</paper-button>
-										</a>
-									</div>
-								</div>
-								<div class="w3-row w3-text-white a-border-top" style="padding-bottom: 20px;">
-									<paper-button style="width: 100%;font-size: 10px;" on-tap="loadTerms">Terms and Conditions</paper-button>
+								<div class="w3-margin-top w3-padding-small w3-rest">
+									<div class="user-name w3-medium" style="color: #fff;">{{fullName}}</div>
 								</div>
 							</div>
-							<div class="w3-rest" id="main-content" on-click="_closeSidebarFromBody">
-								<div class="w3-row" id="main-header">
-									<!--style$="{{companyBgColor}}; {{menuTextColor}}" <div class="w3-padding w3-right w3-relative" on-click="unshortedURL">
-										<iron-icon icon="app:message"></iron-icon>
-										<span class="w3-hide-small">UnShorten URL</span>
-									</div> -->
-									<div data="send-feedback" class="w3-padding-small w3-right w3-relative" on-click="_openModal">
-										<paper-ripple></paper-ripple>
-										<iron-icon icon="app:message"></iron-icon>
-										<span class="w3-hide-small">FeedBack</span>
-									</div>
-									<div id="open-notifications" data="my-notifications" class="w3-padding-small w3-right w3-relative" on-click="_openModal">
-										<paper-ripple></paper-ripple>
-										<iron-icon on-click="_openModal" data="my-notifications" id="notificationIcon" icon="app:notifications"></iron-icon>
-										<div class="w3-new-badge nt"
-											style="left:22px!important; top:2px!important; z-index:222; position:absolute;background-color: #0085a5;">
-											{{unread_string}}
-										</div>
-										<span class="w3-padding-small w3-hide-small">Notifications</span>
-									</div>
-									<div class="w3-padding-small w3-left w3-relative w3-relative" id="sidebar-menu" on-click="_sideBarOpen" style="z-index: 999;">
-										<paper-ripple></paper-ripple>
-										<iron-icon icon="app:menu"></iron-icon>
-									</div>
-									<div class="w3-padding-small w3-center" id="mobile-logo">
-										<!-- OneConnect -->
-										<template is="dom-if" if="[[isEqual(_companyid, '-LDVbbRyIMhukVtTVQ0n')]]">
-											<img class="oneconnectlogo" src$="{{companyLogo}}">
-										</template>
-										<!-- Global Leadership Platform - Corporate -->
-										<template is="dom-if" if="[[isEqual(_companyid, '-KgsUcgfo7z1U9MXgd9i')]]">
-											<div style="background-image: url('{{companyLogo}}');" class="mobilelogo"></div>
-										</template>
-										<!-- Global Leadership Platform - Public -->
-										<template is="dom-if" if="[[isEqual(_companyid, '-LEiZPT-C2PyLu_YLKNU')]]">
-											<div style="background-image: url('{{companyLogo}}');" class="mobilelogo"></div>
-										</template>
-										<!-- Other Companies -->
-										<template is="dom-if" if="[[isEqual(_companyid, '12345')]]">
-											<img class="oneconnectlogo" src$="{{companyLogo}}">
-										</template>
-										
-									</div>
+							<div class="w3-row w3-padding w3-sb-title follow w3-hover-dark-grey" style="position:relative;">
+								<div id="openFollowers" class="w3-col s6 w3-center" on-tap="_openModal" data="my-followers" style="position:relative; cursor: pointer;">
+									<span class="w3-badge w3-small w3-light-grey">{{no_followers}}</span> Followers
 								</div>
-								<iron-pages
-										selected="{{page}}"
-										attr-for-selected="name"
-										fallback-selection="not-found"
-										role="main">
-									<company-thoughts name="company-thoughts" _companyid="[[_companyid]]" user="[[user]]"></company-thoughts>
-									<daily-thoughts name="daily-thoughts" _companyid="[[_companyid]]" user="[[user]]"></daily-thoughts>
-									<leadership-thoughts company="[[company]]" name="leadership-thoughts" _companyid="[[_companyid]]" user="[[user]]"></leadership-thoughts>
-									<leadership-articles name="leadership-articles" _companyid="[[_companyid]]" user="[[user]]"></leadership-articles>
-									<!-- <master-class name="master-class" _companyid="[[_companyid]]" user="[[user]]"></master-class> -->
-									<ldp-companies name="ldp-companies" user="[[user]]"></ldp-companies>
-									<topleader-thoughts name="topleader-thoughts" _companyid="[[_companyid]]" user="[[user]]"></topleader-thoughts>
-									<leadership-podcasts name="leadership-podcasts" _companyid="[[_companyid]]" user="[[user]]"></leadership-podcasts>
-									<leadership-videos name="leadership-videos" _companyid="[[_companyid]]" user="[[user]]"></leadership-videos>
-									<leadership-ebooks name="leadership-ebooks" _companyid="[[_companyid]]" user="[[user]]"></leadership-ebooks>
-									<company-profile name="company-profile" _companyid="[[_companyid]]" user="[[user]]"></company-profile>
-									<company-staff name="company-staff" _companyid="[[_companyid]]" user="[[user]]"></company-staff>
-									<thoughts-management name="thoughts-management" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]"></thoughts-management>
-									<my-pldp name="my-pldp" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]"></my-pldp>
-									<about-pldp name="about-pldp" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]"></about-pldp>
-									<add-thoughts name="add-thoughts" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]" addedit="[[addedit]]" company="[[company]]"></add-thoughts>
-									<add-article name="add-article" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]"></add-article>
-									<read-articles name="read-articles" _companyid="[[_companyid]]" user="[[user]]" author="[[bookAuthor]]" title="[[bookTitle]]" body="[[bookBody]]" photo="[[bookPhoto]]"></read-articles>
-									<add-podcast name="add-podcast" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]"></add-podcast>
-									<add-video name="add-video" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]"></add-video>
-									<add-voicemail name="add-voicemail" _companyid="[[_companyid]]" user="[[user]]" previouspage="[[previousPage]]"></add-voicemail>
-									<i-lead name="i-lead" _companyid="[[_companyid]]" user="[[user]]"></i-lead>
-								</iron-pages>
-								<!-- <div class="w3-display-container w3-text-blue" style="height: 20px; bottom: 0px;">
-									<div class="w3-display-bottommiddle">
-										<a href="../terms-conditions.html" target="_blank">Terms & Conditions</a>
-									</div>
-								</div> -->
+								<div id="openFollowing" class="w3-col s6 w3-center" on-tap="_openModal" data="my-followers" style="cursor: pointer;">
+									<span class="w3-badge w3-small w3-light-grey">{{no_following}}</span> Following
+								</div>
+								<paper-ripple></paper-ripple>
 							</div>
 						</div>
+						<sidebar-menus id="sidebarMenu" hidecompany="[[hidecompany]]" notcompanyadmin="[[notcompanyadmin]]" pendingstring="{{pending_string}}" leadershipapp="[[leadershipapp]]" publicapp="[[publicapp]]" salesapp="[[salesapp]]" hrapp="[[hrapp]]" on-tap="_sideBarClicked"></sidebar-menus>
+						<div class="w3-text-white">
+							<br>
+							<div class="w3-row w3-padding-16">
+								<a on-tap="logout" href="[[rootPath]]" style="display: block; text-decoration: none; width:100%" class="w3-left a-border-top">
+									<paper-button class="w3-text-light-grey w3-hover-deep-orange w3-center" style="min-width:92% !important">
+										<iron-icon icon="smapp:input"></iron-icon>
+										Sign Out
+									</paper-button>
+								</a>
+							</div>
+						</div>
+						<div class="w3-row w3-text-white a-border-top" style="padding-bottom: 20px;">
+							<paper-button style="width: 100%;font-size: 10px;" on-tap="loadTerms">Terms and Conditions</paper-button>
+						</div>
+					</div>
+					<div class="w3-rest" id="main-content" on-click="_closeSidebarFromBody">
+						<div class="w3-row" id="main-header">
+							<div data="send-feedback" class="w3-padding-small w3-right w3-relative" on-click="_openModal">
+								<paper-ripple></paper-ripple>
+								<iron-icon icon="app:message"></iron-icon>
+								<span class="w3-hide-small">FeedBack</span>
+							</div>
+							<div id="open-notifications" data="my-notifications" class="w3-padding-small w3-right w3-relative" on-click="_openModal">
+								<paper-ripple></paper-ripple>
+								<iron-icon on-click="_openModal" data="my-notifications" id="notificationIcon" icon="app:notifications"></iron-icon>
+								<div class="w3-new-badge nt"
+									style="left:22px!important; top:2px!important; z-index:222; position:absolute;background-color: #0085a5;">
+									{{unreadstring}}
+								</div>
+								<span class="w3-padding-small w3-hide-small">Notifications</span>
+							</div>
+							<div class="w3-padding-small w3-left w3-relative w3-relative" id="sidebar-menu" on-click="_sideBarOpen" style="z-index: 999;">
+								<paper-ripple></paper-ripple>
+								<iron-icon icon="app:menu"></iron-icon>
+							</div>
+							<div class="w3-padding-small w3-center" id="mobile-logo" style="background-color: #ffffff;">
+								<!-- OneConnect -->
+								<template is="dom-if" if="[[isEqual(_companyid, '-LDVbbRyIMhukVtTVQ0n')]]">
+									<a href="."><img class="oneconnectlogo" src$="{{companyLogo}}"></a>
+								</template>
+								<!-- Global Leadership Platform - Corporate -->
+								<template is="dom-if" if="[[isEqual(_companyid, '-KgsUcgfo7z1U9MXgd9i')]]">
+									<a href="."><div style="background-image: url('{{companyLogo}}');" class="mobilelogo"></div></a>
+								</template>
+								<!-- Global Leadership Platform - Public -->
+								<template is="dom-if" if="[[isEqual(_companyid, '-LEiZPT-C2PyLu_YLKNU')]]">
+									<a href="."><div style="background-image: url('{{companyLogo}}');" class="mobilelogo"></div></a>
+								</template>
+								<!-- Other Companies -->
+								<template is="dom-if" if="[[isEqual(_companyid, '12345')]]">
+									<a href="."><img class="oneconnectlogo" src$="{{companyLogo}}"></a>
+								</template>
+								
+							</div>
+						</div>
+						<iron-pages
+								selected="{{page}}"
+								attr-for-selected="name"
+								fallback-selection="not-found"
+								role="main">
+							<company-thoughts name="company-thoughts" _companyid="[[_companyid]]" user="[[_user]]"></company-thoughts>
+							<i-lead name="i-lead" _companyid="[[_publicid]]" user="[[_user]]"></i-lead>
+							<!-- -LEiZPT-C2PyLu_YLKNU -->
+							<daily-thoughts name="daily-thoughts" _companyid="[[_companyid]]" user="[[_user]]"></daily-thoughts>
+							<leadership-thoughts company="[[company]]" name="leadership-thoughts" _companyid="[[_companyid]]" user="[[_user]]"></leadership-thoughts>
+							<leadership-articles name="leadership-articles" _companyid="[[_companyid]]" user="[[_user]]"></leadership-articles>
+							<ldp-companies name="ldp-companies" user="[[_user]]"></ldp-companies>
+							<topleader-thoughts name="topleader-thoughts" _companyid="[[_companyid]]" user="[[_user]]"></topleader-thoughts>
+							<leadership-podcasts name="leadership-podcasts" _companyid="[[_companyid]]" user="[[_user]]"></leadership-podcasts>
+							<leadership-videos name="leadership-videos" _companyid="[[_companyid]]" user="[[_user]]"></leadership-videos>
+							<leadership-ebooks name="leadership-ebooks" _companyid="[[_companyid]]" user="[[_user]]"></leadership-ebooks>
+							<company-profile name="company-profile" _companyid="[[_companyid]]" user="[[_user]]"></company-profile>
+							<company-staff name="company-staff" _companyid="[[_companyid]]" user="[[_user]]"></company-staff>
+							<thoughts-management name="thoughts-management" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]"></thoughts-management>
+							<my-pldp name="my-pldp" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]"></my-pldp>
+							<about-pldp name="about-pldp" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]"></about-pldp>
+							<add-thoughts name="add-thoughts" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]" addedit="[[addedit]]" company="[[company]]"></add-thoughts>
+							<add-article name="add-article" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]"></add-article>
+							<read-articles name="read-articles" _companyid="[[_companyid]]" user="[[_user]]" author="[[bookAuthor]]" title="[[bookTitle]]" body="[[bookBody]]" photo="[[bookPhoto]]"></read-articles>
+							<add-podcast name="add-podcast" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]"></add-podcast>
+							<add-video name="add-video" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]"></add-video>
+							<add-voicemail name="add-voicemail" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]"></add-voicemail>
+							
+						</iron-pages>
+						
+					</div>
 			</div>
-			<div pages-name="terms">
-				<terms-conditions currentpage="{{currentpage}}"></terms-conditions>
-			</div>
-    </iron-pages>
-		
+		</div>
+		<div pages-name="terms">
+			<terms-conditions currentpage="{{currentpage}}"></terms-conditions>
+		</div>
+	</iron-pages>
+		<paper-fab-speed-dial id="paperSpeed" with-backdrop style="z-index: 200" hidden$="[[hidemenu]]">
+			<paper-fab-speed-dial-action id="fabthoughts" icon="app:message" on-tap="_loadElement1" indexed="add-thoughts" caption="Add Thought">Thought</paper-fab-speed-dial-action>
+			<paper-fab-speed-dial-action id="fabarticles" icon="app:remove-red-eye" on-tap="_loadElement1" indexed="add-article" caption="Add Article" hidden$="[[hidesubmenu]]">Article</paper-fab-speed-dial-action>
+			<paper-fab-speed-dial-action id="fabvoicemail" icon="app:record-voice-over" on-tap="_loadElement1" indexed="add-voicemail" caption="Add Voicemail" hidden$="[[hidesubmenu]]">Voicemail</paper-fab-speed-dial-action>
+			<paper-fab-speed-dial-action id="fabpodcast" icon="app:mic" on-tap="_loadElement1" indexed="add-podcast" caption="Add Podcast" hidden$="[[hidesubmenu]]">Podcast</paper-fab-speed-dial-action>
+			<paper-fab-speed-dial-action id="fabvideo" icon="app:videocam" on-tap="_loadElement1" indexed="add-video" caption="Add Video" hidden$="[[hidesubmenu]]">Video</paper-fab-speed-dial-action>
+		</paper-fab-speed-dial>
 		<div id="send-feedback" class="w3-modal w3-animate-zoom">
 			<div class="w3-modal-content w3-round max-modal-width" >
 				<div class="w3-container">
@@ -542,39 +514,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				</div>
 			</div>
 		</div>
-		<div id="level-users" class="w3-modal w3-animate-zoom">
-			<div class="w3-modal-content w3-round max-modal-width">
-				<div class="w3-container">
-					<span id="close-levelusers" data="level-users" on-click="_closeModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white">&times;</span>
-					<div class="w3-large" style="padding:20px 15px">
-						<b class="w3-text-blue"><iron-icon icon="app:group-add"></iron-icon>&nbsp;Level of Users</b>
-					</div>
-					<div class="w3-row w3-margin-bottom">
-						<ul class="w3-ul w3-hoverable" style="cursor:pointer;">
-							<li>
-								<iron-icon class="w3-text-yellow" icon="app:star-border"></iron-icon>
-								<iron-icon class="w3-text-yellow" icon="app:star-border"></iron-icon>
-								<iron-icon class="w3-text-yellow" icon="app:star-border"></iron-icon>
-								&nbsp;Standard User
-							</li>
-							<li>
-								<iron-icon class="w3-text-yellow" icon="app:star-half"></iron-icon>
-								<iron-icon class="w3-text-yellow" icon="app:star-half"></iron-icon>
-								<iron-icon class="w3-text-yellow" icon="app:star-half"></iron-icon>
-								&nbsp;Master Contributor
-							</li>
-							<li>
-								<iron-icon class="w3-text-yellow" icon="app:star"></iron-icon>
-								<iron-icon class="w3-text-yellow" icon="app:star"></iron-icon>
-								<iron-icon class="w3-text-yellow" icon="app:star"></iron-icon>
-								&nbsp;Global Contributor
-							</li>
-						</ul>
-					</div>
-				</div>
-			</div>
-		</div>
-
 		<div id="my-notifications" class="ldp-modal w3-animate-zoom">
 			<div class="ldp-modal-content w3-round max-modal-width">
 				<div>
@@ -583,24 +522,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						<b class="w3-text-blue"><iron-icon icon="app:notifications"></iron-icon>&nbsp;Notifications</b>
 					</div>
 					<div class="w3-row">
-						<my-notifications user="[[user]]" notificationsdata="[[userNotificationData]]" rootpath=[[rootPath]]></my-notifications>
+						<my-notifications unreadstring="{{unreadstring}}" userid="[[_userID]]" rootpath=[[rootPath]]></my-notifications>
 					</div>
 				</div>
 			</div>
 		</div>
-
 		<div id="my-followers" class="ldp-modal w3-animate-zoom">
 			<div class="ldp-modal-content w3-round max-modal-width">
 				<div>
 					<span id="close-followers" data="my-followers" on-click="_closeModal" class="w3-button w3-display-topright w3-medium">&times;</span>
 					<div class="w3-row">
-						<my-followers follow="{{follow}}" user="[[user]]"></my-followers>
+						<my-followers follow="{{follow}}" user="[[_user]]"></my-followers>
 					</div>
 					
 				</div>
 			</div>
 		</div>
-
 		<div id="add-items" class="w3-modal w3-animate-zoom padding-modal-top">
 			<div class="w3-modal-content w3-round max-modal-width">
 				<div class="w3-container">
@@ -612,22 +549,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				</div>
 			</div>
 		</div>
-
-		<paper-fab-speed-dial id="paperSpeed" with-backdrop style="z-index: 200" hidden$="[[hidemenu]]">
-			<paper-fab-speed-dial-action id="fabthoughts" icon="app:message" on-tap="_loadElement1" indexed="add-thoughts" caption="Add Thought">Thought</paper-fab-speed-dial-action>
-			<paper-fab-speed-dial-action id="fabarticles" icon="app:remove-red-eye" on-tap="_loadElement1" indexed="add-article" caption="Add Article" hidden$="[[hidesubmenu]]">Article</paper-fab-speed-dial-action>
-			<paper-fab-speed-dial-action id="fabvoicemail" icon="app:record-voice-over" on-tap="_loadElement1" indexed="add-voicemail" caption="Add Voicemail" hidden$="[[hidesubmenu]]">Voicemail</paper-fab-speed-dial-action>
-			<paper-fab-speed-dial-action id="fabpodcast" icon="app:mic" on-tap="_loadElement1" indexed="add-podcast" caption="Add Podcast" hidden$="[[hidesubmenu]]">Podcast</paper-fab-speed-dial-action>
-			<paper-fab-speed-dial-action id="fabvideo" icon="app:videocam" on-tap="_loadElement1" indexed="add-video" caption="Add Video" hidden$="[[hidesubmenu]]">Video</paper-fab-speed-dial-action>
-		</paper-fab-speed-dial>
-
 		<div id="snackbar"></div>
 		<div class="ldp-modal" id="userProfile">
 			<div class="ldp-modal-content" style="max-width:700px">
 				<span on-click="_closeUserProfile" class="w3-button w3-display-topright w3-medium w3-red w3-text-white ldp-modal-close">&times;</span>
-				<user-profile name="user-profile" _companyid="[[_companyid]]" user="[[user]]" photo="[[photo]]"></user-profile>
+				<user-profile name="user-profile" _companyid="[[_companyid]]" user="[[_user]]" photo="[[photo]]"></user-profile>
 			</div>
 		</div>
+
+		<template is="dom-if" if="[[_companyid]]">
+			<firebase-query
+				id="qrycompany"
+				path="/companies"
+				order-by-child="companyID"
+				equal-to="[[_companyid]]"
+				data="{{companyData}}">
+			</firebase-query>
+
+		</template>
 	</template>
 
 	<script>
@@ -678,6 +617,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				
 				var a = Polymer.dom(this.root).querySelectorAll('.drawer-list');
 				var that = this;
+				
 				var closer = Polymer.dom(this.root).querySelector('#close-side-bar');
 				$(a).on('click', 'a.w3-row', function(){
 					parent.location.hash = '#';
@@ -688,8 +628,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				this._setCompanyTypeSidebar();
 				this._setAccountDefaults();
-				
-				// this.installApp();
 			}
 
 			static get properties() {
@@ -700,12 +638,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						observer: '_pageChanged',
 						notify: true
 					},
-					unread_notifications: {
-						type: Number,
-						value: 0,
-						notify: true
-					},
-					unread_string: {
+					unreadstring: {
 						type: String,
 						value: "0",
 						notify: true
@@ -781,7 +714,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					},
 					publicapp: {
 						type: Boolean,
-						value: false,
+						value: true,
 						notify: true
 					},
 					salesapp: {
@@ -796,7 +729,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					},
 					_user: {
 						type: Object,
-						notify: true
+						notify: true,
+						observer: '_userDataChange'
 					},
 					follow: {
 						type: String,
@@ -804,14 +738,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					},
 					_userID:{
 						type: String
-					},
-					userData: {
-						type: Object,
-						observer: '_userDataChange'
-					},
-					userNotificationData: {
-						type: Object,
-						observer: '_userNotificationDataChange'
 					},
 					user: {
 						type: Object
@@ -830,6 +756,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						type: String,
 						notify: true
 					},
+					_publicid: {
+						type: String,
+						notify: true
+					},
 					bookAuthor: String,
 					bookTitle: String,
 					bookBody: String,
@@ -845,10 +775,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					orderCommentBy: String,
 					addedit: Number,
 					currentpage: {
-            type: String,
-            value: 'mainapp',
+						type: String,
+						value: 'mainapp',
 						notify: true
-          }
+					}
 				};
 			}
 
@@ -886,6 +816,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					this.addIOSBugfix();
 				}
 				let modal = Polymer.dom(this.root).querySelector('#userProfile');
+				this.loadPage('user-profile');
 				$(modal).css('display', 'block');
 			}
 
@@ -898,9 +829,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				$(modal).css('display', 'none');
 			}
 
-			installApp(){
-				addToHomescreen();
-			}
 			setDeviceType(device){
 				let database = firebase.database();
 				if(this._user.userID != undefined){
@@ -928,17 +856,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			_objLenNotifications(obj) {
 				var unread = 0;
 				if(obj != undefined){
-					
-					var notificationsLen = Object.keys(obj).length;
-
-					for (var i = 0; i < notificationsLen; i++) {
-						// if(obj[i].seen === false) unread++;						
-					}
-					// len = Object.keys(obj).length;
+					unread = this._toArray(obj);
 				}
+			}
 
-				if(unread > 0) return unread;
-				return '';
+			_toArray(obj) {
+				var that = this;
+				var unread = 0;
+				if(obj != undefined){
+					return Object.keys(obj).map(function(key) {
+						if(obj[key].seen == false) {
+							unread++;
+							if(unread > 20) that.unreadstring = "20+";
+							else that.unreadstring = ""+unread; 
+
+							return 1
+						};
+					});
+				}
+				
 			}
 
 			sendFeedback(){
@@ -966,11 +902,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					var data = {
 						subject: subject,
 						message: message,
-						companyID: this.user.companyID,
-						companyName: this.user.companyName,
-						journalUserID: this.user.userID,
-						journalUserName: this.user.firstName+" "+this.user.lastName,
-						journalUserEmail: this.user.email,
+						companyID: this._user.companyID,
+						companyName: this._user.companyName,
+						journalUserID: this._user.userID,
+						journalUserName: this._user.firstName+" "+this._user.lastName,
+						journalUserEmail: this._user.email,
 						feedbackID: feedbackID,
 						dateRegistered: timeInMs
 					}
@@ -1001,6 +937,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				}
 				var modal_name = e.currentTarget.getAttribute('data');
 				var modal = Polymer.dom(this.root).querySelector('#'+modal_name);
+				this.loadPage(modal_name);
 				modal.style.display = 'block';
 			}
 			_closeModal(e){
@@ -1274,7 +1211,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 			_pageChanged(page) {
 				// Load page import on demand. Show 404 page if fails
-				this.page = page || 'view1';
+				this.page = page || 'topleader-thoughts';
 				var resolvedPageUrl = this.resolveUrl(page + '.html');
 				Polymer.importHref(
 						resolvedPageUrl,
@@ -1321,7 +1258,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				var container = Polymer.dom(this.root).querySelector('#item-holder');
 				var __companyid = this._companyid;
-				var __user = this.user;
+				var __user = this._user;
 				var previousPage = this.previousPage;
 				var company = this.company;
 
@@ -1394,77 +1331,100 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			}
 
 			_userDataChange(newData, oldData) {
-				for (var item in newData) {
-					if(newData[item] != undefined){
-						this._user = newData[item];
-						this._userID = newData[item].userID;
+				if(this._objLen(this._user) > 0){
+					this._userID = this._user.userID;
 
-						if(this._user.photoURL != undefined || this._user.photoURL) {
-							this.photo = this._user.photoURL;
-						}else{
-							this.photo = "../images/default-user.png";
-						}
-						
-						//Updates the following tab automatically
-						var database = firebase.database();
-						database.ref('users').child(this._userID).child('following').on('value', (data)=>{
-							this.no_following = this._objLen(data.val());
-
-							database.ref('/users/' + this._user.userID).child('analytics').child('following').set(this.no_following);
-						})
-
-						database.ref('users').child(this._userID).child('follower').on('value', (data)=>{
-
-							this.no_followers = this._objLen(data.val());
-							database.ref('/users/' + this._user.userID).child('analytics').child('followers').set(this.no_followers);
-						})
-
-						var follow_id = localStorage.getItem("follow_id");
-						if(follow_id === null){
-							// console.log("its null");
-						}else{
-							database.ref('/users/' + this._user.userID + '/following').child(follow_id).set(true);
-							database.ref('/users/' + follow_id + '/follower').child(this._user.userID).set(true);
-
-							localStorage.removeItem("follow_id");
-						}
-
-						if(_platform != 'undefined') this.setDeviceType(_platform);
-
-						if((/android|windows|windowsphone/i).test(_platform)) this.setDeviceToken();
+					if(this._user.photoURL != undefined || this._user.photoURL) {
+						this.photo = this._user.photoURL;
+					}else{
+						this.photo = "../images/default-user.png";
 					}
 					
+					//Updates the following tab automatically
+					var database = firebase.database();
+					database.ref('users').child(this._userID).child('following').on('value', (data)=>{
+						this.no_following = this._objLen(data.val());
+
+						database.ref('/users/' + this._user.userID).child('analytics').child('following').set(this.no_following);
+					})
+
+					database.ref('users').child(this._userID).child('follower').on('value', (data)=>{
+						this.no_followers = this._objLen(data.val());
+
+						database.ref('/users/' + this._user.userID).child('analytics').child('followers').set(this.no_followers);
+					})
+
+					var follow_id = localStorage.getItem("follow_id");
+					var that = this;
+					var myPhoto = "";
+
+					if(this._user.photoURL != undefined || this._user.photoURL != ""){
+						myPhoto = this._user.photoURL;
+					}else{
+						myPhoto = "";
+					}
+
+					if(myPhoto == undefined){
+						myPhoto = "";
+					}
+
+					if((follow_id === null) || (follow_id == undefined)){
+						// console.log("its null");
+					}else{
+						var userRef = database.ref('users/' + follow_id);
+						userRef.on('value', function(data) {
+							var childData = data.val();
+							let journalUserName = childData.firstName + " "+childData.lastName;
+
+							var photoURL = "";
+							if(childData.photoURL != undefined || childData.photoURL != ""){
+								photoURL = childData.photoURL;
+							}else{
+								photoURL = "";
+							}
+
+							if(photoURL == undefined){
+								photoURL = "";
+							}
+
+							var theirdata = {
+								"firstName":childData.firstName,
+								"lastName":childData.lastName,
+								"companyName":childData.companyName,
+								"photoURL":photoURL
+							}
+
+							var mydata = {
+								"firstName":that._user.firstName,
+								"lastName":that._user.lastName,
+								"companyName":that._user.companyName,
+								"photoURL":myPhoto
+							}
+
+							var updates = {}
+							updates["users/"+that._user.userID+"/following/"+follow_id]=theirdata;
+							updates["users/"+follow_id+"/follower/"+that._user.userID]=mydata;
+
+							database.ref().update(updates);
+							
+						});
+						// database.ref('/users/' + this._user.userID + '/following').child(follow_id).set(true);
+						
+						// database.ref('/users/' + follow_id + '/follower').child(this._user.userID).set(true);
+
+						let countFollowers = database.ref('users').child(follow_id).child('analytics').child('followers');
+
+						localStorage.removeItem("follow_id");
+					}
+
+					if(_platform != 'undefined') this.setDeviceType(_platform);
+
+					if((/android|windows|windowsphone/i).test(_platform)) this.setDeviceToken();
+
+					// console.log(this._user.notifications);
+					this._objLenNotifications(this._user.notifications);
 				}
-			}
-			
-			_userNotificationDataChange(a, b) {
-		 		var notifications;
-				var unread = 0;
-
-				//Updates the following tab automatically
-				var database = firebase.database();
-				var that = this;
-				let seen = false;
-
-				var notificationsRef = database.ref('/users/'+this._userID+'/notifications').orderByChild("seen").equalTo(seen);
-
-				notificationsRef.on('child_added', function(data) {
-					var unread = 0;
-					unread++;
-					if(unread > 0) that.unread_notifications += unread;
-
-					if(that.unread_notifications > 20) that.unread_string = "20+";
-					else that.unread_string = ""+that.unread_notifications;
-				});
-
-				notificationsRef.on('child_removed', function(data) {
-					var unread = 0;
-					unread++;
-					if(unread > 0) that.unread_notifications = that.unread_notifications - unread;
-
-					if(that.unread_notifications > 20) that.unread_string = "20+";
-					else that.unread_string = ""+that.unread_notifications;
-				});
+				
 			}
 
 			getContrastYIQ(hexcolor){
@@ -1491,7 +1451,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				menuTextColor = localStorage.getItem("menuTextColor");
 
 				this.fullName = localStorage.getItem("fullName");
-				this.userLogo = localStorage.getItem("userLogo");
+				this._userLogo = localStorage.getItem("userLogo");
 
 				topBarColor = localStorage.getItem("topBarColor");
 				topBarColorText = localStorage.getItem("topBarColorText");
@@ -1592,7 +1552,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						this.menuTextColor = "color: "+this.getContrastYIQ(newData[0].primaryColor);
 						this.companyBgColor = "background-color: "+primaryColor;
 					}
-					
 
 					localStorage.setItem("primaryColor", newData[0].primaryColor);
 					localStorage.setItem("menuTextColor", this.menuTextColor);
@@ -1634,6 +1593,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				sessionStorage.setItem("DESC_INTERNAL_DAILY_THOUGHT", "Internal Daily Thought");
 				sessionStorage.setItem("DESC_GLOBAL_DAILY_THOUGHT", "Global Daily Thought");
+				sessionStorage.setItem("DESC_ILEAD_DAILY_THOUGHT", "I-LEAD Thought");
 
 				sessionStorage.setItem("APPROVED", "approved");
 				sessionStorage.setItem("DECLINED", "declined");
@@ -1648,8 +1608,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				localStorage.removeItem("fullName");
 				localStorage.removeItem("userLogo");
 
-				this.$.auth.signOut();
-				window.location = '';
+				// this.$.auth.signOut();
+				firebase.auth().signOut();
+				window.location = '.';
 				return;
 			}
 			_onCompanyPhotoChange(newData, oldData){
@@ -1675,7 +1636,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 			loadTerms(){
 				this.currentpage = "terms";
+				this.loadPage('terms-conditions');
 			}
+
+			
+			loadPage(page){
+            var resolvedPageUrl = this.resolveUrl(page + '.html');
+            Polymer.importHref(
+                resolvedPageUrl,
+                null,
+                page + '.html',
+                true);
+        	}
 		}
 
 		window.customElements.define(MyApp.is, MyApp);

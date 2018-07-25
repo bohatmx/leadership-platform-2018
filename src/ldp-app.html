@@ -8,16 +8,9 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 <link rel="manifest" href="/manifest.json">
-
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
-
-<!-- <link rel="import" href="/bower_components/polymer/polymer.html"> -->
-
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
-
-<!-- Firebase Auth -->
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
-<!-- <link rel="import" href="/bower_components/polymerfire/firebase-query.html"> -->
 
 <!-- Sign In and Main Content -->
 <link rel="import" href="my-app.html">
@@ -33,13 +26,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         messaging-sender-id="438289288307">
     </firebase-app>
 
-    <firebase-auth id="auth" user="{{user}}" provider="google" status-known="{{statusKnown}}" on-error="handleError" signed-in="{{signedIn}}">
-    </firebase-auth>
     <style>
-      :host {
-        display: block;
-        background-color: #f6f6f6;
-      }
+      :host {display: block;background-color: #f6f6f6;}
 
         /* ============ Snack Bar ======================== */
         #snackbar {
@@ -64,14 +52,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
             animation: fadein 0.5s, fadeout 0.5s 2.5s;
         }
-        .snacklogo {
+        /* .snacklogo {
             background-image: url('../../images/manifest/icon-48x48.png');
             background-repeat: no-repeat;
             background-size: contain;
             display: block;
             height: 48px;
             width: 48px;
-        }
+        } */
         .snackmsg{
             display: flex;
             flex-direction: column;
@@ -87,41 +75,55 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             from {bottom: 0; opacity: 0;}
             to {bottom: 30px; opacity: 1;}
         }
-
         @-webkit-keyframes fadeout {
             from {bottom: 30px; opacity: 1;} 
             to {bottom: 0; opacity: 0;}
         }
-
         @keyframes fadeout {
             from {bottom: 30px; opacity: 1;}
             to {bottom: 0; opacity: 0;}
         }
     </style>
+    <app-location route="{{route}}" use-hash-as-path></app-location>
+    <app-route route="{{route}}"
+        pattern="/lead/:follow_id/:nextpage"
+        data="{{routeData}}"
+        tail="{{subroute}}">
+   </app-route>
     
-        <template is="dom-if" if="[[signedIn]]">
+        <template id="mainTemplate" is="dom-if" if="{{signedIn}}">
             <firebase-query
                 id="qryuser"
                 path="/users"
                 order-by-child="uid"
-                equal-to="[[user.uid]]"
-                data="{{userData}}">
+                equal-to="{{user.uid}}"
+                data="{{userdata}}">
             </firebase-query>
-    
-            <my-app notcompanyadmin="{{notcompanyadmin}}" approvethoughts="[[approveThoughts]]" addthoughts = "[[addThoughts]]" addarticle = "[[addArticle]]" hidecompany = "[[hidecompany]]" mythoughts = "[[myThoughts]]" user="[[_user]]" _companyid="[[_user.companyID]]" hidemenu="[[hidemenu]]" hidesubmenu="[[hidesubmenu]]"></my-app>
+
+            <!-- <template is="dom-if" if="[[isEqual(user.uid,_user.uid)]]"> -->
+            <my-app notcompanyadmin="{{notcompanyadmin}}" approvethoughts="[[approveThoughts]]" addthoughts = "[[addThoughts]]" addarticle = "[[addArticle]]" hidecompany = "[[hidecompany]]" mythoughts = "[[myThoughts]]" _user="[[_user]]" _companyid="[[_user.companyID]]" hidemenu="[[hidemenu]]" hidesubmenu="[[hidesubmenu]]" _publicid="[[_publicid]]"></my-app>
+            <!-- </template> -->
+
+            <!-- <template is="dom-if" if="[[!isEqual(user.uid,_user.uid)]]">
+                <sign-in></sign-in>
+            </template> -->
+            
         </template>
         <template is="dom-if" if="[[!signedIn]]">
             <sign-in></sign-in>
         </template>
         
     <div id="snackbar">
-        <div id="snacklogo" class="snacklogo">
-        </div>
+        <!-- <div id="snacklogo" class="snacklogo">
+        </div> -->
         <div class="snackmsg">
             <div id="snacktitle" class="snacktitle"></div>
             <div id="snackbody" class="snackbody"></div>
         </div>
     </div>
+
+    <firebase-auth id="auth" user="{{user}}" provider="google" status-known="{{statusKnown}}" on-error="handleError" signed-in="{{userSignedIn}}">
+    </firebase-auth>
   </template>
   
   <script>
@@ -147,6 +149,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         };
         
 		_platform = plat();
+        localStorage.setItem("platform", _platform);
+
+        Polymer.setPassiveTouchGestures(true);
     /**
      * @customElement
      * @polymer
@@ -162,6 +167,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 value: 0,
                 notify: true
             },
+            uid: String,
            addThoughts: {
                type: Boolean
            },
@@ -198,80 +204,94 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
            statusKnown: {
                type: Object
            },
-           userData: {
+           userdata: {
                 type: Object,
+                notify: true,
                 observer: '_onUserDataReceived'
             },
            _user: {
-               type: Object
+               type: Object,
+               notify: true
            },
            _companyID: String,
-           signedIn: Boolean,
-           
-
+           signedIn: {
+               type: Boolean,
+               notify: true,
+           },
+           userSignedIn: {
+               type: Boolean,
+               observer: 'userLoggedIn'
+           },
+           routeData: {
+            type: String,
+            observer: "_onrouteData"
+          },
         },
         ready: function(){
             var that = this;
+            
+            var appID = "AIzaSyAf_oJi6fgm6-ZrVPeOVdW2DDoeu3v5SxY";
+            var logged = localStorage.getItem("firebase:authUser:"+appID+":[DEFAULT]");
+            
+            if(logged) {
+                this.signedIn = true
+            }
+            else this.signedIn = false;
 
-            setTimeout(function(){ 
-                if(that.signedIn === false) that.loadPage('sign-in');
-             }, 2000);
-            // else this.loadPage('leadership-app');
+            if(this.signedIn === false) this.loadPage('sign-in')
 
             // set messaging
             const messaging = firebase.messaging();
+
             // Request for Permission
             this.requestPermission();
 
-            // Generate FCM Token if it's Windows, Android or Windows Phone
-            if((/android|windows|windowsphone/i).test(_platform)){
-                // [START refresh_token]
-                // Callback fired if Instance ID token is updated.
-                messaging.onTokenRefresh(function() {
-                    messaging.getToken()
-                    .then(function(refreshedToken) {
+            // [START refresh_token]
+            // Callback fired if Instance ID token is updated.
+            messaging.onTokenRefresh(function() {
+                messaging.getToken()
+                .then(function(refreshedToken) {
 
-                        return messaging.getToken();
-                    })
-                    .then(function(currentToken) {
-                        if (currentToken) {
-                            setTokenSentToServer(false);
-                            setTokenToLocalStorage(currentToken);
-                            sendTokenToServer();
-                        }
-                    })
-                    .catch(function(err) {
-                        console.log('Unable to retrieve refreshed token ', err);
-                    });
-
-                    // [END request_permission]
-                    function setTokenToLocalStorage(currentToken) {
-                        window.localStorage.setItem('currentToken', currentToken);
+                    return messaging.getToken();
+                })
+                .then(function(currentToken) {
+                    if (currentToken) {
+                        setTokenSentToServer(false);
+                        setTokenToLocalStorage(currentToken);
+                        sendTokenToServer();
                     }
-                    function sendTokenToServer() {
-                        // Get a reference to the database service
-                        var database = firebase.database();
-                        console.log(this._user);
-
-                        if (!isTokenSentToServer()) {
-                            // Update user fcmToken
-                            var updates = {};
-                            updates['/users/' + this._user.userID+'/fcmToken'] = localStorage.getItem('currentToken');
-                            database.ref().update(updates);
-
-                            setTokenSentToServer(true);
-                        } 
-                    }
-                    function isTokenSentToServer() {
-                        return window.localStorage.getItem('sentToServer') == 1;
-                    }
-                    function setTokenSentToServer(sent) {
-                        window.localStorage.setItem('sentToServer', sent ? 1 : 0);
-                    }
-                    
+                })
+                .catch(function(err) {
+                    console.log('Unable to retrieve refreshed token ', err);
                 });
-                // [END refresh_token]
-            }
+
+                // [END request_permission]
+                function setTokenToLocalStorage(currentToken) {
+                    window.localStorage.setItem('currentToken', currentToken);
+                }
+                function sendTokenToServer() {
+                    // Get a reference to the database service
+                    var database = firebase.database();
+
+                    if (!isTokenSentToServer()) {
+
+                        // Update user fcmToken
+                        var updates = {};
+                        updates['/users/' + this._user.userID+'/fcmToken'] = localStorage.getItem('currentToken');
+                        database.ref().update(updates);
+
+                        setTokenSentToServer(true);
+                    } 
+                }
+                function isTokenSentToServer() {
+                    return window.localStorage.getItem('sentToServer') == 1;
+                }
+                function setTokenSentToServer(sent) {
+                    window.localStorage.setItem('sentToServer', sent ? 1 : 0);
+                }
+                
+            });
+            // [END refresh_token]
 
             // [START receive_message]
             // Handle incoming messages. Called when:
@@ -302,14 +322,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 setTimeout(function(){ x.className = x.className.replace("show", ""); }, 10000);
             }
             // [END receive_message]
-        },
-        loadPage: function(page){
-            var resolvedPageUrl = this.resolveUrl(page + '.html');
-            Polymer.importHref(
-                resolvedPageUrl,
-                null,
-                'sign-in.html',
-                true);
+
+            
         },
         requestPermission: function() {
             // set messaging
@@ -356,14 +370,87 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         setTokenSentToServer: function(sent) {
             window.localStorage.setItem('sentToServer', sent ? 1 : 0);
         },
+        userLoggedIn: function(){
+            if(this.userSignedIn === true) {
+                this.signedIn = true;
+                var database = firebase.database();
+                var userRef = database.ref('users').orderByChild("uid").equalTo(this.user.uid);
+
+                var that = this;
+
+                userRef.on('child_added', function(snapshot, prevChildKey) {
+                    var newUser = snapshot.val();
+                    that._user = newUser;
+                    that._companyID = that._user.companyID;
+                    that._publicid = "-LEiZPT-C2PyLu_YLKNU";
+
+                    that.approveThoughts = false;
+
+                    // set user name and logo
+                    localStorage.setItem("fullName", that._user.firstName+' '+that._user.lastName);
+                    
+                    if(that._user.photoURL != undefined || that._user.photoURL) {
+                        localStorage.setItem("userLogo", that._user.photoURL);
+                    }else{
+                        localStorage.setItem("userLogo", "../images/default-user.png");
+                    }
+
+                    if((that._user.userType == 4) || (that._user.userType == 5) || (that._user.userType == 6) || (that._user.userType == 7) || (that._user.userType == 9) || (that._user.userType == 3) || (that._user.userType == 8)){
+                        that.hidemenu = false;
+
+                        if((that._user.userType === 5) || (that._user.userType === 3) || (that._user.userType === 8)) that.hidesubmenu = true; 
+                        else that.hidesubmenu = false;                
+                    }
+                    else{
+                        that.hidemenu = true;  
+                        that.hidesubmenu = true;
+                    }
+
+                    if(that._user.userType === 7) that.notcompanyadmin = false; 
+                    else that.notcompanyadmin = true;
+                });
+
+                this.$.mainTemplate.render();
+            };
+        },
+        _onrouteData: function(newData, oldData){
+            if(newData != undefined){
+                if(newData.follow_id != undefined){
+                    localStorage.setItem("follow_id", ""+newData.follow_id);
+
+                    var appID = "AIzaSyAf_oJi6fgm6-ZrVPeOVdW2DDoeu3v5SxY";
+                    var logged = localStorage.getItem("firebase:authUser:"+appID+":[DEFAULT]");
+                    
+                    if(logged) {
+                        window.location = "./company-thoughts";
+                    }
+                }
+            }
+		},
+        loadPage: function(page){
+            var resolvedPageUrl = this.resolveUrl(page + '.html');
+            Polymer.importHref(
+                resolvedPageUrl,
+                null,
+                'sign-in.html',
+                true);
+        },
         _onUserDataReceived: function(newData, oldData){
-          for (var item in newData) { 
+            var newCount = 0;
             
+            if(newData != undefined){
+                newCount = newData.length;
+                if(newCount == 0){
+                    this.loadPage('sign-in');
+                    return;
+                }
+            }
+          for (var item in newData) {
             if(newData[item] != undefined){
                 this._user = newData[item];
                 this._companyID = this._user.companyID;
+                this._publicid = "-LEiZPT-C2PyLu_YLKNU";
 
-                this.sendTokenToServer();
                 this.approveThoughts = false;
 
                 // set user name and logo
@@ -376,14 +463,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
 
                 // rights for standard user
-                if(this._user.userType == 8){
-                    this.hidemenu = true;
-                    this.hidesubmenu = true;
-                }
-                else if((this._user.userType == 4) || (this._user.userType == 5) || (this._user.userType == 6) || (this._user.userType == 7) || (this._user.userType == 9) || (this._user.userType == 3)){
+                // if(this._user.userType == 8){
+                //     this.hidemenu = true;
+                //     this.hidesubmenu = true;
+                // }
+                // else 
+                if((this._user.userType == 4) || (this._user.userType == 5) || (this._user.userType == 6) || (this._user.userType == 7) || (this._user.userType == 9) || (this._user.userType == 3) || (this._user.userType == 8)){
                     this.hidemenu = false;
 
-                    if(this._user.userType === 5 || this._user.userType === 3) this.hidesubmenu = true; 
+                    if((this._user.userType === 5) || (this._user.userType === 3) || (this._user.userType === 8)) this.hidesubmenu = true; 
                     else this.hidesubmenu = false;                
                 }
                 else{
@@ -397,6 +485,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             
           }
         },
+        isEqual: function(a, b) {
+            var c = a === b;
+
+            if(c === false){
+                // this.showSnackBar("Please Sign Up before loggin in.");
+            }
+            return c;
+        },
+        showSnackBar: function(msg){
+            var x = this.$.snackbar;
+            x.innerHTML = msg;
+            x.className = "show";
+            setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+        }
       });
 
   </script>

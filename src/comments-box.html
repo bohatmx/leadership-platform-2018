@@ -28,7 +28,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/l2t-paper-rating/l2t-paper-rating.html">
 <link rel="import" href="app-icons.html">
-<link rel="import" href="who-liked.html">
+<link rel="lazy-import" href="who-liked.html">
 
 <dom-module id="comments-box">
 	<template>
@@ -177,7 +177,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				flex-direction: row;
 				align-items: center;
 				justify-content: center;">
-					<paper-fab data="{{item.likes}}" icon="{{__computeFavIcon(item.likes)}}" on-tap="__toggleFavorite" class="w3-left" style="margin-right: 8px;"></paper-fab>
+					<paper-fab data="{{item.likesData}}" icon="{{__computeFavIcon(item.likes)}}" on-tap="__toggleFavorite" class="w3-left" style="margin-right: 8px;"></paper-fab>
 					<span class="w3-new-badge w3-small w3-left w3-blue" style$="[[hideSpan(item.countLikes)]]" data="{{item.likesData}}" on-tap="_openWhoLiked">[[_getLikesCount(item.countLikes)]]</span>
 				</div>
 				<div class="w3-right">
@@ -187,12 +187,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						<span class="w3-new-badge w3-small w3-blue">[[_getCount(item.comments)]]</span>
 					</paper-button>
 				</div>
-				
-				<!-- <paper-button class="bar-item w3-left" on-tap="_toggleCRHItem" crhType="ratings">
-					<paper-ripple></paper-ripple>
-					<iron-icon icon="app:star" class="w3-margin-right"></iron-icon>
-					<span class="w3-new-badge w3-small w3-blue">[[_getCount(item.ratings)]]</span>
-				</paper-button> -->
 			</div>
 			<div class="w3-padding w3-center comment-message w3-hide">west</div>
 			<div class="comments-ratings-holder w3-row" on-tap="_openModal">
@@ -229,6 +223,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 								</div>
 								<div class="comment-box-text">[[comment.comment]]</div>
 							</div>
+							<!-- <template is="dom-if" if="[[isEqual(comment.journalUserID, user.userID)]]"><paper-icon-button icon="delete"></paper-icon-button></template> -->
 						</div>
 					</template>
 				</div>
@@ -238,10 +233,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						<div class="w3-left">
 							<div style$="[[_profilePhoto(user.photoURL)]]" class="commentor-photo"></div>
 						</div>	
-						<!-- <div class="w3-right w3-padding-small w3-relative w3-text-grey w3-hover-text-dark-grey" style="margin-top:20px;">
-							<paper-ripple></paper-ripple>
-							<iron-icon icon="app:send" on-tap="_saveRateValue"></iron-icon>
-						</div> -->
 						<div class="w3-rest w3-padding-tiny">
 							<div class="comment-box-author w3-app-text">
 								<b>[[user.firstName]] [[user.firstName]]</b>
@@ -252,27 +243,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 							</div>
 						</div>
 					</div>
-					<template is="dom-if" if="[[_noComments(item.ratings)]]">
-						<div class="w3-padding w3-text-grey w3-center w3-margin-bottom">No ratings yet.</div>
-					</template>
-					<template is="dom-repeat" items="{{_sortComments(item.ratings)}}" as="rating">
-						<template is="dom-if" if="[[isNotCurrentUser(rating.journalUserID)]]">
-							<div class="w3-row crh-row">
-								<div class="w3-left">
-									<div style$="[[_profilePhoto(rating.photoURL)]]" class="commentor-photo"></div>
-								</div>
-								<div class="w3-rest">
-									<div class="comment-box-author w3-app-text">
-										<b>[[rating.journalUserName]]</b>
-										<span class="w3-margin-left w3-text-grey">[[timeSince(rating.date)]]</span>
-									</div>
-									<div class="comment-box-text w3-small">
-										<l2t-paper-rating rating="[[rating.rating]]" readonly class="rate-color-posted rated-icons"></l2t-paper-rating>
-									</div>
-								</div>
-							</div>
-						</template>
-					</template>
 				</div>
 			</div>
 		</div>
@@ -311,8 +281,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						type: String
 					},
 					itemrating: {
-						type: Number,
-						observer: 'saveRatingChange'
+						type: Number
 					},
 					videoChanged: {type:Boolean, value:true},
 					firstTime: {type:Boolean, value:true},
@@ -365,11 +334,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			}
 
 			_openWhoLiked(e){
-				// console.log(e.currentTarget.data);
 				this.likesdata = e.currentTarget.data;
 
 				if(this.likesdata != undefined){
 					var modal = Polymer.dom(this.root).querySelector('#who-liked');
+					this.loadPage('who-liked');
 					modal.style.display = 'block';
 				}
 			}
@@ -505,31 +474,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				if(this.thetype == 'Video'){
 					this.videoChanged = true;
 					this.entityid = newData.videoID;
-					// this.itemrating = this.getUserRating(newData.ratings);
-					// this.itemDate = this.getUserDateRating(newData.ratings);
 				}
 				if(this.thetype != 'Video'){
 					if(newData.ratings){
-						// this.itemrating = this.getUserRating(newData.ratings);
-						// this.itemDate = this.getUserDateRating(newData.ratings);
 					}	
-				}
-			}
-
-			saveRatingChange(newData, oldData){
-				if(this.thetype != 'Video'){
-					if(oldData!==undefined){
-						this._saveRateValue();
-					}
-				}
-				else{
-					
-					if(this.videoChanged == false){ // Not video being opened so legitimate rating change
-						this._saveRateValue();
-					}
-					else{// if its false then the video has just been opened so do not save rating just change statis to video changed.
-						this.videoChanged = false; 
-					}
 				}
 			}
 
@@ -545,32 +493,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				}
 
 				return photo_url;
-			}
-
-			getUserDateRating(rtObj){
-				if(rtObj==undefined || rtObj == null){
-					return 0;
-				}
-				var userID = this.user.userID;
-				var rtObj = Object.values(rtObj);
-				var result = rtObj.filter(function( obj ) {
-					return obj.journalUserID == userID;
-				});
-				if(result.length > 0)
-					return result[0].date == undefined ? 0 : result[0].date;
-			}
-
-			getUserRating(rtObj){
-				if(rtObj==undefined || rtObj == null){
-					return 0;
-				}
-				var userID = this.user.userID;
-				var rtObj = Object.values(rtObj);
-				var result = rtObj.filter(function( obj ) {
-					return obj.journalUserID == userID;
-				});
-				if(result.length > 0)
-					return result[0].rating == undefined ? 0 : result[0].rating;
 			}
 
 			_saveLike(state){
@@ -640,71 +562,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				var am_pm = date.getHours() >= 12 ? "PM" : "AM"
 
 				return day+' '+month+' '+year+' '+hours+':'+minutes+" "+am_pm;
-			}
-
-			_saveRateValue(){
-				let dailyThought_ID = this.entityid;
-				
-				let rating = this.itemrating;
-				let comment = "";
-
-				var journalUserID = this.user.userID;
-				var journalUserName = this.user.firstName+" "+this.user.lastName;
-
-				var companyID = this.user.companyID;
-				var companyName = this.user.companyName;
-
-				var photoURL = "";
-
-				if(this.user.photoURL != undefined || this.user.photoURL != ""){
-					photoURL = this.user.photoURL;
-				}else{
-					photoURL = "";
-				}
-
-				if(photoURL == undefined){
-					photoURL = "";
-				}
-
-				let date = Date.now();
-				this.itemDate = date;
-				let stringDate = this.formatDate(date);
-				let stringRateDate = this.formatRateTime(date);
-				// let stringDate = new Date(date).toUTCString();
-
-				// Get a reference to the database service
-				var database = firebase.database();
-
-				var newRateKey = journalUserID;
-
-				if(comment == undefined){
-					comment = "";
-				}
-
-				// if rating not equal to undefined
-				if(rating != undefined){
-					// fix data
-					// dailyThoughts
-					var data = {
-						companyID: companyID,
-						companyName: companyName,
-						journalUserID: journalUserID,
-						journalUserName: journalUserName,
-						photoURL: photoURL,
-						comment: comment,
-						dailyThoughtID: dailyThought_ID,
-						date: date,
-						rating: rating,
-						ratingID: newRateKey,
-						stringDate: stringDate,
-						stringRateDate: stringRateDate
-					}
-
-					// Write the new rating on thoughts data
-					database.ref(this.firebaseref).child(dailyThought_ID).child('ratings').child(journalUserID).set(data);
-					
-					this._showCommentBoxMessage("<span class='w3-text-red'>Rating posted successfully!</span>", 2000);
-				}
 			}
 
 			_saveComment(e){
@@ -900,6 +757,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				}
 				// return favorite ? 'app:favorite' : 'app:favorite-border';
 			}
+			isEqual(a, b) {
+				return a === b;
+			}
+			loadPage(page){
+            var resolvedPageUrl = this.resolveUrl(page + '.html');
+            Polymer.importHref(
+                resolvedPageUrl,
+                null,
+                page + '.html',
+                true);
+        	}
 		}
 
 		window.customElements.define(CommentsBox.is, CommentsBox);

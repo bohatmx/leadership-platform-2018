@@ -35,7 +35,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <!-- Firebase Query -->
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-database-behavior.html">
+
+<!-- <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html"> -->
 
 <link rel="import" href="app-icons.html">
 <link rel="import" href="shared-styles.html">
@@ -54,9 +57,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						path="/dailyThoughts"
 						order-by-child="publish_status"
 						equal-to="[[_companyid]]_approved"
-						limit-to-last="15"
+						limit-to-last="3"
 						data="{{thoughtsData}}">
 					</firebase-query>
+
+					<firebase-query
+						path="/dailyThoughts"
+						order-by-child="publish_status"
+						equal-to="[[_companyid]]_approved"
+						limit-to-last="{{minData}}"
+						data="{{thoughtsData1}}">
+					</firebase-query>
+
+					<!-- <app-indexeddb-mirror
+						session="[[user.userID]]"
+						key="keycompanythoughts"
+						data="{{thoughtsData1}}"
+						persisted-data="{{thoughtsData}}">
+					</app-indexeddb-mirror> -->
 				</template>
 	
 				<template is="dom-if" if="[[isEqual(thoughtype, 'dailythoughts')]]">
@@ -65,8 +83,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						path="/dailyThoughts"
 						order-by-child="publish_status"
 						equal-to="daily_approved"
-						limit-to-last="15"
+						limit-to-last="3"
 						data="{{thoughtsData}}">
+					</firebase-query>
+
+					<firebase-query
+						path="/dailyThoughts"
+						order-by-child="publish_status"
+						equal-to="daily_approved"
+						limit-to-last="{{minData}}"
+						data="{{thoughtsData1}}">
 					</firebase-query>
 				</template>
 	
@@ -76,8 +102,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						path="/dailyThoughts"
 						order-by-child="journalUserID"
 						equal-to="[[user.userID]]"
-						limit-to-last="15"
+						limit-to-last="3"
 						data="{{thoughtsData}}">
+					</firebase-query>
+
+					<firebase-query
+						path="/dailyThoughts"
+						order-by-child="journalUserID"
+						equal-to="[[user.userID]]"
+						limit-to-last="{{minData}}"
+						data="{{thoughtsData1}}">
 					</firebase-query>
 				</template>
 	
@@ -87,22 +121,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						path="/dailyThoughts"
 						order-by-child="publish_status"
 						equal-to="hc_approved"
-						limit-to-last="15"
+						limit-to-last="3"
 						data="{{thoughtsData}}">
+					</firebase-query>
+
+					<firebase-query
+						path="/dailyThoughts"
+						order-by-child="publish_status"
+						equal-to="hc_approved"
+						limit-to-last="{{minData}}"
+						data="{{thoughtsData1}}">
 					</firebase-query>
 				</template>
 			</template>
 			<template is="dom-if" if="[[!hasNoFilter]]">
-					<firebase-query
-						id="qry_viewthought_filtered"
-						path="/dailyThoughts"
-						equal-to="[[filterID]]"
-						data="{{thoughtsData}}">
-					</firebase-query>
+				<firebase-query
+					id="qry_viewthought_filtered"
+					path="/dailyThoughts"
+					equal-to="[[filterID]]"
+					data="{{thoughtsData}}">
+				</firebase-query>
 			</template>
 		</template>
-
-			<style include="theme-styles"></style>
 			<style include="w3-styles"></style>
 			<style include="shared-styles">
 
@@ -125,102 +165,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						color: var(--app-primary-text);
 					};
 				}
-				.rate-color-post {
-					--rating-icon-color: var(--app-primary-color);
-					--rating-ink-color: var(--app-primary-color);
-				}
-				.rate-color {
-					--rating-icon-color: #9e9e9e;
-					--rating-ink-color: #9e9e9e;
-				}
-				.pageComments{
-					padding: 0 8px;
-					background-color: #f7f7f7;
-				}
-				.comment-date{
-					color: #9e9e9e !important;
-				}
-				.comment-msg{
-				 color: var(--app-primary-text);
-				}
-				.comment-input{
-					background-color: #ffffff;
-					padding: 0 16px;
-					border-radius: 2px;
-				}
-				.comment-area{
-					display: flex;
-					flex-direction: row;
-					padding-bottom: 10px;
-					padding-top: 10px;
-				}
-				.comment-input{
-					flex-grow: 8;
-					margin-left: -10px;
-				}
-				.comment-btn{
-					margin: 10px;
-					color: var(--app-primary-color);
-				}
 				.header-det{
 					flex-grow: 9;
 					display: flex;
 				}
-				.header-actions{
-					flex-grow: 1;
-					align-content: flex-end;
-					justify-content: center;
-				}
-				.thought-rate-title, .thought-rate-subtitle{
-					text-align: center;
-				}
 				.thought-rate-title{
+					text-align: center;
 					font-family: sans-serif;
 					white-space: wrap;
 					margin: 12px 0;
-				}
-				.thought-rate-subtitle{
-					font-style: italic;
 				}
 				@media screen and (max-width: 900px) {
 					.main-card{
 						margin: 0px;
 					}
-				}
-				.pldp-link{
-					text-decoration: none;
-					text-transform: uppercase;
-					text-align: -webkit-center;
-					display: flex;
-					align-items: center;
-					color: var(--paper-dialog-button-color, var(--primary-color));
-					-webkit-user-select: none;
-					user-select: none;
-					padding: 0 8px 0 2px;
-				}
-				.thought-prevImg{
-					display: flex;
-					height: 280px;
-					width: 100%;
-					border-radius: 1px;
-					text-align: center;
-					flex-direction: column;
-					align-items: center;
-					justify-content: center;
-					margin-bottom: 1px;
-				}
-				.thoughtItems{
-					position: absolute;
-				}
-				.thoughtItems > .thoughtTitle{
-					line-height: 16px;
-					font-size: 16px;
-				}
-				.thoughtItems > .thoughtSubtitle{
-					margin-top: 16px;
-					line-height: 12px;
-					font-size: 12px;
-					font-style: italic;
 				}
 
 				.previewFooter{
@@ -271,7 +229,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				</div>
 				<template id="thoughtsList" is="dom-repeat" items="[[thoughtsData]]" as="item" sort="_sort" observe="dateScheduled">
 					<div class="modal-div w3-animate-zoom">
-						
 						<div class="card-container fadeInUp">
 							<span class="w3-button w3-display-topright w3-red w3-medium w3-hide closer-for-modal" style="z-index:999999;">&times;</span>
 							<div class="container card-header">
@@ -338,6 +295,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						</div>
 					</div>
 				</template>
+
+				<div class="w3-row w3-center" style="width: 100%">
+					<div class="w3-row w3-text-green" style="width: 100%"><paper-button hidden="{{loadmore}}" on-tap="_loadMorePosts">Read More Posts</paper-button></div>
+					<div class="w3-row" style="width: 100%"><paper-spinner  active="{{isloadingmore}}"></paper-spinner></div>
+				</div>
+				
 			</div>
 		</section>
 		<div class="container">
@@ -368,31 +331,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				super.ready();
 				
 				var that = this;
-				$(window).scroll(function(){
-					var thoughtCard = Polymer.dom(that.root).querySelector("#thoughts-Holder");
-					$(thoughtCard).find('.modal-div').each(function(i, e){
-						var imgHolder = $(e).find('.thought-img')[0];
 
-						if(that.isElementInViewport(imgHolder)){
-							var itemID = $(e).find('thought-card-attachments').prop('itemid');
-							// console.log(itemID)
-						}
-					});
+				setTimeout(function(){
+					that.minData += 6;
+				}, 2000);
 
-				})
+				// $(window).scroll(function(){
+				// 	var thoughtCard = Polymer.dom(that.root).querySelector("#thoughts-Holder");
+				// 	$(thoughtCard).find('.modal-div').each(function(i, e){
+				// 		var imgHolder = $(e).find('.thought-img')[0];
+
+				// 		if(that.isElementInViewport(imgHolder)){
+				// 			var itemID = $(e).find('thought-card-attachments').prop('itemid');
+				// 			// console.log(itemID)
+				// 		}
+				// 	});
 
 				var hParts = window.location.hash.split('#')[1];
 				this.filterID = (hParts!==undefined && hParts.length) > 0 ? hParts : '';
 				$(window).on('hashchange', ()=>{
 					var hParts = window.location.hash.split('#')[1];
 					this.filterID = (hParts!==undefined && hParts.length) > 0 ? hParts : '';
-					console.log("We triggered something here", this.filterID);
+					// console.log("We triggered something here", this.filterID);
 				});
 			}
 			static get properties() {
 				return {
 					user: {
 						type: Object
+					},
+					minData: {
+						type: Number,
+						value: 3
 					},
 					_userid: {
 						type: String,
@@ -409,6 +379,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					thoughtsData: {
 						type: Object,
 						observer: '_onthoughtsDataReceived'
+					},
+					thoughtsData1: {
+						type: Object,
+						observer: '_onthoughtsData1Received'
 					},
 					commentsData: {
 						type: Object,
@@ -462,11 +436,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					userobj: {
 						type: Object,
 						notify: true
+					},
+					loadmore: {
+						type: Boolean,
+						value: true
+					},
+					isloadingmore: {
+						type: Boolean,
+						value: false
 					}
 				};
 			}
 			connectedCallback() { 
 				super.connectedCallback();
+			}
+
+			_loadMorePosts(){
+				this.isloadingmore = true;
+				this.minData += 6;
 			}
 
 			updateFollowBTN(journalUserID, following){
@@ -505,12 +492,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			}
 
 			isFollowing(journalUserID){
-				if(this.user.following){
-				let following =  this.user.following;
-				let isfollowing = following[journalUserID];
+				if(this.user.following != undefined){
+					if(this.user.following){
+					let following =  this.user.following;
+					let isfollowing = following[journalUserID];
 
-				return isfollowing ? 'Following' : 'Follow';
+					return isfollowing ? 'Following' : 'Follow';
+					}else return "Follow";
 				}else return "Follow";
+				
 			}
 
 			isFollowingStyle(journalUserID){
@@ -538,42 +528,86 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				let following = e.target.innerHTML;
 				let userID = this.user.userID;
 				var that = this;
+				var myPhoto = "";
+
+				if(this.user.photoURL != undefined || this.user.photoURL != ""){
+					myPhoto = this.user.photoURL;
+				}else{
+					myPhoto = "";
+				}
+
+				if(myPhoto == undefined){
+					myPhoto = "";
+				}
 				// let journalUserName = e.target.parentNode.firstChild.nextSibling.innerText;
 
 				var userRef = database.ref('users/' + journalUserID);
 				userRef.on('value', function(data) {
 					var childData = data.val();
-
 					let journalUserName = childData.firstName + " "+childData.lastName;
+					
 
 					if(following == "Follow"){
-						var followingdata = {}
-						followingdata[journalUserID]=true;
-
-						var followerdata = {}
-						followerdata[userID]=true;
-
-						// set following data
-						var followingupdates = {};
-						database.ref('/users/' + userID + '/following').child(journalUserID).set(true);
-
-						// set follower data
-						var followerupdates = {};
-						database.ref('/users/' + journalUserID + '/follower').child(userID).set(true);
-
 						$(e.target).addClass('following');
 
 						e.target.innerHTML = "Following";
 						that.updateFollowBTN(journalUserID, following);
-					}else{
-						database.ref('users/'+ userID + '/following/'+journalUserID).remove();
-						database.ref('users/'+ journalUserID + '/follower/'+userID).remove();
 
+						var photoURL = "";
+						if(childData.photoURL != undefined || childData.photoURL != ""){
+							photoURL = childData.photoURL;
+						}else{
+							photoURL = "";
+						}
+
+						if(photoURL == undefined){
+							photoURL = "";
+						}
+
+						var theirdata = {
+							"firstName":childData.firstName,
+							"lastName":childData.lastName,
+							"companyName":childData.companyName,
+							"photoURL":photoURL
+						}
+
+						var mydata = {
+							"firstName":that.user.firstName,
+							"lastName":that.user.lastName,
+							"companyName":that.user.companyName,
+							"photoURL":myPhoto
+						}
+
+						var updates = {}
+						updates["users/"+userID+"/following/"+journalUserID]=theirdata;
+						updates["users/"+journalUserID+"/follower/"+userID]=mydata;
+
+						database.ref().update(updates);
+
+						// var uRef = database.ref('users');
+						// uRef.child(userID).child('following').child(journalUserID).set(true);
+						
+						// uRef.child(journalUserID).child('follower').child(userID).set(true);
+						// uRef.off();
+
+					}else{
 						that.isFollowingStyle(journalUserID);
 
 						$(e.target).removeClass('following');
 						e.target.innerHTML = "Follow";
 						that.updateFollowBTN(journalUserID, following);
+
+						var updates = {}
+						updates["users/"+userID+"/following/"+journalUserID]=null;
+						updates["users/"+journalUserID+"/follower/"+userID]=null;
+
+						database.ref().update(updates);
+
+						// var uRef = database.ref('users');
+						// uRef.child(userID).child('following').child(journalUserID).remove();
+						// uRef.child(journalUserID).child('follower').child(userID).remove();
+						// uRef.off();
+						
 					}
 					
 				});
@@ -640,6 +674,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				if (a.dateScheduled < b.dateScheduled) return 1;
 				return 0;
 			}
+			_onthoughtsData1Received(newData, oldData){
+				var objLen = this._objLen(newData);
+				if(objLen > 2){
+					this.thoughtsData = newData;
+					// this.thoughtsData = Object.assign(this.thoughtsData, newData);
+					this.$.thoughtsList.render();
+				}
+				
+			}
 			_onthoughtsDataReceived(newData, oldData){
 				var that = this;
 				
@@ -650,6 +693,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				if(newData.length > 0){
 					this.isloading = false;
 					this.loadingmessage = "";
+					this.loadmore = false;
+					this.isloadingmore = false;
 				} 
 
 				setTimeout(function(){
@@ -658,7 +703,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					if(newData.length == 0) that.loadingmessage = "No posts found";
 					else that.loadingmessage = "";
 
-				},20000)
+				},30000)
 			}
 			_oncommentsData(){
 				this.commentsData.sort(function(a, b) {
@@ -915,7 +960,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						var retObj = {};
 						retObj = obj[key];
 						// assign object id to lpUID
-						retObj['lpUID'] = key;
+						// retObj['lpUID'] = key;
 						return retObj;
 						// return obj[key];
 				});
@@ -950,7 +995,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				}else if(photo == ""){
 					photo_url = "background-image: url('../images/default-user.png');";
 				}else{
-					photo_url = 'background-image: url('+photo+');';
+					photo_url = "background-image: url('"+photo+"');";
 				}
 
 				return photo_url;
@@ -1381,12 +1426,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			_getWebsite(url){
 				var res = "";
 				if(url != undefined || url != ""){
-					if(url.indexOf('http') == -1) {
-						var addHead = "http://";
-						res = addHead + url;
-					} else {
-						res = url;
+					if(url == undefined){
+					}else{
+						if(url.indexOf('http') == -1) {
+							var addHead = "http://";
+							res = addHead + url;
+						} else {
+							res = url;
+						}
+
 					}
+					
 				}
 				return res;
 			}

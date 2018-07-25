@@ -8,21 +8,11 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
-<link rel="manifest" href="/manifest.json">
-
-<link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
-<!-- Firebase Auth -->
-<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
-
-<!-- Firebase Query -->
-<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-database-behavior.html">
-
-<link rel="lazy-import" href="daily-thoughts.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 
 <dom-module id="my-notifications">
 	<template>
@@ -46,10 +36,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			
 		</style>
 
-		<div >
+		<firebase-query
+			id="qryusernotifications"
+			path="/users/[[userid]]/notifications"
+			limit-to-last="20"
+			data="{{userNotificationData}}">
+		</firebase-query>
+
+		<div>
 			<ul class="w3-ul w3-hoverable w3-margin-bottom">
 				<hr>
-				<template id="resultList" is="dom-repeat" items="{{notificationsdata}}" as="item" sort="_sort" observe="notificationDate">
+				<template id="resultList" is="dom-repeat" items="{{userNotificationData}}" as="item" sort="_sort" observe="notificationDate">
 					<li class="w3-bar notification" style$="[[_notificationOpened(item.opened)]]" on-tap="_notificationClicked" data="[[item]]">
 						<paper-ripple></paper-ripple>
 						<img class="w3-bar-item w3-circle w3-third" style="width:38px; height: 38px;" src="[[_profilePhoto(item.photoURL)]]">
@@ -60,7 +57,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					</li>
 				</template>
 			</ul>
-		</div>	
+			<div class="w3-row w3-center" style="width: 100%">
+				<paper-spinner  active="{{isloading}}"></paper-spinner>
+			</div>
+		</div>
 	</template>
 	<script>
 
@@ -71,18 +71,77 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 		}
 		static get properties() {
 			return {
-				user: {
-					type: Object
+				unread_notifications: {
+					type: Number,
+					value: 0
+				},
+				unreadstring: {
+					type: String,
+					value: "0",
+					notify: true
+				},
+				isloading:{
+					type: Boolean,
+					value: true
 				},
 				rootpath: {type:String},
-				notificationsdata: {
-					type: Object
+				userid: {
+					type: String,
+					notify: true
+				},
+				userNotificationData: {
+					type: Object,
+					observer: "userNotificationDataChanged"
 				},
 			};
 		}
 
 		_loadThisElement(nT,t){
 			return nT == t;
+		}
+
+		userNotificationDataChanged(a, b){
+			var notifications;
+			var unread = 0;
+
+			//Updates the following tab automatically
+			var database = firebase.database();
+			var that = this;
+			var seen = false;
+
+			if(a != undefined){
+				var newCount = a.length;
+                if(newCount > 0){
+					var notificationsRef = database.ref('/users/'+this.userid+'/notifications').orderByChild("seen").equalTo(seen);
+
+					notificationsRef.on('child_added', function(data) {
+						var unread = 0;
+						unread++;
+
+						if(unread > 0) that.unread_notifications += unread;
+
+						if(that.unread_notifications > 20) that.unreadstring = "20+";
+						else that.unreadstring = ""+that.unread_notifications;
+					});
+
+					notificationsRef.on('child_removed', function(data) {
+						var unread = 0;
+						unread++;
+						if(unread > 0) that.unread_notifications = that.unread_notifications - unread;
+
+						if(that.unread_notifications > 20) that.unreadstring = "20+";
+						else that.unreadstring = ""+that.unread_notifications;
+					});
+
+					this.isloading = false;
+                }
+			}else{
+				this.isloading = false;
+			}
+
+			setTimeout(function(){
+				that.isloading = false;
+			},8000)
 		}
 
 		_notificationOpened(opened){
@@ -95,11 +154,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 		_notificationSeen(nots){
 			var myNotifications = {};
-			var _userID = this.user.userID;
 
 			$.each(nots, function(n, nt){
-				myNotifications['/users/'+_userID+'/notifications/'+n+'/seen'] = true
-				myNotifications['/users/'+_userID+'/notifications/'+n+'/opened'] = true
+				myNotifications['/users/'+this.userid+'/notifications/'+n+'/seen'] = true
+				myNotifications['/users/'+this.userid+'/notifications/'+n+'/opened'] = true
 			});
 
 			let database = firebase.database();
@@ -123,7 +181,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			var notification = e.currentTarget.data;
 			let database = firebase.database();
 			var myNotifications = {};
-			var _userID = this.user.userID;
+			var _userID = this.userid
 
 			if(notification.notificationType === "pending-thought"){
 				window.location = "./"+this.getPage(notification.notificationType);
@@ -132,23 +190,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				database.ref().update(myNotifications);
 
 				window.location = "./"+this.getPage(notification.notificationType)+"/#"+notification.notificationItemID;
+
+				this.removeFromParent();
 			}
 
 			let seen = false;
 			
-			database.ref('/users/'+this.user.userID+'/notifications').orderByChild("seen").equalTo(seen).once('value').then((data)=>{
+			database.ref('/users/'+this.userid+'/notifications').orderByChild("seen").equalTo(seen).once('value').then((data)=>{
 				var myNotifications = data.val();
-				console.log('mynotifications', myNotifications);
-				if(myNotifications === null){
-					console.log("No notifications");
+				if(myNotifications === null){;
 				}else{
 					this._notificationSeen(myNotifications)
 				}
 				
 			}).catch(function(error) {
-				console.log("Error updating user notifications:", error);
+				// console.log("Error updating user notifications:", error);
 			});
 			
+		}
+
+		removeFromParent(){
+			var a = Polymer.dom(this).parentNode;
+			$(a).siblings('#close-notifications').trigger('click');
 		}
 
 		_profilePhoto(photo){

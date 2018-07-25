@@ -41,7 +41,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="thought-card-attachments.html">
 <link rel="import" href="comments-box.html">
 <link rel="import" href="app-icons.html">
-<link rel="import" href="view-sidebar.html">
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="view-masterclass">
@@ -234,9 +233,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						</div>
 					</div>
 				</template>
-			</div>
-			<div class="side-card">
-				<view-sidebar user="[[user]]" _companyid="[[_companyid]]"></view-sidebar>
 			</div>
 		</section>
 
@@ -444,7 +440,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				}else if(photo == ""){
 					photo_url = "background-image: url('../images/default-user.png');";
 				}else{
-					photo_url = 'background-image: url('+photo+');';
+					photo_url = "background-image: url('"+photo+"');";
 				}
 
 				return photo_url;

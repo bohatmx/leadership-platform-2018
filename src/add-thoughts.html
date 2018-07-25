@@ -281,9 +281,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <paper-input class="timeScheduled" id="timeScheduled" name="timeScheduled" always-float-label label="Time" type="time" auto-validate value$="[[_defaultTime()]]" tabindex="3"></paper-input>
           </div>
           <br>
-            <paper-radio-group hidden="[[isEqual(user.userType, 3)]]" selected="postInternal" id="postInternalGlobal" name="postInternalGlobal">
-              <paper-radio-button id="postInternal" name="postInternal">Post Internal</paper-radio-button>
-              <paper-radio-button id="postGlobally" name="postGlobally">Post Globally</paper-radio-button>
+            <paper-radio-group hidden="[[isEqual(user.userType, 3)]]" selected$="[[selectedPost(user.userType)]]" id="postInternalGlobal" name="postInternalGlobal">
+              <paper-radio-button hidden="[[!isEqual(user.userType, 4)]]" id="postInternal" name="postInternal">{{internalCaption}}</paper-radio-button>
+              <paper-radio-button hidden="[[!isEqual(user.userType, 4)]]" id="postGlobally" name="postGlobally">Post Globally</paper-radio-button>
+              <!-- Hide i-lead option for the GC public users -->
+              <paper-radio-button hidden="[[isEqual(user.companyID, '-LEiZPT-C2PyLu_YLKNU')]]" id="postILead" name="postILead">Post I-LEAD</paper-radio-button>
             </paper-radio-group>
           <hr>
           <label class="paper-font-caption">Attach</label>
@@ -501,9 +503,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var modal = Polymer.dom(this.root).querySelector('#myModal');
         var span = Polymer.dom(this.root).querySelector('#closeModal');
 
-          span.addEventListener('click', function(e){
-              modal.style.display = "none";
-          });
+        span.addEventListener('click', function(e){
+            modal.style.display = "none";
+        });
+        
       }
       connectedCallback() { 
         super.connectedCallback(); /* ... */
@@ -515,7 +518,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Object
           },
           company: {
-            type: Object
+            type: Object,
+            observer: '_companyChanged'
           },
           addedit: {
             type: Number,
@@ -570,8 +574,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Array,
           },
           thoughtTitle: String,
-          thoughtSubtitle: String
+          thoughtSubtitle: String,
+          internalCaption: {
+            type: String,
+            value: "Post Organisational"
+          }
         };
+      }
+      _companyChanged(){
+        if(this.company != undefined){
+          if(this.company.companyID == "-LEiZPT-C2PyLu_YLKNU") this.internalCaption = "Post I-LEAD"
+          else this.internalCaption = "Post Organisational";
+        }
+      }
+
+      selectedPost(user_type){
+        if(user_type == 4){
+          return "postInternal";
+        }else{
+          return "postILead";
+        }
+
       }
       previewPost(){
         var modal = Polymer.dom(this.root).querySelector('#myModal');
@@ -665,7 +688,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.$.thoughtInput.value = this.editObj.title;
             this.$.authorInput.value = this.editObj.subtitle;
             if(this.editObj.dailyThoughtType == 1) this.$.postInternalGlobal.selected = "postInternal";
-            else this.$.postInternalGlobal.selected = "postGlobally";
+            else if (this.editObj.dailyThoughtType == 2) this.$.postInternalGlobal.selected = "postGlobally";
+            else this.$.postInternalGlobal.selected = "postILead";
 
             // var thoughtTitle = Polymer.dom(this.root).querySelector('#thoughtTitle');
             // var thoughtSubtitle = Polymer.dom(this.root).querySelector('#thoughtSubtitle');
@@ -1000,33 +1024,45 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var newThoughtKey = sessionStorage.getItem("newThoughtKey");
           var refThoughtVideo = sessionStorage.getItem("refThoughtVideo");
 
-          var database = firebase.database();
-          var videoupdates = {};
-          var thoughtupdates = {};
+          if(refThoughtVideo != null){
+            var database = firebase.database();
+            var videoupdates = {};
+            var thoughtupdates = {};
 
-          videoupdates['/videos/'+videoID+'/url'] = downloadURL;
-          database.ref().update(videoupdates);
+            videoupdates['/videos/'+videoID+'/url'] = downloadURL;
+            database.ref().update(videoupdates);
 
-          thoughtupdates['/dailyThoughts/'+newThoughtKey+'/videos/'+refThoughtVideo+'/url'] = downloadURL;
-          database.ref().update(thoughtupdates);
+            thoughtupdates['/dailyThoughts/'+newThoughtKey+'/videos/'+refThoughtVideo+'/url'] = downloadURL;
+            database.ref().update(thoughtupdates);
 
-          sessionStorage.removeItem("newVideoKey");
-          sessionStorage.removeItem("refThoughtVideo");
+            sessionStorage.removeItem("newVideoKey");
+            sessionStorage.removeItem("refThoughtVideo");
 
-          // reset video
-          var videoPlayer = Polymer.dom(this.root).querySelector('#videoPlayer');
-          var videoPlayer1 = Polymer.dom(this.root).querySelector('#videoPlayer1');
-          var videoPlayer2 = Polymer.dom(this.root).querySelector('#videoPlayer2');
-          var videoPlayer3 = Polymer.dom(this.root).querySelector('#videoPlayer3');
+            // reset video
+            var videoPlayer = Polymer.dom(this.root).querySelector('#videoPlayer');
+            var videoPlayer1 = Polymer.dom(this.root).querySelector('#videoPlayer1');
+            var videoPlayer2 = Polymer.dom(this.root).querySelector('#videoPlayer2');
+            var videoPlayer3 = Polymer.dom(this.root).querySelector('#videoPlayer3');
 
-          videoPlayer1.src = "";
-          videoPlayer2.src = "";
-          videoPlayer3.src = "";
-          videoPlayer.src = "";
+            videoPlayer1.src = "";
+            videoPlayer2.src = "";
+            videoPlayer3.src = "";
+            videoPlayer.src = "";
 
-          Polymer.dom(this.root).querySelector('#fs').clearTasks();
+            this.showSnackBar("Thought posted successfully!");
 
-          return "Upload Completed Successfully!"
+            this._removeItems();
+            var that = this;
+
+            setTimeout(myFunction, 3000);
+            function myFunction(){
+              that.removeFromParent();
+            }
+
+            Polymer.dom(this.root).querySelector('#fs').reset();
+
+            window.location.reload();
+          }
         }
       }
       removeVideo(){
@@ -1601,6 +1637,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var DailyThoughtDescription = sessionStorage.getItem("DESC_GLOBAL_DAILY_THOUGHT");
           var DailyThoughtType = 2;
         }
+
+        // Post i-lead
+        if(postInternalGlobal == 'postILead'){
+          var DailyThoughtDescription = sessionStorage.getItem("DESC_ILEAD_DAILY_THOUGHT");
+          var DailyThoughtType = 3;
+        }
         
         // Platinum User,  Platinum Admin, Company Admin, Daily Thoughts, I-Leader
         if ((user_type == 'user4') || (user_type == 'user7') || (user_type == 'user6') || (user_type == 'user9') || (user_type == 'user3')) {
@@ -1613,12 +1655,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
         // Gold User - Master Contributor
         else if (user_type == 'user5') {
+          if(postInternalGlobal == 'postILead'){
+            // set public company ID and status
+            var DailyThoughtType_status = DailyThoughtType +"_"+status;
+            var companyID_status = "-LEiZPT-C2PyLu_YLKNU_"+status;
+            // status here can approved or unpublished
+            publish_status = "-LEiZPT-C2PyLu_YLKNU_"+status;
+          }else{
             var DailyThoughtType_status = DailyThoughtType +"_"+sessionStorage.getItem("PENDING");
             status = sessionStorage.getItem("PENDING");
             var companyID_status = this.user.companyID+"_"+sessionStorage.getItem("PENDING");
             // status here can approved or unpublished
             publish_status = this.user.companyID+"_"+status;
-        } else {
+          }
+        } 
+        else {
           this.showSnackBar('This account is not authorised to post, Please contact the Admin.');
           return;
         }
@@ -1659,8 +1710,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           publish_status = "daily_"+status;
         }
 
-        console.log(publish_status);
-        // return
+        if(postInternalGlobal == 'postILead'){
+          // set public company ID and status
+          var DailyThoughtType_status = DailyThoughtType +"_"+status;
+          var companyID_status = "-LEiZPT-C2PyLu_YLKNU_"+status;
+          // status here can approved or unpublished
+          publish_status = "-LEiZPT-C2PyLu_YLKNU_"+status;
+          companyID = "-LEiZPT-C2PyLu_YLKNU";
+        }
+
+        if(user_type == 'user9'){
+          // status will be approved or unpublished
+          publish_status = "daily_"+status;
+          var DailyThoughtType_status = DailyThoughtType +"_"+status;
+          var companyID_status = this.user.companyID+"_"+status;
+          companyID = this.user.companyID;
+        }
 
         if(VidUploadExternal == 'vidupload'){
           // Validate video file
@@ -1705,7 +1770,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           // fix data
           var data = {
             active: true,
-            companyID: this.user.companyID,
+            companyID: companyID,
             companyName: this.user.companyName,
             dailyThoughtID: newThoughtKey,
             companyID_status: companyID_status,
@@ -1773,7 +1838,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         // Add url to thought
         var urlCount = Object.keys(this.articleObj).length;
-        console.log('URL Count',urlCount, this.articleObj);
 
         for (var i = 0; i < urlCount; i++) {
           var urls = {
@@ -2076,21 +2140,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           );
         }
 
-        if (video == undefined){
-          this.showSnackBar("Thought posted successfully!");
-        }else{
-          this.showSnackBar("Thought posted successfully!");
+        if((VidUploadExternal != 'vidupload') || (PodcastExternalRecord != 'podcastrecord')){
+          if (video == undefined){
+            this.showSnackBar("Thought posted successfully!");
+          }else{
+            this.showSnackBar("Thought posted successfully!");
+          }
+
+          this._removeItems();
+          var that = this;
+
+          setTimeout(myFunction, 3000);
+          function myFunction(){
+            that.removeFromParent();
+          }
         }
-
-        this._removeItems();
-        var that = this;
-
-        setTimeout(myFunction, 3000);
-
-        function myFunction(){
-          that.removeFromParent();
-        }
-
       }
       splitDate(date, char){
         return date.split(char);

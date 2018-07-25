@@ -10,17 +10,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="manifest" href="/manifest.json">
 
-<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<!-- <link rel="import" href="../bower_components/polymer/polymer-element.html"> -->
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
 <!-- Firebase Auth -->
-<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<!-- <link rel="import" href="../bower_components/polymerfire/firebase-auth.html"> -->
 
 <!-- Firebase Query -->
-<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-database-behavior.html">
+<!-- <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-database-behavior.html"> -->
 
 <dom-module id="my-followers">
     <template>
@@ -37,11 +37,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         
     </style>
 
-    <firebase-query
+    <!-- <firebase-query
         id="qryusers"
         path="/users"
         data="{{usersData}}">
-    </firebase-query>
+    </firebase-query> -->
 
     <div class="w3-row w3-text-white">
         <div id="Followers" class="w3-col s6 w3-card-2" style="cursor: pointer;" on-tap="toggleFollow">
@@ -64,7 +64,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </div>
         <ul class="w3-ul w3-card-2 w3-hoverable w3-margin-bottom">
             <hr>
-            <template id="resultList" is="dom-repeat" items="[[usersData]]" as="item" filter="_filter">
+            <template id="resultList" is="dom-repeat" items="[[mylist]]" as="item" filter="_filter">
                 <li class="w3-bar" style="padding: 8px 0;">
                 <img class="w3-bar-item w3-circle" style="width:48px; height: 48px;" src="[[_profilePhoto(item.photoURL)]]">
                     <div class="w3-bar-item">
@@ -87,13 +87,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         static get properties() {
             return {
                 user: {
-                    type: Object
+                    type: Object,
+                    observer: '_usersDataChange',
+                    notify: true,
                 },
                 _companyid: String,
-                usersData: {
-                    type: Object,
-                    observer: '_usersDataChange'
-                },
                 follow: {
                     type: String,
                     observer: 'refreshFilter',
@@ -104,7 +102,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
 
         _usersDataChange(newData, oldData) {
-            
         }
         _profilePhoto(photo){
             let photo_url = "../images/default-user.png";
@@ -123,42 +120,45 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             return this.follow = e.currentTarget.id;
         }
         refreshFilter() {
-            this.$.resultList.render();
-        }
-        _filter (person) {
             var selectedTab = this.$.selectedTab;
             var followersTab = this.$.followersTab;
             var followingTab = this.$.followingTab;
-            
+
             if(this.follow == 'Followers'){
-                // selectedTab.style = "background-color: #616161!important;";
                 selectedTab.style = "background-color: #ff5722!important;";
                 followersTab.style = "background-color: #ff5722!important;";
                 followingTab.style = "background-color: #616161!important;";
-                // Followers
-                if(this.user !== undefined){
-                    if(this.user.follower){
-                        let follower =  this.user.follower;
-                        let isfollower = follower[person.userID];
-                        return isfollower;
-                    }else return false;
+
+                if(this.user.follower != undefined){
+                    this.mylist = this._toArray(this.user.follower);
                 }
-                
             }else{
                 selectedTab.style = "background-color: #ff5722!important;";
                 followersTab.style = "background-color: #616161!important;";
                 followingTab.style = "background-color: #ff5722!important;";
-                // Following
-                if(this.user !== undefined){
-                    if(this.user.following){
-                    let following =  this.user.following;
-                    let isfollowing = following[person.userID];
-
-                        return isfollowing;
-                    }else return false;
+                
+                if(this.user.following != undefined){
+                    this.mylist = this._toArray(this.user.following);
                 }
             }
-            return false;
+            
+            this.$.resultList.render();
+        }
+
+        _toArray(obj) {
+            if(obj != undefined){
+                return Object.keys(obj).map(function(key) {
+                    var retObj = {};
+                    retObj = obj[key];
+                    return retObj;
+                    // return obj[key];
+            });
+            }
+        }
+
+        _filter (person) {
+            if(person.firstName != undefined) return true
+            else return false;
         }
 
     }

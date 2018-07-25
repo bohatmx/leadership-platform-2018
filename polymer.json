@@ -1,25 +1,23 @@
 {
 	"entrypoint": "index.html",
-	"shell": "src/my-app.html",
+	"shell": "src/ldp-app.html",
 	"fragments": [
-		"src/about-pldp.html","src/add-article.html","src/add-podcast.html","src/add-thoughts.html",
+		"src/my-app.html","src/about-pldp.html","src/add-article.html","src/add-podcast.html","src/add-thoughts.html",
 		"src/add-voicemail.html","src/add-video.html","src/app-icons.html","src/company-profile.html",
-		"src/company-staff.html","src/company-thoughts.html","src/i-lead.html","src/daily-thoughts.html","src/js-xlsx.html","src/leadership-app.html","src/leadership-articles.html",
+		"src/company-staff.html","src/company-thoughts.html","src/i-lead.html","src/daily-thoughts.html","src/js-xlsx.html","src/leadership-articles.html",
 		"src/leadership-ebooks.html","src/leadership-podcasts.html","src/leadership-thoughts.html",
 		"src/leadership-videos.html","src/load-media.html","src/master-class.html","src/my-followers.html","src/my-icons.html","src/my-notifications.html","src/my-pldp.html",
 		"src/my-recorder.html","src/not-found.html","src/play-media.html","src/pldp-articles.html",
-		"src/pldp-favorites.html","src/pldp-masterclass.html","src/pldp-podcasts.html","src/pldp-styles.html","src/pldp-thoughts.html","src/pldp-videos.html","src/read-articles.html","src/shared-styles.html","src/sign-in.html","src/theme-color.html",
-		"src/theme-styles.html","src/thought-card-attachments.html","src/thoughts-management.html",
+		"src/pldp-favorites.html","src/pldp-masterclass.html","src/pldp-podcasts.html","src/pldp-styles.html","src/pldp-thoughts.html","src/pldp-videos.html","src/read-articles.html","src/shared-styles.html","src/sign-in.html","src/thought-card-attachments.html","src/thoughts-management.html",
 		"src/topleader-thoughts.html","src/user-profile.html","src/view-articles.html",
-		"src/view-masterclass.html","src/view-podcasts.html","src/view-sidebar.html",
-		"src/view-thoughts.html","src/w3-styles.html", "src/terms-conditions.html", "src/term-condition.html"
+		"src/view-masterclass.html","src/view-podcasts.html","src/view-thoughts.html","src/w3-styles.html", "src/terms-conditions.html", "src/term-condition.html"
 	],
 	"sources": [
 		"src/**/*","images/**/*","data/**/*","bower.json"
 	],
 	"extraDependencies": ["manifest.json","firebase-messaging-sw.js",
     "bower_components/webcomponentsjs/custom-elements-es5-adapter.js",
-    "bower_components/webcomponentsjs/*","bower_components/zxcvbn/dist/zxcvbn.js"
+	"bower_components/webcomponentsjs/*","bower_components/zxcvbn/dist/zxcvbn.js"
   ],
 	"lint": {
 		"rules": ["polymer-2"],

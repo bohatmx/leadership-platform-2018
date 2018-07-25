@@ -112,6 +112,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
       <div class="container">
         <div class="add-thought">
+          <form action=""></form>
           <paper-input label="Enter Podcast Title" type="text" id="podcastTitle" maxlength="240" char-counter autocapitalize tabindex="0">
           </paper-input>
           <paper-input label="Enter Podcast Author" type="text" id="podcastAuthor" maxlength="100" char-counter autocapitalize tabindex="1">
@@ -165,12 +166,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   </div>
                   <br>
                   <!-- <button on-tap="upload">Upload</button> -->
-                  <hr>
                   <template is="dom-repeat" items="[[uploadedFiles]]">
-                    <div style="padding: 20px">
+                    <div style="padding: 6px">
                       <firebase-storage-upload-task
                         task="[[item]]"
-                        id="task-[[index]]"
+                        id="taskpodcast"
                         bytes-transferred="{{item.bytesTransferred}}"
                         total-bytes="{{item.totalBytes}}"
                         state="{{item.state}}"
@@ -198,14 +198,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         <br>
                         <p>[[_uploadComplete(item.refDownloadUrl, item.totalBytes)]]</p>
                       </template>
-
                       <template is="dom-if" if="[[!isEqual(item.state, 'success')]]">
                         <template is="dom-if" if="[[isEqual(item.state, 'running')]]">
-                          <button on-tap="cancel" value="{{index}}">Cancel</button>
-                          <button on-tap="pause" value="{{index}}">Pause</button>
+                          <paper-button on-tap="cancel" value="{{index}}">Cancel</paper-button>
+                          <paper-button on-tap="pause" value="{{index}}">Pause</paper-button>
                         </template>
                         <template is="dom-if" if="[[isEqual(item.state, 'paused')]]">
-                          <button on-tap="resume" value="{{index}}">Resume</button>
+                          <paper-button on-tap="resume" value="{{index}}">Resume</paper-button>
                         </template>
                       </template>
                       <br>
@@ -269,7 +268,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           uploadedFiles: {
             type: Array,
-          }
+          },
+          item: {
+            type: Object,
+            value: null
+          },
         };
       }
       _defaultDate(){
@@ -300,13 +303,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
       }
       cancel(e) {
-        Polymer.dom(this.root).querySelector('#task-' + e.target.value).cancel();
+        Polymer.dom(this.root).querySelector('#taskpodcast').cancel();
       }
       resume(e) {
-        Polymer.dom(this.root).querySelector('#task-' + e.target.value).resume();
+        Polymer.dom(this.root).querySelector('#taskpodcast').resume();
       }
       pause(e) {
-        Polymer.dom(this.root).querySelector('#task-' + e.target.value).pause();
+        Polymer.dom(this.root).querySelector('#taskpodcast').pause();
       }
       download(e) {
         Polymer.dom(this.root).querySelector('#ref-' + e.target.value).getDownloadURL().then(function(d) {
@@ -343,23 +346,36 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if(url != undefined){
           var downloadURL = url;
           var podcastID = sessionStorage.getItem("newPodcastKey");
-          var active = true;
 
-          if(checkStatus == "unpublished") active = false;
+          if(podcastID != null){
+            var active = true;
 
-          var database = firebase.database();
-          var updates = {};
-          updates['/podcasts/'+podcastID+'/active'] = active;
-          updates['/podcasts/'+podcastID+'/company_status'] = "general_"+active;
-          updates['/podcasts/'+podcastID+'/podcastSize'] = size;
-          updates['/podcasts/'+podcastID+'/url'] = downloadURL;
-          database.ref().update(updates);
+            if(checkStatus == "unpublished") active = false;
 
-          sessionStorage.removeItem("newPodcastKey");
+            var database = firebase.database();
+            var updates = {};
+            updates['/podcasts/'+podcastID+'/active'] = active;
+            updates['/podcasts/'+podcastID+'/company_status'] = "general_"+active;
+            updates['/podcasts/'+podcastID+'/podcastSize'] = size;
+            updates['/podcasts/'+podcastID+'/url'] = downloadURL;
+            database.ref().update(updates);
 
-          Polymer.dom(this.root).querySelector('#fs').clearTasks();
+            sessionStorage.removeItem("newPodcastKey");
+            Polymer.dom(this.root).querySelector('#fs').reset();
 
-          return "Upload Completed Successfully!"
+            this.removeItems();
+            this.showSnackBar("New podcast posted successfully!");
+
+            window.location.reload();
+
+            var that = this;
+            setTimeout(myFunction, 3000);
+            function myFunction(){
+              that.removeFromParent();
+            }
+
+          }
+          
         }
       }
       
@@ -563,14 +579,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           podcastupdates['/podcasts/' + newPodcastKey] = audioObj;
           database.ref().update(podcastupdates);
 
+         if(UploadExternal == 'external'){
           this.removeItems();
-          // this.showSnackBar("New podcast uploaded successfully!");
+          this.showSnackBar("New podcast posted successfully!");
 
           var that = this;
           setTimeout(myFunction, 3000);
           function myFunction(){
             that.removeFromParent();
           }
+        }
+
+          
       }
       removeFromParent(){
         var a = Polymer.dom(this).parentNode;

@@ -117,16 +117,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (typeof AudioContext !== "undefined")
         {
             audio_context = new AudioContext();
-            console.log("Created AudioContext");
         }
         else if (typeof webkitAudioContext !== "undefined")
         {
             audio_context = new webkitAudioContext();
-            console.log("Created webkitAudioContext");
         }
         else
         {
-            this.__log("No web audio support in this browser 0!");
+            this.__log("No web audio support in this browser!");
             // alert('No web audio support in this browser 0!');
             return;
         }
@@ -134,24 +132,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         processor = audio_context.createScriptProcessor(4096, 2, 2);
         processor.connect(audio_context.destination);
         } catch (e) {
-            this.__log('No web audio support in this browser 1! '+e);
+            this.__log('No web audio support in this browser! '+e);
             // alert('No web audio support in this browser 1! '+e);
         }
     
         if (navigator.getUserMedia) {
-            this.__log('Recording getUserMedia...'); 
+            this.__log('Recording...'); 
             navigator.getUserMedia({audio: true}, this.startUserMedia, function(e) {
-                this.__log('No live audio input: ' + e);
+                this.__log('No live audio input');
             });
         } else if (navigator.webkitGetUserMedia) {
-            this.__log('Recording webkitGetUserMedia...');    
+            this.__log('Recording...');    
             navigator.webkitGetUserMedia({audio: true}, this.startUserMedia, function(e) {
-                this.__log('No live audio input: ' + e);
+                this.__log('No live audio input');
             });
         } else if (navigator.mediaDevices.getUserMedia) {
-            this.__log('Recording mediaDevices.getUserMedia...');    
+            this.__log('Recording...');    
             navigator.mediaDevices.getUserMedia({audio: true}).then(this.startUserMedia).catch(function(e) {
-                this.__log('No live audio input: ' + e);
+                this.__log('No live audio input');
             });
         } else {
             this.__log('No user media support');
@@ -193,31 +191,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     __log(e, data) {
         var log = this.$.log;
-        if (typeof e == "object")
-        {
-            console.log(e, '>>>>>>>> Log Object string');
-            // e = ">>>>>>>>>>>>>>>>>>>>>>>>>>"+JSON.stringify(e);
-        }else{
-            console.log(e, 'Not Log Object string');
-        }
-
-        log.innerHTML += "\n" + e + " <<<<< " + (data || '');
+        log.innerHTML += "\n" + e + " " + (data || '');
     }	
 
     startUserMedia(stream) {
         window.localStream = stream;
 
         var input = audio_context.createMediaStreamSource(stream);
-        console.log('Media stream created.');
         
         recorder = new Recorder(input,processor);
         // recorder = new Recorder(input);
-        console.log('Recorder initialised.');
         
         // this.startRecordingAftrInit();
         audio_context.resume();
         recorder && recorder.record();
-        console.log('Recording...');
     }
 
     startRecording() {

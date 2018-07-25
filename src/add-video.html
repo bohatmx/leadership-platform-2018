@@ -147,7 +147,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   <br>
                   <firebase-storage-multiupload
                     id="fs"
-                    path="/videos"
+                    path="/testvideos"
                     upload-tasks="{{uploadedFiles}}"
                     on-error="catchError"
                     force-unique>
@@ -164,7 +164,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <div style="padding: 20px">
                       <firebase-storage-upload-task
                         task="[[item]]"
-                        id="task-[[index]]"
+                        id="taskvideos"
                         bytes-transferred="{{item.bytesTransferred}}"
                         total-bytes="{{item.totalBytes}}"
                         state="{{item.state}}"
@@ -195,11 +195,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                       <template is="dom-if" if="[[!isEqual(item.state, 'success')]]">
                         <template is="dom-if" if="[[isEqual(item.state, 'running')]]">
-                          <button on-tap="cancel" value="{{index}}">Cancel</button>
-                          <button on-tap="pause" value="{{index}}">Pause</button>
+                          <paper-button on-tap="cancel" value="{{index}}">Cancel</paper-button>
+                          <paper-button on-tap="pause" value="{{index}}">Pause</paper-button>
                         </template>
                         <template is="dom-if" if="[[isEqual(item.state, 'paused')]]">
-                          <button on-tap="resume" value="{{index}}">Resume</button>
+                          <paper-button on-tap="resume" value="{{index}}">Resume</paper-button>
                         </template>
                       </template>
                       <br>
@@ -263,7 +263,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           uploadedFiles: {
             type: Array,
-          }
+          },
+          item: {
+            type: Object,
+            value: null
+          },
         };
       }
       _defaultDate(){
@@ -340,13 +344,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
       }
       cancel(e) {
-        Polymer.dom(this.root).querySelector('#task-' + e.target.value).cancel();
+        Polymer.dom(this.root).querySelector('#taskvideos').cancel();
       }
       resume(e) {
-        Polymer.dom(this.root).querySelector('#task-' + e.target.value).resume();
+        Polymer.dom(this.root).querySelector('#taskvideos').resume();
       }
       pause(e) {
-        Polymer.dom(this.root).querySelector('#task-' + e.target.value).pause();
+        Polymer.dom(this.root).querySelector('#taskvideos').pause();
       }
       download(e) {
         Polymer.dom(this.root).querySelector('#ref-' + e.target.value).getDownloadURL().then(function(d) {
@@ -384,23 +388,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var downloadURL = url;
           var videoID = sessionStorage.getItem("newvideoKey");
 
-          var active = true;
+          if(videoID != null){
+            var active = true;
+            if(checkStatus == "unpublished") active = false;
+            
+            var database = firebase.database();
+            var updates = {};
+            updates['/videos/'+videoID+'/active'] = active;
+            updates['/videos/'+videoID+'/company_status'] = "general_"+active;
+            updates['/videos/'+videoID+'/videoSize'] = size;
+            updates['/videos/'+videoID+'/url'] = downloadURL;
+            database.ref().update(updates);
 
-          if(checkStatus == "unpublished") active = false;
+            sessionStorage.removeItem("newvideoKey");
 
-          var database = firebase.database();
-          var updates = {};
-          updates['/videos/'+videoID+'/active'] = active;
-          updates['/videos/'+videoID+'/company_status'] = "general_"+active;
-          updates['/videos/'+videoID+'/videoSize'] = size;
-          updates['/videos/'+videoID+'/url'] = downloadURL;
-          database.ref().update(updates);
+            Polymer.dom(this.root).querySelector('#fs').reset();
 
-          sessionStorage.removeItem("newvideoKey");
+            this.showSnackBar("Video uploaded successfully!");
+            this.removeItems();
 
-          Polymer.dom(this.root).querySelector('#fs').clearTasks();
+            window.location.reload();
 
-          return "Upload Completed Successfully!"
+            var that = this;
+            setTimeout(myFunction, 3000);
+            function myFunction(){
+              that.removeFromParent();
+            }
+
+            this.uploadedFiles = null;
+          }
         }
       }
       
@@ -610,13 +626,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           videoupdates['/videos/' + newvideoKey] = videoObj;
           database.ref().update(videoupdates);
 
-          this.showSnackBar("Video uploaded successfully!");
-          this.removeItems();
+          if(UploadExternal == 'external'){
+            this.showSnackBar("Video uploaded successfully!");
+            this.removeItems();
 
-          var that = this;
-          setTimeout(myFunction, 3000);
-          function myFunction(){
-            that.removeFromParent();
+            var that = this;
+            setTimeout(myFunction, 3000);
+            function myFunction(){
+              that.removeFromParent();
+            }
           }
       }
       removeFromParent(){

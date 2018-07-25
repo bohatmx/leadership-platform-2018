@@ -25,7 +25,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <!-- Paper items -->
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
-<link rel="import" href="/bower_components/gold-password-input/gold-password-input.html">
+<link rel="import" href="../bower_components/gold-password-input/gold-password-input.html">
 
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 
@@ -279,6 +279,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var user = firebase.auth().currentUser;
 
           user.updatePassword(password).then(function() {
+            // Update successful.
+          }).catch(function(error) {
+            // An error happened.
+          });
+
+          user.updateProfile({
+            displayName: firstName+" "+lastName
+          }).then(function() {
             // Update successful.
           }).catch(function(error) {
             // An error happened.

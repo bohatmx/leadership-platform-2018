@@ -10,7 +10,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="manifest" href="/manifest.json">
 
-<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<!-- <link rel="import" href="../bower_components/polymer/polymer-element.html"> -->
+<!-- <link rel="import" href="../bower_components/polymer/lib/elements/dom-if.html"> -->
 
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
@@ -25,9 +26,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-database-behavior.html">
 
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
-<link rel="import" href="play-media.html">
-<link rel="import" href="app-icons.html">
-<link rel="import" href="shared-styles.html">
+<link rel="lazy-import" href="play-media.html">
+<!-- <link rel="import" href="app-icons.html">
+<link rel="import" href="shared-styles.html"> -->
 
 <dom-module id="thought-card-attachments">
   <template>
@@ -171,8 +172,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <iron-icon icon="myicons:delete"></iron-icon>
               </div>
             </template>
-            <div id="podcast[[item1.dateRegistered]]" title="[[item1.storageName]]" class="w3-rest w3-padding-small" on-tap="_openPodcast" data="[[item1.url]]" style="max-width: 280px;">
-              <iron-icon icon="myicons:small-mic" class="w3-text-green"></iron-icon>[[item1.storageName]]
+            <div id="podcast[[item1.dateRegistered]]" title="[[item.title]]" class="w3-rest w3-padding-small" on-tap="_openPodcast" data="[[item1.url]]" style="max-width: 280px;">
+              <iron-icon icon="myicons:small-mic" class="w3-text-green"></iron-icon>[[item.subtitle]] [[item1.storageName]]
             </div>
           </div>
         </template>
@@ -185,8 +186,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <iron-icon icon="myicons:delete"></iron-icon>
               </div>
             </template>
-            <div class="video-thumbnail" on-tap="_openVideo" data="[[item1.url]]" name="[[_getVideoName(item1.storageName)]]">
-              <img id="img[[item1.dateRegistered]][[item.dateRegistered]]" style="max-width:120px" src$="[[getYoutubeThumbnail(item1.url)]]" alt="LP">
+            <div class="video-thumbnail" on-tap="_openVideo" data="[[item1.url]]" name="[[item.title]]" uploadtype="[[item1.UploadExternal]]">
+              <template is="dom-if" if="[[_isEqual(item1.UploadExternal, 'videxternal')]]">
+                <img id="img[[item1.dateRegistered]][[item.dateRegistered]]" style="max-width:120px" src$="[[getYoutubeThumbnail(item1.url)]]" alt="LP" uploadtype="[[item1.UploadExternal]]" data="[[item1.url]]">
+              </template>
+              <template is="dom-if" if="[[_isEqual(item1.UploadExternal, 'vidupload')]]">
+                <video id="thumb[[item1.dateRegistered]]" style="max-width:120px; cursor: pointer;" data="[[item1.url]]" on-click="_openVideo" uploadtype="[[item1.UploadExternal]]" poster="../data/play.png">
+                  <source src="[[item1.url]]" type="video/mp4">
+                  <source src="[[item1.url]]" type="video/ogg">
+                  Your browser does not support video.
+                </video>
+              </template>
             </div>
           </div>
         </template>
@@ -206,14 +216,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </div>
     </div>
     <div class="ldp-modal">
-      
       <div class="ldp-modal-content" style="max-width:600px;resize: both;overflow: auto;">
-        <span class="w3-display-topright w3-padding w3-red w3-text-white" on-tap="_closeVideo">&times;</span>
+        <span class="w3-display-topright w3-padding w3-red w3-text-white" on-tap="_closeVideo" style="z-index: 999; cursor: pointer;">&times;</span>
         <div class="w3-white w3-card-2 w3-round">
           <div class="w3-row" style="padding:3px">
-            <iframe src="{{videourl}}" frameborder="0" height="400" width="100%"></iframe>
+            <iframe id="videoPlayer" width="100%" height="400"
+              src="" autoplay="false" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen>
+            </iframe>
+            <video src="" id="videoPlayerUpload" controls autoplay>
+              <source id="videoPlayerUpload1" src="" type="video/mp4">
+              <source id="videoPlayerUpload2" src="" type="video/ogg">
+              Your browser does not support video.
+            </video>
           </div>
-          <div class="w3-padding-large w3-large w3-text-dark-grey">{{videoname}}</div>
+          <div class="w3-padding-large w3-medium w3-text-dark-grey"><i>{{videoname}}</i></div>
         </div>
       </div>
     </div>
@@ -267,6 +283,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         };
       }
+
+      _setPoster(){
+        var platform = localStorage.getItem("platform");
+        if((platform == undefined) || (platform == "")){
+          return "../data/play.png";
+        }
+        else if((platform == "iOS") || (platform == "Android")){
+          return "../data/play.png";
+        }
+
+        return "";
+        
+      }
       
       _changeParentPhoto(e){
         var url = e.currentTarget.data;
@@ -283,6 +312,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var modalCloser = Polymer.dom(this.root).querySelectorAll('.ldp-modal-close');
 				this.videourl = "";
 				this.videoname = "";
+
+        var videoPlayer = Polymer.dom(this.root).querySelector('#videoPlayer');
+				videoPlayer.src = "";
+
+				var videoPlayerUpload = Polymer.dom(this.root).querySelector('#videoPlayerUpload');
+				var videoPlayerUpload1 = Polymer.dom(this.root).querySelector('#videoPlayerUpload1');
+				var videoPlayerUpload2 = Polymer.dom(this.root).querySelector('#videoPlayerUpload2');
+				
+				videoPlayerUpload.src = "";
+				videoPlayerUpload1.src = "";
+				videoPlayerUpload2.src = "";
+
         $(modalCloser).addClass('w3-hide');
         $(modal).css('display', 'none');
       }
@@ -299,7 +340,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			}
 
       _openMediaModal(){
-				var modal = Polymer.dom(this.root).querySelector('#play-media');
+        var modal = Polymer.dom(this.root).querySelector('#play-media');
+        this.loadPage('play-media');
 				modal.style.display = 'block';
 			}
 
@@ -307,15 +349,64 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.loadsrc = "";
 				var modal = Polymer.dom(this.root).querySelector('#play-media');
 				modal.style.display = 'none';
-			}
+      }
+      
+      loadPage(page){
+        var resolvedPageUrl = this.resolveUrl(page + '.html');
+        Polymer.importHref(
+            resolvedPageUrl,
+            null,
+            page + '.html',
+            true);
+      }
 
       _openVideo(e){
         var name = e.currentTarget.name;
+
         var url = e.currentTarget.data;
         this.videoname = name;
-        this.videourl = this.getMediaURL(url);
+
+        var uploadtype = e.currentTarget.uploadtype;
+
+        if(uploadtype == "videxternal"){
+          this.videourl = this.getMediaURL(url);
+          var videoPlayer = Polymer.dom(this.root).querySelector('#videoPlayer');
+          videoPlayer.style = "display: block;";
+
+          var videoPlayerUpload = Polymer.dom(this.root).querySelector('#videoPlayerUpload');
+          var videoPlayerUpload1 = Polymer.dom(this.root).querySelector('#videoPlayerUpload1');
+          var videoPlayerUpload2 = Polymer.dom(this.root).querySelector('#videoPlayerUpload2');
+
+          videoPlayerUpload.src = "";
+          videoPlayerUpload1.src = "";
+          videoPlayerUpload2.src = "";
+
+          videoPlayerUpload.style = "display: none;";
+
+          videoPlayer.src = this.videourl;
+        }else{
+          this.videourl = this.getMediaURL(url);
+
+          var videoPlayer = Polymer.dom(this.root).querySelector('#videoPlayer');
+          videoPlayer.style = "display: none;";
+          videoPlayer.src = "";
+
+          var videoPlayerUpload = Polymer.dom(this.root).querySelector('#videoPlayerUpload');
+          videoPlayerUpload.style = "display: block; width:100%; max-height: 400px;";
+
+          var videoPlayerUpload1 = Polymer.dom(this.root).querySelector('#videoPlayerUpload1');
+          var videoPlayerUpload2 = Polymer.dom(this.root).querySelector('#videoPlayerUpload2');
+          
+          // var src = this.getMediaURL(videoClicked);
+          videoPlayerUpload.src = this.videourl;
+          videoPlayerUpload1.src = this.videourl;
+          videoPlayerUpload2.src = this.videourl;
+        }
+
+
         var modal = Polymer.dom(this.root).querySelectorAll('.ldp-modal');
         var modalCloser = Polymer.dom(this.root).querySelectorAll('.ldp-modal-close');
+
         $(modalCloser).removeClass('w3-hide');
         $(modal).css('display', 'block');
       }
@@ -325,7 +416,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       getMediaURL(url){
-        console.log('url', url);
 				var res = "";
 				var checkHTTP;
 
@@ -337,8 +427,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					if(checkHTTP == -1) res = url;
 					else res = url.replace("http:", "https:");
 				}
-
-        console.log('res', res);
 				
 				return res;
 			}

@@ -10,7 +10,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="manifest" href="/manifest.json">
 
-<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<!-- <link rel="import" href="../bower_components/polymer/polymer-element.html"> -->
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
@@ -24,7 +24,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             display: block;
         }
     </style>
-    <div class="w3-container">
+    <!-- <firebase-query
+        id="qryusers"
+        path="/users"
+        data="{{usersData}}">
+    </firebase-query> -->
+    <div class="w3-container" style="margin-bottom: 60px;">
         <div class="w3-large w3-center" style="padding:8px;">
             <b class="w3-text-blue"><iron-icon icon="app:favorite"></iron-icon>&nbsp;Liked By</b>
         </div>
@@ -32,7 +37,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <hr>
             <template id="resultList" is="dom-repeat" items="[[likes]]" as="item">
                 <li class="w3-bar" style="padding: 8px 0;">
-                <img class="w3-bar-item w3-circle" style="width:48px; height: 48px;" src="[[item.photoURL]]">
+                <img class="w3-bar-item w3-circle" style="width:48px; height: 48px;" src="[[_profilePhoto(item.photoURL)]]">
                     <div class="w3-bar-item">
                         <span class="w3-large w3-text-blue">[[item.journalUserName]]</span><br>
                         <span>[[item.companyName]]</span>
@@ -71,6 +76,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
         refreshFilter() {
             this.$.resultList.render();
+        }
+
+        _filter (person) {
+            if(this.likesdata !== undefined){
+                let isliking = this.likesdata[person.userID];
+                return isliking;
+            }
+            return false;
         }
         _profilePhoto(photo){
             let photo_url = "../images/default-user.png";

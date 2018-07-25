@@ -51,7 +51,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
 
   
-  <view-thoughts user="[[user]]" _companyid="-LEiZPT-C2PyLu_YLKNU" thoughtype="companythoughts" placeholder="Search for I-Lead Messages"></view-thoughts>
+  <view-thoughts user="[[user]]" _companyid="[[_companyid]]" thoughtype="companythoughts" placeholder="Search for I-Lead Messages"></view-thoughts>
 
 </template>
 
@@ -60,13 +60,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       static get is() { return 'i-lead'; }
       static get properties() {
         return {
-          user: {
-              type: Object
-          },
+          user: {type: Object},
           _companyid: String,
         };
       }
-      connectedCallback() { 
+      connectedCallback() {
         super.connectedCallback();
         var resolvedPageUrl = this.resolveUrl('view-thoughts.html');
         Polymer.importHref(
