@@ -11,8 +11,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="manifest" href="/manifest.json">
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
-<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
-<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 
 <!-- Firebase -->
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
@@ -30,6 +28,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/l2t-paper-rating/l2t-paper-rating.html">
 <link rel="import" href="app-icons.html">
 <link rel="lazy-import" href="who-liked.html">
+<link rel="import" href="like-button.html">
+
+<firebase-query
+	path="[[firebaseref]]/[[entityid]]/likesData"
+	data="{{whoLiked}}">
+</firebase-query>
 
 <dom-module id="comments-box">
 	<template>
@@ -163,13 +167,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			.comments-box{
 				cursor: pointer!important;
 			}
-			paper-fab {
-				height: 18px;
-				width: 18px;
-				padding: 12px;
-				--paper-fab-background: #1298f1;
-				--paper-fab-keyboard-focus-background: #1298f1;
-			}
+			
 		</style> 
 		
 		<div class="comments-box">
@@ -178,8 +176,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				flex-direction: row;
 				align-items: center;
 				justify-content: center;">
-					<paper-fab data="{{item.likesData}}" icon="{{__computeFavIcon(item.likes)}}" on-tap="__toggleFavorite" class="w3-left" style="margin-right: 8px;"></paper-fab>
-					<span class="w3-new-badge w3-small w3-left w3-blue" style$="[[hideSpan(item.countLikes)]]" data="{{item.likesData}}" on-tap="_openWhoLiked">[[_getLikesCount(item.countLikes)]]</span>
+					<!-- <paper-fab data="{{item.likesData}}" icon="{{__computeFavIcon(item.likes)}}" on-tap="__toggleFavorite" class="w3-left" style="margin-right: 8px;"></paper-fab> -->
+					<like-button icon="{{__computeFavIcon(item.likes)}}" userid="{{user.userID}}" companyid="{{user.companyID}}" companyname="{{user.companyName}}" username="{{user.firstName}} {{user.lastName}}" photourl="{{_profilePhotoURL(user.photoURL)}}" thetype="{{thetype}}" entityid="{{entityid}}" uid="{{user.uid}}" favorite="{{toggleFavorite(item.likes)}}"></like-button>
+					<span class="w3-new-badge w3-small w3-left w3-blue" style$="{{hideSpan(item.likes)}}" data="{{item.likesData}}" on-tap="_openWhoLiked">{{_getLikesCount(item.likes)}}</span>
 				</div>
 				<div class="w3-right">
 					<paper-button class="bar-item w3-left selected" on-tap="_toggleCRHItem" crhType="comments">
@@ -212,7 +211,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					<template is="dom-if" if="[[_noComments(item.comments)]]">
 						<div class="w3-padding w3-text-grey w3-center w3-margin-bottom">No comments yet.</div>
 					</template>
-					<template is="dom-repeat" items="{{_sortComments(item.comments)}}" as="comment" sort="_sort" observe="date">
+					<template is="dom-repeat" items="{{_sortComments(item.comments)}}" as="comment">
 						<div class="w3-row crh-row">
 							<div class="w3-left">
 									<div style$="[[_profilePhoto(comment.photoURL)]]" class="commentor-photo"></div>
@@ -222,14 +221,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 									<b>[[comment.journalUserName]]</b>
 									<span class="w3-margin-left w3-text-grey">[[timeSince(comment.date)]]</span>
 								</div>
-								<div class="comment-box-text w3-row">
-									<table style="width:100%;"><tbody>
-										<tr><td class="w3-rest">[[comment.comment]]</td>
-										<td class="w3-right"><template is="dom-if" if="[[isEqual(comment.journalUserID, user.userID)]]"><paper-icon-button icon="delete" key="[[item.$key]]" on-tap="_deleteComment" data="[[comment.commentID]]"></paper-icon-button></template></td></tr>
-									</tbody></table>
-								</div>
+								<div class="comment-box-text">[[comment.comment]]</div>
 							</div>
-							
+							<!-- <template is="dom-if" if="[[isEqual(comment.journalUserID, user.userID)]]"><paper-icon-button icon="delete"></paper-icon-button></template> -->
 						</div>
 					</template>
 				</div>
@@ -259,21 +253,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					<div class="w3-row">
 						<who-liked likesdata="{{likesdata}}"></who-liked>
 					</div>
-					<div id="item-holder" class="w3-row w3-border w3-round-small w3-margin-bottom"></div>
+					<div id="item-holder" class="w3-row w3-padding w3-border w3-round-small w3-margin-bottom"></div>
 				</div>
 			</div>
 		</div>
-
-		<paper-dialog id="pldpDialog">
-			<h4 class="w3-text-red"><paper-icon-button icon="myicons:delete"></paper-icon-button>Confirmation</h4>
-			<hr>
-				<p id="thoughtTitle" class="thought-rate-title">Are you sure you want to delete this comment?</p>
-			<hr>
-			<div class="buttons w3-text-white">
-				<paper-button class="w3-green" dialog-dismiss on-tap="_closeDeleteDialog">CANCEL</paper-button>
-				<paper-button class="w3-red" on-tap="deleteComment">DELETE</paper-button>
-			</div>
-		</paper-dialog>
 	</template>
 
 	<script>
@@ -306,6 +289,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					entityid: {type: String}, // This is the ID an entity like a thought, video, podcast etc.
 					item: { //This is the entire entity comments and rating and all
 						type: Object,
+						notify: true,
 						observer: 'onCRHDataChanged'
 					},
 					thetype: { type: String }, //Can be thought, video, podcast etc.
@@ -314,10 +298,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						value: false
 					},
 					likesdata: {
+						type: Object
+					},
+					whoLiked:{
 						type: Object,
-						notify: true
+						observer:"_whoLikedChanged"
 					}
 				};
+			}
+			_whoLikedChanged(newData, oldData){
+				console.log("whoLiked data: ", newData)
 			}
 			
 			isNotCurrentUser(user){
@@ -329,15 +319,37 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			}
 
 			hideSpan(itms) {
-				if(itms == 0) return "display: none";
+				// console.log("itms: ", itms);
+				if(itms != null || itms != undefined){
+					return "display: block;"
+				}else{
+					return "display: none";
+				}
 
-				return itms == undefined ? "display: none" : "display: block;";
+				// if(itms == 0) return "display: none";
+
+				// return itms == undefined ? "display: none" : "display: block;";
 			}
 
 			_getLikesCount(itms) {
-				if(itms == 1) return "1 Like";
+				console.log("likes count here ", itms);
+				if(itms != null || itms == undefined){
+					var count = itms == undefined ? 0 : Object.keys(itms).length;				
+					if(count == 1) return "1 Like";
 
-				return itms == undefined ? "" : itms + " Likes";
+					// console.log("likes count here 2", count);
+
+					return count == 0 ? "" : count + " Likes";
+				}else{
+					// var count = itms == undefined ? 0 : Object.keys(itms).length;				
+					// if(count == 1) return "1 Like";
+
+					// console.log("no likes count here", count);
+
+					// return count == 0 ? "" : count + " Likes";
+					return ""
+				}
+				
 			}
 
 			_showAllComments(nData, oData){
@@ -358,40 +370,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					this.loadPage('who-liked');
 					modal.style.display = 'block';
 				}
-			}
-
-			_deleteComment(e){
-				var commentID = e.currentTarget.data;
-				var key = e.currentTarget.key;
-
-				sessionStorage.setItem("commentID",commentID);
-        		sessionStorage.setItem("key",key);
-				
-				this.$.pldpDialog.open();
-			}
-
-			_closeDeleteDialog(){
-				sessionStorage.removeItem("commentID");
-        		sessionStorage.removeItem("key");
-
-				this.$.pldpDialog.close();
-			}
-
-			deleteComment(){
-				var database = firebase.database();
-				var commentID = sessionStorage.getItem("commentID");
-				var key = sessionStorage.getItem("key");
-
-				var commentObjRef = database.ref(this.firebaseref+'/'+key+'/comments/'+commentID);
-				var commentRef = database.ref('comments/'+commentID);
-
-				commentObjRef.remove();
-				commentRef.remove();
-
-				sessionStorage.removeItem("commentID");
-        		sessionStorage.removeItem("key");
-
-				this.$.pldpDialog.close();
 			}
 
 			_closeItemsModal(e){
@@ -453,12 +431,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						return obj[key];
 					});
 				}
-			}
-
-			_sort(a, b) {  
-				if (a.date > b.date) return -1;
-				if (a.date < b.date) return 1;
-				return 0;
 			}
 
 			_hasComments(comms, ratns){ //Check whether comments exist
@@ -552,6 +524,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				return photo_url;
 			}
 
+			_profilePhotoURL(photo){
+				let photo_url = "";
+
+				if(photo == undefined){
+					photo_url = "";
+				}else if(photo == ""){
+					photo_url = "";
+				}else{
+					photo_url = photo;
+				}
+
+				return photo_url;
+			}
+
 			_saveLike(state){
 				let dailyThought_ID = this.entityid;
 				var journalUserID = this.user.userID;
@@ -560,6 +546,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				var database = firebase.database();
 
 				if(state == false){
+					database.ref(this.firebaseref).child(dailyThought_ID).child('likes').child(journalUserID).set(true);
+
+					let countLikes = database.ref(this.firebaseref).child(dailyThought_ID).child('countLikes');
+					let currentCount = countLikes.transaction(function(current) {
+						return (current || 0) + 1;
+					});
 
 					var journalUserName = this.user.firstName+" "+this.user.lastName;
 					var companyID = this.user.companyID;
@@ -568,15 +560,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					var timeInMs = Date.now();
 					var likesStringDate = this._formate_date(timeInMs);
 					var photoURL = "";
-					var that = this;
 
-					photoURL = this.user.photoURL;
-
-					if(photoURL == undefined || photoURL == null){
+					if(this.user.photoURL != undefined || this.user.photoURL != ""){
+						photoURL = this.user.photoURL;
+					}else{
 						photoURL = "";
 					}
-
-					var user_post = journalUserID+"_"+dailyThought_ID;
 
 					var data = {
 						companyID: companyID,
@@ -585,70 +574,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						journalUserName: journalUserName,
 						likesDate: timeInMs,
 						likesStringDate: likesStringDate,
-						photoURL: photoURL,
-						postType: this.firebaseref,
-						itemID:dailyThought_ID,
-						userPost:user_post						
+						photoURL: photoURL
 					}
 
-					var clickdata = {
-						userID: journalUserID,
-						userName: journalUserName,
-						myPhoto: photoURL,
-						myCompanyID: companyID,
-						myCompanyName: companyName,
-						dateRegistered: timeInMs,
-						postType: this.thetype,
-						journalID: dailyThought_ID,
-						clickType:"posts",
-						clickArea:"like",
-						clickItem:"button"
-					}
-
-					var updatedUserData = {};
-					updatedUserData[this.firebaseref+'/'+dailyThought_ID+'/likes/'+journalUserID] = true;
-					updatedUserData[this.firebaseref+'/'+dailyThought_ID+'/likesData/'+journalUserID] = data;
-					updatedUserData['user-liked/'+user_post] = data;
-					updatedUserData['user-clicks/'+user_post] = clickdata;
-					
-					// Do a deep-path update
-					database.ref().update(updatedUserData, function(error) {
-						if (error) {
-							console.log("Error updating data:", error);
-						}else{
-							let countLikes = database.ref(that.firebaseref).child(dailyThought_ID).child('countLikes');
-							let currentCount = countLikes.transaction(function(current) {
-								return (current || 0) + 1;
-							});
-						}
-					});
+					database.ref(this.firebaseref).child(dailyThought_ID).child('likesData').child(journalUserID).set(data);
 
 					this._showCommentBoxMessage("<span class='w3-text-red'>You liked the post!</span>", 2000);
 
 				}else{
-					let dailyThought_ID = this.entityid;
-					var journalUserID = this.user.userID;
-					var that = this;
+					database.ref(this.firebaseref).child(dailyThought_ID).child('likes').child(journalUserID).remove();
 
-					var user_post = journalUserID+"_"+dailyThought_ID;
-					var updatedUserData = {};
-					updatedUserData[this.firebaseref+'/'+dailyThought_ID+'/likes/'+journalUserID] = null;
-					updatedUserData[this.firebaseref+'/'+dailyThought_ID+'/likesData/'+journalUserID] = null;
-					updatedUserData['user-liked/'+user_post] = null;
-					
-					// Do a deep-path update
-					database.ref().update(updatedUserData, function(error) {
-						if (error) {
-							console.log("Error updating data:", error);
-						}else{
-							let countLikes = database.ref(that.firebaseref).child(dailyThought_ID).child('countLikes');
+					database.ref(this.firebaseref).child(dailyThought_ID).child('likesData').child(journalUserID).remove();
 
-							let currentCount = countLikes.transaction(function(current) {
-								return (current || 0) - 1;
-							});
-						}
+					let countLikes = database.ref(this.firebaseref).child(dailyThought_ID).child('countLikes');
+					let currentCount = countLikes.transaction(function(current) {
+						return (current || 0) - 1;
 					});
-					
 				}
 				
 			}
@@ -702,13 +643,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				// Get a reference to the database service
 				var database = firebase.database();
 
+				var newCommentKey = database.ref().child('comments').push().key;
+
 				if(comment == undefined){
 					comment = "";
 				}
-
-				// Write the new comments on thoughts data
-				this._showCommentBoxMessage('<span class="loader"></span> Saving the Comment');
-				var newTypeCommentKey = database.ref().child('/'+this.firebaseref+'/' + dailyThought_ID +'/comments').push().key;
 
 				// fix data
 				// dailyThoughts
@@ -721,31 +660,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					comment: comment,
 					dailyThoughtID: dailyThought_ID,
 					date: date,
-					commentID: newTypeCommentKey,
+					commentID: newCommentKey,
 					stringDate: stringDate,
 					stringCommentDate: stringCommentDate,
 					postType: this.firebaseref
 				}
 
-				var clickdata = {
-					userID: journalUserID,
-					userName: journalUserName,
-					myPhoto: photoURL,
-					myCompanyID: companyID,
-					myCompanyName: companyName,
-					dateRegistered: date,
-					postType: this.thetype,
-					journalID: dailyThought_ID,
-					clickType:"posts",
-					clickArea:"comment",
-					clickItem:"button",
-					commentID: newTypeCommentKey
-				}
-				
+				// Write the new comments on thoughts data
+				this._showCommentBoxMessage('<span class="loader"></span> Saving the Comment');
+				var newTypeCommentKey = database.ref().child('/'+this.firebaseref+'/' + dailyThought_ID +'/comments').push().key;
 				var commentUpdates = {};
 				commentUpdates['/'+this.firebaseref+'/'+dailyThought_ID+'/comments/'+newTypeCommentKey] = data;
 				commentUpdates['/comments/'+newTypeCommentKey] = data;
-				commentUpdates['user-clicks/'+newTypeCommentKey] = clickdata;
 				database.ref().update(commentUpdates);
 				
 				this._showCommentBoxMessage('<span class="w3-text-green">Comment Saved!</span>', 1000);
@@ -850,21 +776,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				}
 				
 			}
-			__toggleFavorite(event, detail) {
-				this.__favorite = !this.__favorite;
-				var likes = event.currentTarget.data;
-				var journalUserID = this.user.userID;
+			toggleFavorite(likes) {
+				if(likes == undefined){
+					return false;
+				}else{
+					var journalUserID = this.user.userID;
+					let youLiked = likes[journalUserID];
+					return youLiked;
+				}
 
-				var youLiked;
-
-				if(likes != undefined){
-					youLiked = likes[journalUserID];
-					if(youLiked == undefined) youLiked = false;
-				}else { youLiked = false};
-				// return;
-				
-				this._saveLike(youLiked);
 			}
+			// __toggleFavorite(event, detail) {
+			// 	this.__favorite = !this.__favorite;
+			// 	var likes = event.currentTarget.data;
+			// 	var journalUserID = this.user.userID;
+
+			// 	var youLiked;
+
+			// 	if(likes != undefined){
+			// 		youLiked = likes[journalUserID];
+			// 		if(youLiked == undefined) youLiked = false;
+			// 	}else { youLiked = false};
+				
+			// 	this._saveLike(youLiked);
+			// }
 			__computeFavIcon(favorite) {
 				if(favorite == undefined){
 					return 'app:favorite-border';

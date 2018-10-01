@@ -314,8 +314,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   </div>
                   <div page-name="page-2" id="page2" style="border: 2px solid green; padding: 0 8px;">
                     <paper-radio-group id="PodcastExternalRecord" name="PodcastExternalRecord">
-                      <paper-radio-button id="podcastexternal" name="podcastexternal" on-click="togglePodcast">External Link</paper-radio-button>
+                        <paper-radio-button id="podcastexternal" name="podcastexternal" on-click="togglePodcast">External Link</paper-radio-button>
                         <paper-radio-button id="podcastrecord" name="podcastrecord" on-click="togglePodcast">Record Voicemail</paper-radio-button>
+                        <paper-radio-button id="greenopodcast" name="greenopodcast" on-click="toggleNone">None</paper-radio-button>
                       </paper-radio-group>
                       <iron-collapse id="collapsePodcast">
                         <iron-pages selected="[[_podcastoption]]" attr-for-selected="page-name">
@@ -343,6 +344,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <paper-radio-group id="VidUploadExternal" name="VidUploadExternal">
                       <paper-radio-button id="videxternal" name="videxternal" on-click="toggleVid">External Link</paper-radio-button>
                       <paper-radio-button id="vidupload" name="vidupload" on-click="toggleVid">Upload Video</paper-radio-button>
+                      <paper-radio-button id="camNovideo" name="camNovideo" on-click="toggleNone">None</paper-radio-button>
                     </paper-radio-group>
                     <iron-collapse id="collapseVideo">
                       <iron-pages selected="[[_vidoption]]" attr-for-selected="page-name">
@@ -1272,6 +1274,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.page4.appendChild(divImg);
       }
 
+      toggleNone(e){
+        var selectedElem = e.target.id;
+        this.opened = Polymer.dom(this.root).querySelector('#collapseAddThought').opened;
+        var res = selectedElem.substring(0, 3);
+        
+        if(res == 'gre'){
+          this._selected = 'page-2';
+          Polymer.dom(this.root).querySelector('#collapsePodcast').opened = false;
+        }else if(res == 'cam'){
+          this._selected = 'page-3';
+          Polymer.dom(this.root).querySelector('#collapseVideo').opened = false;
+        }
+
+        if((this.lastSelected == this._selected) && (this.opened)){
+          Polymer.dom(this.root).querySelector('#collapseAddThought').toggle();
+        }
+
+        if((this.lastSelected == this._selected) && (!this.opened)){
+          Polymer.dom(this.root).querySelector('#collapseAddThought').toggle();
+        }
+
+        if((this.lastSelected != this._selected) && (!this.opened)){
+          Polymer.dom(this.root).querySelector('#collapseAddThought').toggle();
+        }
+        this.lastSelected = this._selected;
+
+      }
       toggle(e){
         var selectedElem = e.target.id;
 
@@ -1889,7 +1918,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.uploadVoicemail(voicemail, audioObj);
           }
 
-        }else{
+        }else if(PodcastExternalRecord == "podcastexternal"){
           // Add podcast to thought
           urlCount = 0;
           urlCount = Object.keys(this.podcastObj).length;

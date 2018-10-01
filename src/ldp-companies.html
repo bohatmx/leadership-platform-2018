@@ -274,16 +274,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var img = new Image();
         if(fType == "postsLogo"){
           img.onload = function() {
-            if(this.width==this.height){
-              var reader = new FileReader();
-              reader.onload = function(){
-                that.formCompanyPostLogo = reader.result;
-              };
-              reader.readAsDataURL(photo);
-            }
-            else{
-              alert("Please enter a logo with square dimensions.")
-            }
+            var reader = new FileReader();
+            reader.onload = function(){
+              that.formCompanyPostLogo = reader.result;
+            };
+            reader.readAsDataURL(photo);
+            // if(this.width==this.height){
+            //   var reader = new FileReader();
+            //   reader.onload = function(){
+            //     that.formCompanyPostLogo = reader.result;
+            //   };
+            //   reader.readAsDataURL(photo);
+            // }
+            // else{
+            //   alert("Please enter a logo with square dimensions.")
+            // }
           }
         }
         else{

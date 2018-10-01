@@ -114,9 +114,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
     <app-location route="{{route}}" use-hash-as-path></app-location>
     <app-route route="{{route}}"
-              pattern="/lead/:follow_id/:nextpage"
-              data="{{routeData}}"
-              tail="{{subroute}}">
+      pattern="/lead/:follow_id/:nextpage"
+      data="{{routeData}}"
+      tail="{{subroute}}">
    </app-route>
 
      <!-- list/detail pages -->
@@ -145,7 +145,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <div class="w3-text-grey">
                       <p class="w3-small">You don't have an account?</p>
                     </div>
-                    <paper-button class="w3-ripple w3-round-large" on-tap="signUpPage">Sign Up</paper-button>
+                    <paper-button class="w3-ripple w3-round-large w3-theme" on-tap="signUpPage">Sign Up</paper-button>
                   </div>
                   <div class="w3-row">
                     <a href="#" on-tap="resetPage" style="text-decoration: none;">Forgot your password?</a>
@@ -286,6 +286,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             
             if(isUser){
               // console.log("user logged in");
+              var userLoginData = {
+                uid: uid,
+                name: name,
+                email: email,
+                dateRegistered: Date.now(),
+                clickType:"lastlogin"
+              }
+
+              if(isUser.uid == "cEgC7UgFzJSuQ9lUpQtwvex0VDU2"){
+                console.log("Is OneConnect User");
+              }
+
+              database.ref('user-lastlogin').push(userLoginData);
             }else{
               // get date and time
               var timeInMs = Date.now();
@@ -316,12 +329,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               var updates = {};
               updates['/users/' + userID] = data;
 
-              database.ref().update(updates).catch(function(error) {
-                // Handle Errors here.
-                var errorCode = error.code;
-                var errorMessage = error.message;
-                console.log("E",errorMessage);
+              database.ref().update(updates, function(error) {
+                if (error) {
+                  // The write failed...
+                  console.log("Error updating new user 1");
+                } else {
+                  // Data saved successfully!
+                  window.location = "./i-lead";
+                  console.log("New user 1 updated successfully.")
+                }
               });
+
+              var userLoginData = {
+                uid: uid,
+                name: name,
+                email: email,
+                dateRegistered: Date.now(),
+                clickType:"lastlogin"
+              }
+
+              database.ref('user-lastlogin').push(userLoginData);
             }
 						
 					}).catch(function(error) {
@@ -367,6 +394,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             that.$.passwordinput.value = "";
             
             localStorage.setItem("LoggedIn", true);
+
             var profile = firebase.auth().currentUser;
             var name = profile.displayName;
             var email = profile.email;
@@ -377,10 +405,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             var database = firebase.database();
             database.ref('/users').orderByChild("uid").equalTo(uid).once('value').then((data)=>{
-              var isUser = data.val();
+            var isUser = data.val();
               
               if(isUser){
                 // console.log("user logged in 11111");
+                var userLoginData = {
+                  uid: uid,
+                  name: name,
+                  email: email,
+                  dateRegistered: Date.now(),
+                  clickType:"lastlogin"
+                }
+
+                console.log("user: ",isUser)
+
+                if(isUser.uid == "cEgC7UgFzJSuQ9lUpQtwvex0VDU2"){
+                  console.log("Is OneConnect User");
+                }
+
+                database.ref('user-lastlogin').push(userLoginData);
               }else{
                 // get date and time
                 var timeInMs = Date.now();
@@ -411,12 +454,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 var updates = {};
                 updates['/users/' + userID] = data;
 
-                database.ref().update(updates).catch(function(error) {
-                  // Handle Errors here.
-                  var errorCode = error.code;
-                  var errorMessage = error.message;
-                  console.log("E",errorMessage);
+                database.ref().update(updates, function(error) {
+                  if (error) {
+                    // The write failed...
+                    console.log("Error updating new user 2");
+                  } else {
+                    // Data saved successfully!
+                    window.location = "./i-lead";
+                    console.log("New user 2 updated successfully.")
+                  }
                 });
+
+                var userLoginData = {
+                  uid: uid,
+                  name: name,
+                  email: email,
+                  dateRegistered: Date.now(),
+                  clickType:"lastlogin"
+                }
+
+                database.ref('user-lastlogin').push(userLoginData);
               }
               
             }).catch(function(error) {
@@ -470,7 +527,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
 
         var actionCodeSettings = {
-          url: 'https://thinklead.app'
+          url: window.location.origin
         };
 
         firebase.auth().sendPasswordResetEmail(email, actionCodeSettings).then(function(){
@@ -556,14 +613,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             that.$.email.value = "";
             that.$.newpassword.value = "";
 
-            database.ref().update(updates).catch(function(error) {
-              // Handle Errors here.
-              var errorCode = error.code;
-              var errorMessage = error.message;
-              console.log("Error",errorMessage);
+            database.ref().update(updates, function(error) {
+              if (error) {
+                // The write failed...
+                console.log("Error updating new user 3");
+              } else {
+                // Data saved successfully!
+                window.location = "./i-lead";
+                console.log("New user 3 updated successfully.")
+              }
             });
 
-            that.showSnackBar("New account created successfully.");
+            database.ref('user-signup').push(data);
+
               //you can save the user data here.
           }).catch(function(error) {
             // Handle Errors here.

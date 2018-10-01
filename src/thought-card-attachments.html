@@ -136,7 +136,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <paper-icon-button class="w3-text-green" icon="myicons:small-mic" on-click="_toggle" data-tca="tca-podcasts"></paper-icon-button>
           <paper-icon-button class="w3-text-grey" icon="myicons:small-videocam" on-click="_toggle" data-tca="tca-videos"></paper-icon-button>
           <paper-icon-button class="w3-text-red" icon="myicons:small-image" on-click="_toggle" data-tca="tca-photos"></paper-icon-button>
-          <paper-icon-button class="w3-text-brown" icon="myicons:small-share" data="[[item.dailyThoughtID]]" id="share[[item.dateRegistered]]"></paper-icon-button>
+          <!-- <paper-icon-button class="w3-text-brown" icon="myicons:small-share" data="[[item.dailyThoughtID]]" id="share[[item.dateRegistered]]"></paper-icon-button> -->
           <paper-button id="pldp[[item.dateRegistered]]" class="w3-text-red thought-actions pldp-text w3-small" data="[[item.dailyThoughtID]]" on-tap="_openPLDP" hidden$="[[ispldp]]">My PLDP</paper-button>
         </div>
         <div class="horizontal justified">
@@ -157,7 +157,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </div>
             </template>
             <div class="w3-rest w3-padding-small" style="max-width: 280px;">
-              <a class="more-links" target="_blank" href="[[item1.url]]">
+              <a id="article[[item1.dateRegistered]]" class="more-links" target="_blank" href="[[item1.url]]" on-tap="_openArticle" data="[[item1.title]]">
                 <iron-icon icon="myicons:small-link" class="w3-text-blue"></iron-icon>[[item1.title]]
               </a>
             </div>
@@ -186,7 +186,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <iron-icon icon="myicons:delete"></iron-icon>
               </div>
             </template>
-            <div class="video-thumbnail" on-tap="_openVideo" data="[[item1.url]]" name="[[item.title]]" uploadtype="[[item1.UploadExternal]]">
+            <div id="divthumb[[item1.dateRegistered]]" class="video-thumbnail" on-tap="_openVideo" data="[[item1.url]]" name="[[item.title]]" uploadtype="[[item1.UploadExternal]]">
               <template is="dom-if" if="[[_isEqual(item1.UploadExternal, 'videxternal')]]">
                 <img id="img[[item1.dateRegistered]][[item.dateRegistered]]" style="max-width:120px" src$="[[getYoutubeThumbnail(item1.url)]]" alt="LP" uploadtype="[[item1.UploadExternal]]" data="[[item1.url]]">
               </template>
@@ -284,6 +284,83 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         };
       }
 
+      _captureClicks(res, obj){
+        var database = firebase.database();
+        var userID = this.user.userID;
+        var userName = this.user.firstName + " " + this.user.lastName;
+        var myPhoto;
+        var myCompanyID = this.user.companyID;
+        var myCompanyName = this.user.companyName;
+        var dateRegistered = Date.now();
+        var postType = "thoughts";
+
+        if(this.user.photoURL != undefined || this.user.photoURL != ""){
+					myPhoto = this.user.photoURL;
+				}else{
+					myPhoto = "";
+				}
+
+				if(myPhoto == undefined){
+					myPhoto = "";
+        }
+        
+        if(this.thetype == "dailyThoughts"){
+          postType = "thoughts";
+        }else if(this.thetype == "news"){
+          postType = "articles"
+        }
+
+        var journalID = this.itemid;
+        var journalUserID = this.item.journalUserID;
+        var journalUserName = this.item.journalUserName;
+        var journalCompanyID = this.item.companyID;
+        var journalCompanyName = this.item.companyName;
+        var journalDateRegistered = this.item.dateRegistered;
+        var journalPhotoURL;
+        
+        if(this.item.photoURL != undefined || this.item.photoURL != ""){
+					journalPhotoURL = this.item.photoURL;
+				}else{
+					journalPhotoURL = "";
+				}
+
+				if(journalPhotoURL == undefined){
+					journalPhotoURL = "";
+        }
+
+        var data = {
+          userID: userID,
+          userName: userName,
+          myPhoto: myPhoto,
+          myCompanyID: myCompanyID,
+          myCompanyName: myCompanyName,
+          dateRegistered: dateRegistered,
+          postType: postType,
+          journalID: journalID,
+          journalUserID: journalUserID,
+          journalUserName: journalUserName,
+          journalCompanyID: journalCompanyID,
+          journalCompanyName: journalCompanyName,
+          journalDateRegistered: journalDateRegistered,
+          journalPhotoURL: journalPhotoURL,
+          clickType:"posts",
+          clickArea:res,
+          clickItem:obj
+        }
+
+        database.ref('user-clicks').push(data);
+      }
+
+      _openArticle(e){
+        var obj = {
+          itemID: e.currentTarget.id,
+          title: e.currentTarget.data,
+          ref: e.currentTarget.href
+        }
+
+        this._captureClicks("openedLink", obj);
+      }
+
       _setPoster(){
         var platform = localStorage.getItem("platform");
         if((platform == undefined) || (platform == "")){
@@ -330,13 +407,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _openPodcast(e){
 				var podcastClicked = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).data;
-				var podcastTitle = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).title;
+        var podcastTitle = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).title;
+        var itemID = e.currentTarget.id;
 
 				var src = this.getMediaURL(podcastClicked);
 				this.media_title = podcastTitle;
 
 				this.loadsrc = src;
-				this._openMediaModal();
+        this._openMediaModal();
+
+        var obj = {
+          itemID: itemID,
+          title: podcastTitle,
+          ref: src
+        }
+
+        this._captureClicks("listenedTo", obj);
 			}
 
       _openMediaModal(){
@@ -362,9 +448,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _openVideo(e){
         var name = e.currentTarget.name;
-
         var url = e.currentTarget.data;
         this.videoname = name;
+        var itemID = e.currentTarget.id;
 
         var uploadtype = e.currentTarget.uploadtype;
 
@@ -384,6 +470,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           videoPlayerUpload.style = "display: none;";
 
           videoPlayer.src = this.videourl;
+
+          var obj = {
+            itemID: itemID,
+            title: this.videoname,
+            ref: this.videourl
+          }
+
+          this._captureClicks("viewed", obj);
         }else{
           this.videourl = this.getMediaURL(url);
 
@@ -401,8 +495,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           videoPlayerUpload.src = this.videourl;
           videoPlayerUpload1.src = this.videourl;
           videoPlayerUpload2.src = this.videourl;
-        }
 
+          var obj = {
+            itemID: itemID,
+            title: this.videoname,
+            ref: this.videourl
+          }
+
+          this._captureClicks("viewed", obj);
+        }
 
         var modal = Polymer.dom(this.root).querySelectorAll('.ldp-modal');
         var modalCloser = Polymer.dom(this.root).querySelectorAll('.ldp-modal-close');
@@ -461,16 +562,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _toggle(e){
         var actionClicked = $(e.currentTarget);
         var tca = actionClicked.data('tca');
+
+        console.log("tca: ", tca);
+
         actionClicked.toggleClass('inSelection').siblings().removeClass('inSelection');
         var tcaParent = actionClicked.parents('.w3-row').siblings('.w3-container');
 
         tcaParent.find('.tca').removeClass('visible');
+
         if(actionClicked.hasClass('inSelection')){
           tcaParent.find('.'+tca).addClass('visible');
         }
         else{
           tcaParent.find('.'+tca).removeClass('visible');
         }
+
+        this._captureClicks(tca, "icon");
       }
 
 			_getVideoName(storageName){
@@ -506,7 +613,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			_openPLDP(e){
 				var thoughtID = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
 				sessionStorage.setItem("PLDP_MasterClassAdd", thoughtID);
-				this.$.pldpDialog.open();
+        this.$.pldpDialog.open();
+        this._captureClicks("Open PLDP", "button");
 			}
 
 			closePLDPDialog(){
@@ -564,6 +672,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         delete this.item['$key']; //remove the $key property
 				ref.child(pldpKey).set(this.item);
         this.closePLDPDialog();
+        this._captureClicks("Save to PLDP", "dialog");
 			}
     }
 

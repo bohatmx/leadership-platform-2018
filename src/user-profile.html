@@ -16,6 +16,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-search/paper-search-bar.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
+<link rel="import" href="../bower_components/paper-radio-button/paper-radio-button.html">
 
 <!-- iron elements -->
 <link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
@@ -26,6 +29,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <!-- Paper items -->
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/gold-password-input/gold-password-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 
@@ -83,7 +87,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         align-items: center;
         align-content: center;
         flex-grow: 2;
-        margin-right: 30px;
+        /* margin-right: 30px; */
       }
       .user-avatar-current {
         background-image: url('../images/profile/default-user.png');
@@ -92,8 +96,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         display: block;
         height: 120px;
         width: 120px;
-        margin-top: 20px;
-        margin-bottom: 20px;
+        /* margin-top: 20px;
+        margin-bottom: 20px; */
+        margin: auto auto;
         border-radius: 6px;
         border: 1px;
       }
@@ -110,38 +115,79 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           display: inline-block;
         }
     }
+    .modal-list{
+      max-height: 66vh; 
+      overflow-y: auto;
+    }
+    /* width */
+			::-webkit-scrollbar {
+				width: 6px;
+			}
+			::-webkit-scrollbar-track {
+				-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+				border-radius: 10px;
+			}
+			::-webkit-scrollbar-thumb {
+				border-radius: 10px;
+				-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+			}
 
     </style>
-  <div class="add-thought">
-    <form class="new-thought card">
-      <h1>User Profile</h1>
-      <hr>
-      <section class="user">
-          <section class="user-avatar">
+  <div class="add-thought w3-padding-small">
+    <form class="new-thought">
+      <div class="w3-row">
+          <b class="w3-text-blue"><h3>User Profile</h3></b>
+        <hr>
+      </div>
+      <div class="w3-row modal-list">
+        <div class="w3-half">
+          <section class="user-avatar w3-center w3-padding w3-margin-bottom">
             <div class="user-avatar-current" id="userAvatar" style$="[[_photo(photo)]]"></div>
+          </section>
+          <div class="w3-row w3-center">
             <label class="paper-font-button w3-teal" style="cursor: pointer; color:#fff; border-radius: 6px; padding: 6px;" for="local_photo_input">
                 Account Avatar
-            </label>
-            <input id="local_photo_input" type="file" accept="image/*" on-change="handlePhoto"/>
-          </section>
-          <section class="user-details">
-              <paper-input id="firstName" name="firstName" always-float-label label="First Name" type="text" auto-validate value="[[user.firstName]]" required></paper-input>
-              <paper-input id="lastName" name="lastName" always-float-label label="Last Name" type="text" auto-validate value="[[user.lastName]]" required></paper-input>
-              <paper-input id="emailAddress" name="emailAddress" always-float-label label="Email Address (readonly)" type="email" auto-validate value="[[user.email]]" readonly>
+              </label>
+              <input id="local_photo_input" type="file" accept="image/*" on-change="handlePhoto"/>
+          </div>
+          <div class="w3-row w3-padding w3-margin-top">
+            <div class="w3-row"><label id="labelPostsEmail" class="w3-small w3-text-grey">Receive email notificatios for new posts?</label></div>
+            <paper-radio-group selected$="[[selectedPost(user.receiveEmails)]]" id="postSubscription" name="postSubscription">
+              <paper-radio-button id="postsSubscribe" name="postsSubscribe">Subscribe</paper-radio-button>
+              <paper-radio-button id="postsUnsubscribe" name="postsUnsubscribe">Unsubscribe</paper-radio-button>
+            </paper-radio-group>
+            <div class="w3-row w3-margin-top"><label id="labelPLDPEmail" class="w3-small w3-text-grey">Receive email notificatios for PLDP tasks?</label></div>
+            <paper-radio-group selected$="[[selectedPLDP(user.receivePLDPEmails)]]" id="pldpSubscription" name="pldpSubscription">
+              <paper-radio-button id="pldpSubscribe" name="pldpSubscribe">Subscribe</paper-radio-button>
+              <paper-radio-button id="pldpUnsubscribe" name="pldpUnsubscribe">Unsubscribe</paper-radio-button>
+            </paper-radio-group>
+            
+          </div>
+        </div>
+        <div class="w3-half">
+          <div class="w3-row w3-padding w3-margin-top">
+            <paper-input id="firstName" name="firstName" always-float-label label="First Name" type="text" auto-validate value="[[user.firstName]]" required></paper-input>
+            <paper-input id="lastName" name="lastName" always-float-label label="Last Name" type="text" auto-validate value="[[user.lastName]]" required></paper-input>
+            <paper-input id="emailAddress" name="emailAddress" always-float-label label="Email Address (readonly)" type="email" auto-validate value="[[user.email]]" readonly>
+            </paper-input>
+            <paper-textarea autocapitalize="sentences" char-counter rows="3" multiple always-float-label label="Biography" type="text" id="biography" name="biography" value="[[user.biography]]">
+            </paper-textarea>
+            <paper-input id="userurl" name="userurl" always-float-label label="Personalized Invite Link" value="[[user.userURL]]" type="text" readonly>
               </paper-input>
-              <paper-input id="userurl" name="userurl" always-float-label label="Personalized Invite Link" value="[[user.userURL]]" type="text" readonly>
-              </paper-input>
-              <h3>Password</h3>
-              <gold-password-input id="currentPassword" name="currentPassword" always-float-label label="Current Password (readonly)" reveal suffix required value="[[user.password]]" strength-meter readonly>
-              </gold-password-input>
-              <gold-password-input id="passwordinput" name="passwordinput" always-float-label label="New Password" reveal suffix required strength-meter minlength="6" error-message="The password must contain at least 6 characters"></gold-password-input>
-              <gold-password-input id="confirmPassword" name="confirmPassword" always-float-label label="Confirm Password" reveal suffix required strength-meter minlength="6" error-message="The password must contain at least 6 characters"></gold-password-input>
-              <div class="buttons">
-                  <!-- <paper-button raised class="w3-deep-orange" on-tap="_closeParentModal">CANCEL</paper-button> -->
-                  <paper-button raised on-tap="updateProfile" class="indigo">UPDATE</paper-button>
-                </div>
-          </section>
-      </section>      
+            <h3>Password</h3>
+            <gold-password-input id="passwordinput" name="passwordinput" always-float-label label="New Password" reveal suffix required strength-meter minlength="6" error-message="The password must contain at least 6 characters"></gold-password-input>
+            <gold-password-input id="confirmPassword" name="confirmPassword" always-float-label label="Confirm Password" reveal suffix required strength-meter minlength="6" error-message="The password must contain at least 6 characters"></gold-password-input>
+          </div>
+          
+        </div>
+      </div>
+      <div class="w3-row w3-border-top">
+        <div class="buttons">
+          <!-- <paper-button raised class="w3-deep-orange" on-tap="_closeParentModal">CANCEL</paper-button> -->
+          <paper-button raised on-tap="updateProfile" class="w3-blue w3-text-white"><iron-icon icon="app:send"></iron-icon>&nbsp;UPDATE</paper-button>
+        </div>
+      </div>
+      
     </form>
   </div>
 
@@ -204,18 +250,58 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var parentNode = Polymer.dom(this).parentNode;
         // ios 11 bug caret position
 				// if ( iOS && iOS11 ) {
-					parentNode.removeIOSBugfix();
+					// parentNode.removeIOSBugfix();
 				// }
         $(parentNode).parents('.ldp-modal').css('display', 'none');
+      }
+
+      selectedPost(r){
+        if(r != undefined){
+          if(r == true){
+            this.$.postSubscription.selected = "postsSubscribe";
+          }else{
+            this.$.postSubscription.selected = "postsUnsubscribe";
+          }
+        }else{
+          this.$.postSubscription.selected = "postsSubscribe";
+        }
+      }
+
+      selectedPLDP(r){
+        if(r != undefined){
+          if(r == true){
+            this.$.pldpSubscription.selected = "pldpSubscribe";
+          }else{
+            this.$.pldpSubscription.selected = "pldpUnsubscribe";
+          }
+        }else{
+          this.$.pldpSubscription.selected = "pldpSubscribe";
+        }
       }
 
       updateProfile(){
         let firstName = this.$.firstName.value;
         let lastName = this.$.lastName.value;
+        let biography = this.$.biography.value;
         // var email = this.$.emailAddress.value;
         let password = this.$.passwordinput.value;
         let confirmPassword = this.$.confirmPassword.value;
         var that = this;
+
+        var postSubscription = this.$.postSubscription.selected;
+        var pldpSubscription = this.$.pldpSubscription.selected;
+
+        if(postSubscription == "postsSubscribe"){
+          var receiveEmails = true;
+        }else{
+          var receiveEmails = false;
+        }
+
+        if(pldpSubscription == "pldpSubscribe"){
+          var receivePLDPEmails = true;
+        }else{
+          var receivePLDPEmails = false;
+        }        
 
         let firstNameVal = this.$.firstName.validate();
         let lastNameVal = this.$.lastName.validate();
@@ -272,10 +358,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         let updates = {};
         updates['/users/' + userID+'/firstName'] = firstName;
         updates['/users/' + userID+'/lastName'] = lastName;
-
+        updates['/users/' + userID+'/receiveEmails'] = receiveEmails;
+        updates['/users/' + userID+'/receivePLDPEmails'] = receivePLDPEmails;
+        updates['/users/' + userID+'/biography'] = biography;
+        updates['/user/' + this.user.uid+'/receiveEmails'] = receiveEmails;
+        updates['/user/' + this.user.uid+'/receivePLDPEmails'] = receivePLDPEmails;
+        updates['/user/' + this.user.uid+'/biography'] = biography;
         if(password && passVal){
-          updates['/users/' + userID+'/password'] = password;
-
           var user = firebase.auth().currentUser;
 
           user.updatePassword(password).then(function() {
@@ -294,12 +383,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
 
         database.ref().update(updates).then(function (){
-          that.showSnackBar("User updated Successfully!");
+          // that.showSnackBar("User updated Successfully!");
         }).catch(function(error) {
+          that.showSnackBar("There was an error updating user detais, please try again!")
           console.log(error);
           // An error happened.
           return;
         });
+
+        var subscriber = {
+          userID:this.user.userID,
+          companyID:this.user.companyID,
+          email:this.user.email,
+          dateRegistered:Date.now()
+        }
+        var subscribe = {};
+
+        // subscribe user
+        if(receiveEmails == true){
+          subscribe["unsubscribed/"+this.user.userID]=null;
+          subscribe["subscribed/"+this.user.userID]=subscriber;
+
+          var usersubscribed = database.ref().update(subscribe).then(() =>{
+              return console.log("Subscribed: ",receiveEmails);
+          }); 
+        }else{
+          subscribe["unsubscribed/"+this.user.userID]=subscriber;
+          subscribe["subscribed/"+this.user.userID]=null;
+
+          var usersubscribed = database.ref().update(subscribe).then(() =>{
+              return console.log("Subscribed: ",receiveEmails);
+          }); 
+        }
 
         // check if the media has been uploaded
         if(photo != undefined){
@@ -358,6 +473,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           );
         }
 
+        var that = this;
+
+        setTimeout(myFunction, 2000);
+        function myFunction(){
+          that.removeFromParent();
+        }
+
         this.showSnackBar("User updated Successfully!");
 
         this.$.passwordinput.value = "";
@@ -368,6 +490,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
         
       }
+
+      removeFromParent(){
+        var a = Polymer.dom(this).parentNode;
+        $(a).siblings('#spancloseUserProfile').trigger('click');
+      }
+
       showSnackBar(msg){
         var x = this.$.snackbar;
 

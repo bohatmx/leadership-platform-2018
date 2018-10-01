@@ -22,7 +22,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
     </style>
 
-    <paper-button on-tap="followUser" data="{{_journaluser}}" class$="followBTN {{isFollowingStyle(_journaluser)}}">{{isFollowing(_journaluser)}}</paper-button>
+    <paper-button on-tap="followUser" data="{{_journaluser}}" class$="followBTN {{isFollowingStyle(_journaluser)}}">{{isFollowing(_journaluserid)}}</paper-button>
+
+    <paper-button on- on-tap="followUser" data="[[item.dailyThoughtID]]" class$="followBTN [[isFollowingStyle(item.journalUserID)]]">[[isFollowing(item.journalUserID)]]</paper-button>
     </template>
     <script>
 
@@ -31,50 +33,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         ready(){
             super.ready();
         }
-      static get properties() {
-        return {
-            user: {
-                type: Object,
-                notify: true
-            },
-            _journaluser:{
-                type: String
-            }
-        };
-      }
-        // updateFollowBTN(){
-        //     console.log('user changed');
-        //     var that = this;
-        //     var parent = this.parentNode;
-        //     var elem = document.querySelector('#thoughts-Holder');
-        //     console.log('>>>>', elem);
-        //     console.log(parent);
-        //     var thoughtCard = Polymer.dom(parent.root).querySelector("#thoughts-Holder");
-        //     console.log(thoughtCard);
-        //     $(thoughtCard).find('.modal-div').each(function(i, e){
-        //         var followBTN = $(e).find('.followBTN')[0];
-        //         var thoughtUserID = $(followBTN).prop('data');
-
-        //         if(thoughtUserID === _journaluser){
-        //             if(following == "Follow"){
-        //                 $(followBTN).addClass('following');
-        //                 followBTN.innerHTML = "Following";
-        //             }else{
-        //                 that.isFollowingStyle(journalUserID);
-        //                 $(followBTN).removeClass('following');
-        //                 followBTN.innerHTML = "Follow";
-        //             }
-        //         }
-        //     });
-        // }
-
+        static get properties() {
+            return {
+                user: {
+                    type: Object,
+                    notify: true
+                },
+                _journaluserid:{
+                    type: String
+                }
+            };
+        }
+        
         isFollowing(journalUserID){
-            if(this.user.following){
-            let following =  this.user.following;
-            let isfollowing = following[journalUserID];
+            if(this.user.following != undefined){
+                if(this.user.following){
+                let following =  this.user.following;
+                let isfollowing = following[journalUserID];
 
-            return isfollowing ? 'Following' : 'Follow';
+                return isfollowing ? 'Following' : 'Follow';
+                }else return "Follow";
             }else return "Follow";
+            
         }
 
         isFollowingStyle(journalUserID){
@@ -95,44 +75,94 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
             
         }
-
         followUser(e){
             let database = firebase.database();
+            let itemID = e.target.data;
 
-            let journalUserID = e.target.data;
+            let filteredArray = this.findObjectByKey(this.thoughtsData, "dailyThoughtID", itemID);
+
             let following = e.target.innerHTML;
             let userID = this.user.userID;
+            var that = this;
+            var myPhoto = "";
+
+            let journalUserID = filteredArray.journalUserID;
+            let journalUserName = filteredArray.journalUserName;
+            var followDate = Date.now();
+            // let journalUserName = e.target.parentNode.firstChild.nextSibling.innerText;
+
+            if(this.user.photoURL != undefined || this.user.photoURL != ""){
+                myPhoto = this.user.photoURL;
+            }else{
+                myPhoto = "";
+            }
+
+            if(myPhoto == undefined){
+                myPhoto = "";
+            }
 
             if(following == "Follow"){
-                var followingdata = {}
-                followingdata[journalUserID]=true;
-
-                var followerdata = {}
-                followerdata[userID]=true;
-
-                // set following data
-                var followingupdates = {};
-                database.ref('/users/' + userID + '/following').child(journalUserID).set(true);
-
-                // set follower data
-                var followerupdates = {};
-                database.ref('/users/' + journalUserID + '/follower').child(userID).set(true);
-
                 $(e.target).addClass('following');
 
                 e.target.innerHTML = "Following";
-            }else{
-                database.ref('users/'+ userID + '/following/'+journalUserID).remove();
-                database.ref('users/'+ journalUserID + '/follower/'+userID).remove();
+                that.updateFollowBTN(journalUserID, following);
 
-                this.isFollowingStyle(journalUserID);
+                var photoURL = "";
+                if(filteredArray.photoURL != undefined || filteredArray.photoURL != ""){
+                    photoURL = filteredArray.photoURL;
+                }else{
+                    photoURL = "";
+                }
+
+                if(photoURL == undefined){
+                    photoURL = "";
+                }
+
+                var theirdata = {
+                    "firstName":filteredArray.journalUserName,
+                    "lastName":"",
+                    "companyName":filteredArray.companyName,
+                    "dateRegistered":followDate,
+                    "photoURL":photoURL,
+                    "userID":journalUserID
+                }
+
+                var mydata = {
+                    "firstName":that.user.firstName,
+                    "lastName":that.user.lastName,
+                    "companyName":that.user.companyName,
+                    "dateRegistered": followDate,
+                    "photoURL":myPhoto,
+                    "userID": userID
+                }
+
+                var updates = {}
+                updates["users/"+userID+"/following/"+journalUserID]=theirdata;
+                updates["users/"+journalUserID+"/follower/"+userID]=mydata;
+                updates["followers/"+journalUserID+"/"+userID]=mydata;
+
+                return database.ref().update(updates).then(() =>{
+                    return console.log("Following");
+                });
+
+            }else{
+                that.isFollowingStyle(journalUserID);
 
                 $(e.target).removeClass('following');
-
                 e.target.innerHTML = "Follow";
+                that.updateFollowBTN(journalUserID, following);
+
+                var updates = {}
+                updates["users/"+userID+"/following/"+journalUserID]=null;
+                updates["users/"+journalUserID+"/follower/"+userID]=null;
+                updates["followers/"+journalUserID+"/"+userID]=null;
+
+                return database.ref().update(updates).then(() =>{
+                    return console.log("Unfollowed");
+                });
+                
             }
 
-            // this.updateFollowBTN();
         }
 
     }

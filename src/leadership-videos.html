@@ -39,34 +39,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="leadership-videos">
 	<template>
 			<template is="dom-if" if="[[_companyid]]">
-					<template is="dom-if" if="[[hasNoFilter]]">
-						<firebase-query
-							id="videos"
-							path="/videos"
-							order-by-child="company_status"
-							equal-to="general_true"
-							limit-to-last="6"
-							data="{{videosData}}">
-						</firebase-query>
+				<firebase-query
+					id="videos"
+					path="/videos"
+					order-by-child="company_status"
+					equal-to="general_true"
+					limit-to-last="{{minData}}"
+					data="{{videosData}}">
+				</firebase-query>
 
-						<firebase-query
-							path="/videos"
-							order-by-child="company_status"
-							equal-to="general_true"
-							limit-to-last="{{minData}}"
-							data="{{videosData1}}">
-						</firebase-query>
+				<!-- <firebase-query
+					path="/videos"
+					order-by-child="company_status"
+					equal-to="general_true"
+					limit-to-last="{{minData}}"
+					data="{{videosData1}}">
+				</firebase-query> -->
 
-					</template>
-					<template is="dom-if" if="[[!hasNoFilter]]">
-						<firebase-query
-							id="filtervideos"
-							path="/videos"
-							equal-to="[[filterID]]"
-							data="{{videosData}}">
-						</firebase-query>
-					</template>
-				</template>
+			</template>
 				<style include="w3-styles"></style>
 				<style include="shared-styles">
 					:host{
@@ -139,9 +129,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					}
 				
 				</style>
-		<div class="container search-bar">
+		<!-- <div class="container search-bar">
 			<paper-search-bar hide-filter-button="true" placeholder="Search for Videos"></paper-search-bar>
-		</div>
+		</div> -->
 		<div class="container">
 			<paper-dialog id="pldpDialog">
 				<h2><paper-icon-button icon="myicons:event-note" class="blue"></paper-icon-button>My PLDP</h2>
@@ -175,7 +165,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				</div>
 			</div>
 		</div>
-			<div class="video-cards-wrapper w3-margin-top">
+			<div class="video-cards-wrapper w3-margin-top" id="thoughts-Holder">
 				
 				<div class="container list-side fadeInUp w3-row">
 					<template id="videosList" is="dom-repeat" items="[[videosData]]" as="item" sort="_sort" observe="dateScheduled">
@@ -186,7 +176,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 									<div class="container card-header w3-row">
 										<div class="card-avatar w3-left" style$="[[_profilePhoto(item.photoURL)]] cursor: pointer;" data$="[[_setProfileInfo(item.userName, item.userID, item.companyName, item.companyID, item.photoURL)]]" on-tap="_previewProfile"></div>
 										<div class="container card-company-container">
-											<div class="row card-postedby w3-medium">[[item.userName]]</div>
+											<div class="row card-postedby w3-medium">
+												<div>[[item.userName]]</div>
+												<paper-button on-tap="followUser" data="[[item.videoID]]" 
+											class$="followBTN [[isFollowingStyle(item.userID)]]">[[isFollowing(item.userID)]]</paper-button>
+											</div>
 											<div class="row card-company">[[item.companyName]]</div>
 										</div>
 										<div class="thought-date">
@@ -274,22 +268,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			static get is() { return 'leadership-videos'; }
 			ready(){
 				super.ready();
-				this.filterID = window.location.hash.split('#')[1];
-				$(window).on('hashchange', ()=>{
-					this.filterID = window.location.hash.split('#')[1];
-				});
 
 				var that = this;
-
-				// window.onscroll = function() {
-				// 	var pageHeight=document.documentElement.offsetHeight,
-				// 	windowHeight=window.innerHeight,
-				// 	scrollPosition=window.scrollY || window.pageYOffset || document.body.scrollTop + (document.documentElement && document.documentElement.scrollTop || 0);
-
-				// 	if (pageHeight <= windowHeight+scrollPosition) {
-				// 		that.minData += 3;
-				// 	}
-				// };
 			}
 			static get properties() {
 				return {
@@ -300,17 +280,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						type: Number,
 						value: 6
 					},
+					scrollPos:{
+						type: Number,
+						value: 0
+					},
 					_userid: {
 						type: String,
 						notify: true
-					},
-					hasNoFilter: {
-						type:Boolean,
-						value: true
-					},
-					filterID:{
-						type:String,
-						observer: 'setHasNoFilter',
 					},
 					cbitem: {type: Object},
 					cbitemID: Number,
@@ -342,12 +318,149 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					}
 				};
 			}
+			isFollowing(journalUserID){
+				if(this.user.following != undefined){
+					if(this.user.following){
+					let following =  this.user.following;
+					let isfollowing = following[journalUserID];
 
-			setHasNoFilter(){
-				this.hasNoFilter = this.filterID.length > 0 ? false : true;
+					return isfollowing ? 'Following' : 'Follow';
+					}else return "Follow";
+				}else return "Follow";
+				
+			}
+
+			isFollowingStyle(journalUserID){
+				let userID = this.user.userID;
+
+				if(userID === journalUserID){
+					return "w3-hide";
+				}
+				else{
+					if(this.user.following){
+						let following =  this.user.following;
+						let isfollowing = following[journalUserID];
+
+						return isfollowing ? 'following' : '';
+					}
+					else {return "";}
+
+				}
+				
+			}
+			followUser(e){
+				let database = firebase.database();
+				let itemID = e.target.data;
+
+				let filteredArray = this.findObjectByKey(this.videosData, "videoID", itemID);
+
+				let following = e.target.innerHTML;
+				let userID = this.user.userID;
+				var that = this;
+				var myPhoto = "";
+
+				let journalUserID = filteredArray.userID;
+				let journalUserName = filteredArray.userName;
+				var followDate = Date.now();
+
+				if(this.user.photoURL != undefined || this.user.photoURL != ""){
+					myPhoto = this.user.photoURL;
+				}else{
+					myPhoto = "";
+				}
+
+				if(myPhoto == undefined){
+					myPhoto = "";
+				}
+
+				if(following == "Follow"){
+					$(e.target).addClass('following');
+
+					e.target.innerHTML = "Following";
+					that.updateFollowBTN(journalUserID, following);
+
+					var photoURL = "";
+					if(filteredArray.photoURL != undefined || filteredArray.photoURL != ""){
+						photoURL = filteredArray.photoURL;
+					}else{
+						photoURL = "";
+					}
+
+					if(photoURL == undefined){
+						photoURL = "";
+					}
+
+					var theirdata = {
+						"firstName":filteredArray.userName,
+						"lastName":"",
+						"companyName":filteredArray.companyName,
+						"dateRegistered":followDate,
+						"photoURL":photoURL,
+						"userID":journalUserID
+					}
+
+					var mydata = {
+						"firstName":that.user.firstName,
+						"lastName":that.user.lastName,
+						"companyName":that.user.companyName,
+						"dateRegistered": followDate,
+						"photoURL":myPhoto,
+						"userID": userID
+					}
+
+					var updates = {}
+					updates["users/"+userID+"/following/"+journalUserID]=theirdata;
+					updates["users/"+journalUserID+"/follower/"+userID]=mydata;
+					updates["followers/"+journalUserID+"/"+userID]=mydata;
+
+					return database.ref().update(updates).then(() =>{
+						return console.log("Following");
+					});
+
+				}else{
+					that.isFollowingStyle(journalUserID);
+
+					$(e.target).removeClass('following');
+					e.target.innerHTML = "Follow";
+					that.updateFollowBTN(journalUserID, following);
+
+					var updates = {}
+					updates["users/"+userID+"/following/"+journalUserID]=null;
+					updates["users/"+journalUserID+"/follower/"+userID]=null;
+					updates["followers/"+journalUserID+"/"+userID]=null;
+
+					return database.ref().update(updates).then(() =>{
+						return console.log("Unfollowed");
+					});
+					
+				}
+
+			}
+			updateFollowBTN(journalUserID, following){
+				var that = this;
+				var thoughtCard = Polymer.dom(that.root).querySelector("#thoughts-Holder");
+
+				$(thoughtCard).find('.vid-item').each(function(i, e){
+					var followBTN = $(e).find('.followBTN')[0];
+					var itemID = $(followBTN).prop('data');
+					let filteredArray = that.findObjectByKey(that.videosData, "videoID", itemID);
+					let thoughtUserID = filteredArray.userID;
+
+					if(thoughtUserID === journalUserID){
+						if(following == "Follow"){
+							$(followBTN).addClass('following');
+							followBTN.innerHTML = "Following";
+						}else{
+							that.isFollowingStyle(journalUserID);
+							$(followBTN).removeClass('following');
+							followBTN.innerHTML = "Follow";
+						}
+					}
+				});
 			}
 
 			_loadMorePosts(){
+				this.scrollPos = window.scrollY;
 				this.isloadingmore = true;
 				this.minData += 6;
 			}
@@ -368,6 +481,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					this.loadingmessage = "";
 					this.loadmore = false;
 					this.isloadingmore = false;
+					setTimeout(function(){
+						window.scrollTo({
+							top: that.scrollPos,
+							behavior: "instant"
+						});
+					}, 1000);
 				} 
 
 				setTimeout(function(){
@@ -459,8 +578,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				var videoClicked = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
 				var uploadtype = Polymer.dom(this.root).querySelector('#'+e.target.id).uploadtype;
 
+				var src = "";
+
 				if(uploadtype == "external"){
-					var src = this.getMediaURL(videoClicked);
+					src = this.getMediaURL(videoClicked);
 					var videoPlayer = Polymer.dom(this.root).querySelector('#videoPlayer');
 					videoPlayer.style = "display: block;";
 
@@ -486,7 +607,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					var videoPlayerUpload1 = Polymer.dom(this.root).querySelector('#videoPlayerUpload1');
 					var videoPlayerUpload2 = Polymer.dom(this.root).querySelector('#videoPlayerUpload2');
 					
-					var src = this.getMediaURL(videoClicked);
+					src = this.getMediaURL(videoClicked);
 					videoPlayerUpload.src = src;
 					videoPlayerUpload1.src = src;
 					videoPlayerUpload2.src = src;
@@ -494,6 +615,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				var modal = Polymer.dom(this.root).querySelector('#video-modal');
 				modal.style.display = 'block';
+
+				var obj = {
+					itemID: this.cbitemID,
+					title: this.modalVideoName,
+					ref: src
+				}
+
+				this._captureClicks(this.cbitemID, "viewed", obj);
+				
 			}
 			getMediaURL(url){
 				var res = "";
@@ -539,16 +669,80 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					}
 					return null;
 			}
+			_captureClicks(journalID, res, obj){
+				var database = firebase.database();
+				var userID = this.user.userID;
+				var userName = this.user.firstName + " " + this.user.lastName;
+				var myPhoto;
+				var myCompanyID = this.user.companyID;
+				var myCompanyName = this.user.companyName;
+				var dateRegistered = Date.now();
+				var postType = "videos";
+
+				if(this.user.photoURL != undefined || this.user.photoURL != ""){
+					myPhoto = this.user.photoURL;
+				}else{
+					myPhoto = "";
+				}
+
+				if(myPhoto == undefined){
+					myPhoto = "";
+				}
+
+				var filteredArray = this.findObjectByKey(this.videosData, "videoID", journalID);
+
+				var journalID = journalID;
+				var journalUserID = filteredArray.userID;
+				var journalUserName = filteredArray.userName;
+				var journalCompanyID = filteredArray.companyID;
+				var journalCompanyName = filteredArray.companyName;
+				var journalDateRegistered = filteredArray.dateRegistered;
+				var journalPhotoURL;
+				
+				if(filteredArray.photoURL != undefined || filteredArray.photoURL != ""){
+					journalPhotoURL = filteredArray.photoURL;
+				}else{
+					journalPhotoURL = "";
+				}
+
+				if(journalPhotoURL == undefined){
+					journalPhotoURL = "";
+				}
+
+				var data = {
+					userID: userID,
+					userName: userName,
+					myPhoto: myPhoto,
+					myCompanyID: myCompanyID,
+					myCompanyName: myCompanyName,
+					dateRegistered: dateRegistered,
+					postType: postType,
+					journalID: journalID,
+					journalUserID: journalUserID,
+					journalUserName: journalUserName,
+					journalCompanyID: journalCompanyID,
+					journalCompanyName: journalCompanyName,
+					journalDateRegistered: journalDateRegistered,
+					journalPhotoURL: journalPhotoURL,
+					clickType:"posts",
+					clickArea:res,
+					clickItem:obj
+				}
+
+				database.ref('user-clicks').push(data);
+			}
 			_openPLDP(e){
 				var vidID = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
 				sessionStorage.setItem("PLDP_VideoAdd", vidID);
 				this.$.pldpDialog.open();
+				this._captureClicks(vidID, "Open PLDP", "button");
 			}
 			closePLDPDialog(){
 				this._addToPLDP();
 				sessionStorage.removeItem("PLDP_VideoAdd");
 				this.$.pldpDialog.close();
 			}
+
 			_addToPLDP(){
 				let PLDP_VideoAdd = sessionStorage.getItem("PLDP_VideoAdd");
 
@@ -584,6 +778,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				let updates = {};
 				updates['/myPLDP/videos/' + newThought] = filteredArray;
 				database.ref().update(updates);
+
+				this._captureClicks(PLDP_VideoAdd, "Save to PLDP", "dialog");
 			}
 			isEqual(a, b) {
 				return a === b;

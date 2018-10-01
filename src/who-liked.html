@@ -15,6 +15,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="preview-profile.html">
 
 <dom-module id="who-liked">
     <template>
@@ -23,28 +24,56 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         :host {
             display: block;
         }
+        .modal-list{
+            max-height: 66vh; 
+            overflow-y: auto;
+        }
+        /* width */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            border-radius: 10px;
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+        }
     </style>
     <!-- <firebase-query
         id="qryusers"
         path="/users"
         data="{{usersData}}">
     </firebase-query> -->
-    <div class="w3-container" style="margin-bottom: 60px;">
-        <div class="w3-large w3-center" style="padding:8px;">
+    <div>
+        <div class="w3-large w3-center" style="padding:20px 15px">
             <b class="w3-text-blue"><iron-icon icon="app:favorite"></iron-icon>&nbsp;Liked By</b>
         </div>
-        <ul class="w3-ul w3-card-2 w3-hoverable w3-margin-bottom">
-            <hr>
-            <template id="resultList" is="dom-repeat" items="[[likes]]" as="item">
-                <li class="w3-bar" style="padding: 8px 0;">
-                <img class="w3-bar-item w3-circle" style="width:48px; height: 48px;" src="[[_profilePhoto(item.photoURL)]]">
-                    <div class="w3-bar-item">
-                        <span class="w3-large w3-text-blue">[[item.journalUserName]]</span><br>
-                        <span>[[item.companyName]]</span>
-                    </div>
-                </li>
-            </template>
-        </ul>
+        <div class="modal-list w3-padding">
+            <ul class="w3-ul w3-card-2 w3-hoverable w3-margin-bottom">
+                <!-- <hr> -->
+                <template id="resultList" is="dom-repeat" items="[[likes]]" as="item" sort="_sort" observe="likesDate">
+                    <li class="w3-bar" style="padding: 8px 0; cursor: pointer;" data="[[item]]" on-tap="_previewProfile">
+                    <img class="w3-bar-item w3-circle" style="width:42px; height: 42px;" src="[[_profilePhoto(item.photoURL)]]">
+                        <div class="w3-bar-item">
+                            <span class="w3-medium w3-text-blue">[[item.journalUserName]]</span><br>
+                            <span>[[item.companyName]]</span>
+                        </div>
+                    </li>
+                </template>
+            </ul>
+        </div>
+    </div>
+    <div id="preview-profile" class="ldp-modal w3-animate-zoom">
+        <div class="ldp-modal-content w3-round max-modal-width">
+            <div>
+                <span id="close-followers" data="preview-profile" on-click="_closeProfileModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white" style="z-index: 999;">&times;</span>
+                <div class="w3-row">
+                    <preview-profile _userid="{{_userid}}" userobj="{{userobj}}"></preview-profile>
+                </div>
+            </div>
+        </div>
     </div>
     
     </template>
@@ -66,7 +95,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     type: Object,
                     observer: "refreshFilter",
                     notify: true
-                }
+                },
+                userobj: {
+                    type: Object,
+                    notify: true
+                },
+                _userid: {
+                    type: String,
+                    notify: true
+                },
             };
         }
         _likesDataChanged(){
@@ -107,6 +144,37 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     // return obj[key];
             });
             }
+        }
+        _sort(a, b) {  
+			if (a.likesDate > b.likesDate) return -1;
+			if (a.likesDate < b.likesDate) return 1;
+			return 0;
+        }
+        _previewProfile(e){
+            var data = e.currentTarget.data;
+            var userdata = data;
+            var photoURL = this._profilePhoto(userdata.photoURL);
+            
+            this.userobj = {
+                journalUserName: userdata.journalUserName,
+                journalUserID: userdata.journalUserID,
+                companyID: userdata.companyID,
+                companyName: userdata.companyName,
+                photoURL: photoURL
+            }
+
+            this._userid = userdata.journalUserID;
+            this._openProfileModal();
+
+            // this._captureClicks(e.currentTarget.postitem, "viewedUserProfile", this.userobj);
+        }
+        _openProfileModal(){
+            var modal = Polymer.dom(this.root).querySelector('#preview-profile');
+            modal.style.display = 'block';
+        }
+        _closeProfileModal(){
+            var modal = Polymer.dom(this.root).querySelector('#preview-profile');
+            modal.style.display = 'none';
         }
         
 

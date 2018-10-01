@@ -1,13 +1,9 @@
-// These scripts are made available when the app is served or deployed on Firebase Hosting
-// If you do not serve/host your project using Firebase Hosting see https://firebase.google.com/docs/web/setup
-// importScripts('/__/firebase/3.9.0/firebase-app.js');
-// importScripts('/__/firebase/3.9.0/firebase-messaging.js');
-// importScripts('/__/firebase/init.js');
 
 importScripts('https://www.gstatic.com/firebasejs/4.6.2/firebase-app.js');
 importScripts('https://www.gstatic.com/firebasejs/4.6.2/firebase-messaging.js');
 
 // Initialize Firebase
+// Public App
 var config = {
     apiKey: "AIzaSyAf_oJi6fgm6-ZrVPeOVdW2DDoeu3v5SxY",
     authDomain: "leadershipplatform-158316.firebaseapp.com",
@@ -16,6 +12,27 @@ var config = {
     storageBucket: "leadershipplatform-158316.appspot.com",
     messagingSenderId: "438289288307"
 };
+
+// Corporate App
+// var config = {
+//     apiKey: "AIzaSyCnpQlwku48ga6bR7Y3Sl94H-fazbzCgus",
+//     authDomain: "glp-corporate.firebaseapp.com",
+//     databaseURL: "https://glp-corporate.firebaseio.com",
+//     projectId: "glp-corporate",
+//     storageBucket: "glp-corporate.appspot.com",
+//     messagingSenderId: "127713036395"
+// };
+
+// Test App
+// var config = {
+//     apiKey: "AIzaSyBJH4pbQEzEpxtEomcnYjlUfsiFC5nqHoQ",
+//     authDomain: "glp-test.firebaseapp.com",
+//     databaseURL: "https://glp-test.firebaseio.com",
+//     projectId: "glp-test",
+//     storageBucket: "glp-test.appspot.com",
+//     messagingSenderId: "805735980290"
+// };
+
 
 firebase.initializeApp(config);
 
@@ -33,8 +50,7 @@ messaging.setBackgroundMessageHandler(function(payload) {
       body: 'Background Message body.',
       icon: '/images/manifest/icon-48x48.png',
       sound: 'default',
-      badge: '1',
-      click_action: "https://leadershipplatform-158316.firebaseapp.com/daily-thoughts"
+      badge: '1'
     };
   
     return self.registration.showNotification(notificationTitle,

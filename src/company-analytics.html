@@ -11,39 +11,39 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 
-<link rel="lazy-import" href="view-podcasts.html">
+<link rel="lazy-import" href="view-analytics.html">
 
-<dom-module id="leadership-podcasts">
+<dom-module id="company-analytics">
   <template>
     <style>
-      
     </style>
-  <view-podcasts user="[[user]]" _companyid="[[_companyid]]" thoughtype="podcasts" placeholder="Search for Podcasts"></view-podcasts>
 
-  </template>
+  <view-analytics user="[[user]]" _companyid="[[_companyid]]"></view-analytics>
+
+</template>
 
   <script>
-    class LeadershipPodcasts extends Polymer.Element {
-      static get is() { return 'leadership-podcasts'; }
+    class CompanyAnalytics extends Polymer.Element {
+      static get is() { return 'company-analytics'; }
       static get properties() {
         return {
-          user: {
-            type: Object
-          },
+          user: {type: Object},
           _companyid: String,
         };
       }
       connectedCallback() { 
         super.connectedCallback();
-        var resolvedPageUrl = this.resolveUrl('view-podcasts.html');
+        var resolvedPageUrl = this.resolveUrl('view-analytics.html');
         Polymer.importHref(
-        resolvedPageUrl,
-        null,
-        'view-podcasts.html',
-        true);
+            resolvedPageUrl,
+            null,
+            'view-analytics.html',
+            true
+        );
       }
+
     }
 
-    window.customElements.define(LeadershipPodcasts.is, LeadershipPodcasts);
+    window.customElements.define(CompanyAnalytics.is, CompanyAnalytics);
   </script>
 </dom-module>

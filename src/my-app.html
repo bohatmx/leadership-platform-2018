@@ -24,7 +24,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-ripple/paper-ripple.html">
-
+<link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
+<link rel="import" href="../bower_components/paper-radio-button/paper-radio-button.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
 <!-- <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html"> -->
@@ -64,14 +66,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="lazy-import" href="my-pldp.html"> 
 <link rel="lazy-import" href="about-pldp.html"> 
 <link rel="lazy-import" href="user-profile.html">
+<link rel="lazy-import" href="welcome-page.html">
 <link rel="lazy-import" href="my-followers.html">
-<link rel="lazy-import" href="my-notifications.html">
+<link rel="lazy-import" href="filtered-thoughts.html">
+<link rel="lazy-import" href="filtered-articles.html">
+<link rel="lazy-import" href="filtered-podcasts.html">
+<link rel="lazy-import" href="filtered-videos.html">
 <link rel="import" href="sidebar-menus.html">
 <link rel="lazy-import" href="terms-conditions.html">
+<link rel="lazy-import" href="company-analytics.html">
 
 <link rel="import" href="app-icons.html" async>
 <link rel="import" href="w3-styles.html" async>
 <link rel="import" href="shared-styles.html" async>
+<link rel="import" href="my-notifications.html" async>
 
 <dom-module id="my-app">
 	<template>
@@ -179,6 +187,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			.user-pic:hover{
 				cursor: pointer;
 				border:4px solid var(--app-theme-color);
+			}
+
+			paper-button.fancy:hover {
+				background: var(--app-theme-color);
 			}
 
 			.user-name{
@@ -341,12 +353,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					background-repeat: no-repeat;
 				}
 			}
+			iron-image{
+				width: 100%;
+				height: 100px;
+			}
+			.ldp-logo{
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+				justify-content: center;
+			}
 
 		</style>
 
 		<app-location
-				route="{{route}}"
-				url-space-regex="^[[rootPath]]">
+			route="{{route}}"
+			url-space-regex="^[[rootPath]]">
 		</app-location>
 
 		<app-route
@@ -393,9 +415,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 							</div>
 						</div>
 						<sidebar-menus id="sidebarMenu" hidecompany="[[hidecompany]]" notcompanyadmin="[[notcompanyadmin]]" pendingstring="{{pending_string}}" leadershipapp="[[leadershipapp]]" publicapp="[[publicapp]]" salesapp="[[salesapp]]" hrapp="[[hrapp]]" on-tap="_sideBarClicked"></sidebar-menus>
+						<div class="w3-row w3-padding w3-small w3-sb-title w3-sb-title-text">MORE ON GLP</div>
 						<div class="w3-text-white">
-							<br>
-							<div class="w3-row w3-padding-16">
+							<div class="w3-row w3-padding-small w3-left">
+								<paper-button class="fancy" style="width: 92%;font-size: 10px;" on-tap="_openWelcomePage">
+									<iron-icon icon="smapp:help-outline"></iron-icon>
+									GLP Tutorials</paper-button>
+							</div>
+						</div>
+						<div class="w3-text-white">
+							<div class="w3-row w3-padding-small w3-left">
+								<paper-button class="fancy" style="width: 92%;font-size: 10px;" on-tap="loadTerms">
+									<!-- <iron-icon icon="smapp:help-outline"></iron-icon> -->
+									Terms and Conditions</paper-button>
+							</div>
+						</div>
+						<div class="w3-text-white">
+							<div class="w3-row w3-padding-small">
 								<a on-tap="logout" href="[[rootPath]]" style="display: block; text-decoration: none; width:100%" class="w3-left a-border-top">
 									<paper-button class="w3-text-light-grey w3-hover-deep-orange w3-center" style="min-width:92% !important">
 										<iron-icon icon="smapp:input"></iron-icon>
@@ -403,17 +439,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 									</paper-button>
 								</a>
 							</div>
-						</div>
-						<div class="w3-row w3-text-white a-border-top" style="padding-bottom: 20px;">
-							<paper-button style="width: 100%;font-size: 10px;" on-tap="loadTerms">Terms and Conditions</paper-button>
-						</div>
+						</div>						
 					</div>
 					<div class="w3-rest" id="main-content" on-click="_closeSidebarFromBody">
 						<div class="w3-row" id="main-header">
-							<div data="send-feedback" class="w3-padding-small w3-right w3-relative" on-click="_openModal">
+							<div data="send-feedback" class="w3-padding-small w3-right w3-relative" on-click="_openFeedbackModal">
 								<paper-ripple></paper-ripple>
 								<iron-icon icon="app:message"></iron-icon>
-								<span class="w3-hide-small">FeedBack</span>
+								<span class="w3-hide-small">Feedback</span>
 							</div>
 							<div id="open-notifications" data="my-notifications" class="w3-padding-small w3-right w3-relative" on-click="_openModal">
 								<paper-ripple></paper-ripple>
@@ -475,7 +508,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 							<add-podcast name="add-podcast" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]"></add-podcast>
 							<add-video name="add-video" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]"></add-video>
 							<add-voicemail name="add-voicemail" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]"></add-voicemail>
-							
+							<filtered-thoughts name="filtered-thoughts" _companyid="[[_companyid]]" user="[[_user]]"></filtered-thoughts>
+							<filtered-articles name="filtered-articles" _companyid="[[_companyid]]" user="[[_user]]"></filtered-articles>
+							<filtered-podcasts name="filtered-podcasts" _companyid="[[_companyid]]" user="[[_user]]"></filtered-podcasts>
+							<filtered-videos name="filtered-videos" _companyid="[[_companyid]]" user="[[_user]]"></filtered-videos>
+							<company-analytics name="company-analytics" _companyid="[[_companyid]]" user="[[_user]]"></company-analytics>
 						</iron-pages>
 						
 					</div>
@@ -485,7 +522,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			<terms-conditions currentpage="{{currentpage}}"></terms-conditions>
 		</div>
 	</iron-pages>
-		<paper-fab-speed-dial id="paperSpeed" with-backdrop style="z-index: 200" hidden$="[[hidemenu]]">
+	<!-- hidden$="[[hidemenu]]" -->
+		<paper-fab-speed-dial id="paperSpeed" with-backdrop style="z-index: 200">
 			<paper-fab-speed-dial-action id="fabthoughts" icon="app:message" on-tap="_loadElement1" indexed="add-thoughts" caption="Add Thought">Thought</paper-fab-speed-dial-action>
 			<paper-fab-speed-dial-action id="fabarticles" icon="app:remove-red-eye" on-tap="_loadElement1" indexed="add-article" caption="Add Article" hidden$="[[hidesubmenu]]">Article</paper-fab-speed-dial-action>
 			<paper-fab-speed-dial-action id="fabvoicemail" icon="app:record-voice-over" on-tap="_loadElement1" indexed="add-voicemail" caption="Add Voicemail" hidden$="[[hidesubmenu]]">Voicemail</paper-fab-speed-dial-action>
@@ -499,10 +537,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					<div class="w3-large" style="padding:20px 15px">
 						<b class="w3-text-dark-grey"><iron-icon icon="app:message"></iron-icon> Send us Feedback</b>
 					</div>
-					<div class="w3-row w3-padding-large">
+					<div class="w3-row">
+						<div class="w3-row w3-padding"><label id="labelFeedback" class="w3-medium w3-text-grey">Feedback Category:</label></div>
+						<paper-radio-group id="feedbackCategory" name="feedbackCategory" selected="" allow-empty-selection>
+							<paper-radio-button id="Feedback" name="Feedback">Feedback</paper-radio-button>
+							<paper-radio-button id="Defect" name="Defect">Report Defect</paper-radio-button>
+						</paper-radio-group>
+					</div>
+					<div class="w3-row w3-padding">
 						<paper-input id="feedbackSubject" label="Subject" auto-validate></paper-input>
 					</div>
-					<div class="w3-row w3-padding-large">
+					<div class="w3-row w3-padding">
 						<paper-textarea id="feedbackMessage" rows="2" multiple label="Feedback" auto-validate></paper-textarea>
 					</div>
 					<div class="w3-row w3-padding-large">
@@ -516,13 +561,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 		</div>
 		<div id="my-notifications" class="ldp-modal w3-animate-zoom">
 			<div class="ldp-modal-content w3-round max-modal-width">
-				<div>
-					<span id="close-notifications" data="my-notifications" on-click="_closeModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white">&times;</span>
+				<div class="w3-container">
+					<span id="closeNotifications" data="my-notifications" on-click="_closeNotificationsModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white">&times;</span>
 					<div class="w3-large" style="padding:20px 15px">
-						<b class="w3-text-blue"><iron-icon icon="app:notifications"></iron-icon>&nbsp;Notifications</b>
+						<b class="w3-text-blue w3-center"><iron-icon icon="app:notifications"></iron-icon>&nbsp;Notifications</b>
 					</div>
 					<div class="w3-row">
-						<my-notifications unreadstring="{{unreadstring}}" userid="[[_userID]]" rootpath=[[rootPath]]></my-notifications>
+						<my-notifications unreadstring="{{unreadstring}}" userid="[[_userID]]" rootpath=[[rootPath]] listclicked="{{listclicked}}"></my-notifications>
 					</div>
 				</div>
 			</div>
@@ -530,7 +575,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 		<div id="my-followers" class="ldp-modal w3-animate-zoom">
 			<div class="ldp-modal-content w3-round max-modal-width">
 				<div>
-					<span id="close-followers" data="my-followers" on-click="_closeModal" class="w3-button w3-display-topright w3-medium">&times;</span>
+					<span id="close-followers" data="my-followers" on-click="_closeModal" class="w3-button w3-display-topright w3-red w3-text-white w3-medium">&times;</span>
 					<div class="w3-row">
 						<my-followers follow="{{follow}}" user="[[_user]]"></my-followers>
 					</div>
@@ -550,13 +595,47 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			</div>
 		</div>
 		<div id="snackbar"></div>
-		<div class="ldp-modal" id="userProfile">
-			<div class="ldp-modal-content" style="max-width:700px">
-				<span on-click="_closeUserProfile" class="w3-button w3-display-topright w3-medium w3-red w3-text-white ldp-modal-close">&times;</span>
-				<user-profile name="user-profile" _companyid="[[_companyid]]" user="[[_user]]" photo="[[photo]]"></user-profile>
+		<div class="ldp-modal w3-animate-zoom" id="userProfile">
+			<div class="ldp-modal-content w3-round-small" style="max-width:700px">
+				<span id="spancloseUserProfile" on-click="_closeUserProfile" class="w3-button w3-display-topright w3-medium w3-red w3-text-white ldp-modal-close">&times;</span>
+				<div class="w3-row w3-round-small">
+					<user-profile name="user-profile" _companyid="[[_companyid]]" user="[[_user]]" photo="[[photo]]"></user-profile>
+				</div>
 			</div>
 		</div>
-
+		<div class="ldp-modal w3-animate-zoom" id="welcomePage">
+			<div class="ldp-modal-content w3-round-small max-modal-width">
+				<span id="spancloseWelcomePage" on-click="_closeWelcomePage" class="w3-button w3-display-topright w3-medium w3-red w3-text-white ldp-modal-close" style="z-index:99;">&times;</span>
+				<div class="w3-row w3-round-small">
+					<welcome-page></welcome-page>
+				</div>
+			</div>
+		</div>
+		<div class="ldp-modal w3-animate-zoom" id="firstPage">
+			<div class="ldp-modal-content w3-round-large" style="max-width:400px">
+				<div class="w3-row w3-padding">
+					<div class="w3-xlarge w3-border-bottom w3-padding">
+						<b class="w3-text-dark-grey">Welcome to GLP</b>
+					</div>
+					<div class="ldp-logo w3-margin-top">
+						<iron-image src="../images/glp-logo.png" preload sizing="contain"></iron-image>
+					</div>
+					<br>
+					<div class="modal-list w3-padding w3-margin-bottom">
+						<div class="w3-row w3-medium">
+							<span>Learn more about the platform, it’s purpose and how the various functions work...</span>
+						</div>
+					</div>
+					<div class="modal-list w3-padding w3-light-grey w3-text-white">
+						<div class="w3-row w3-medium">
+							<paper-button class="w3-green" on-tap="_openWelcomePage">PROCEED</paper-button>
+							<paper-button class="w3-red" on-tap="_closeFirstPage">NOT NOW</paper-button>
+						</div>
+					</div>
+				</div>
+				
+			</div>
+		</div>
 		<template is="dom-if" if="[[_companyid]]">
 			<firebase-query
 				id="qrycompany"
@@ -565,7 +644,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				equal-to="[[_companyid]]"
 				data="{{companyData}}">
 			</firebase-query>
-
 		</template>
 	</template>
 
@@ -596,9 +674,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			if((/macintosh/i).test(_ua) && (nav.platform.match(/MacIntel/i))) plat = 'MacOS';
 			if((/android/i).test(_ua) && (nav.platform.match(/Linux/i))) plat = 'Android';
 			if((/windows nt/i).test(_ua) && (nav.platform.match(/Win32/i))) plat = 'Windows';
+			if((/windows nt/i).test(_ua) && (nav.platform.match(/Win64/i))) plat = 'Windows';
 			if((/windows phone/i).test(_ua)) plat = 'WindowsPhone';
 
 			if(nav.platform.match(/Win32/i)) plat = 'Windows';
+			else if(nav.platform.match(/Win64/i)) plat = 'Windows';
 			else if(nav.platform.match(/MacIntel/i)) plat = 'MacOS';
 			else if(nav.platform.match(/iPhone|iPod|iPad/i)) plat = 'iOS';
 			else if(nav.platform.match(/blackberry/i)) plat = 'BlackBerry';
@@ -628,6 +708,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				this._setCompanyTypeSidebar();
 				this._setAccountDefaults();
+
+				// const app2 = firebase.app("[SHARED]");
+
+				// console.log("Firebase: ", firebase.database(app2).app);
 			}
 
 			static get properties() {
@@ -658,6 +742,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						value: 0,
 						notify: true
 					},
+					seen:{type: Boolean, value: false},
 					routeData: Object,
 					subroute: String,
 					// This shouldn't be neccessary, but the Analyzer isn't picking up
@@ -688,7 +773,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						type: Object,
 						observer: '_onCompanyPhotoChange'
 					},
-					seen: Boolean,
 					hidemenu:{
 						type: Boolean,
 						value: true,
@@ -760,6 +844,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						type: String,
 						notify: true
 					},
+					listclicked: {
+						type: Boolean,
+						value: false,
+						notify: true,
+						observer: "_listclicked"
+					},
 					bookAuthor: String,
 					bookTitle: String,
 					bookBody: String,
@@ -787,27 +877,39 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					'_routePageChanged(routeData.page)',
 				];
 			}
+			_listclicked(){
+				var that = this;
 
-			unshortedURL(){
-				var expander = {
-					expand: function (url, callback) {
-						$.ajax({
-							dataType: 'text',
-							url: url,
-							data: {
-								format: 'text'
-							},
-							success: function(response) {
-								callback(response);
-							}
-						});
+				if(this.listclicked === true){
+					setTimeout(myFunction, 500);
+					function myFunction(){
+						that._closeNotificationsModal();
 					}
-				};
-			//https://t.co/51XZ6kwPyD
-				expander.expand( 'http://t.co/NJwI2ugt', function(response) {
-					console.log(response.indexOf('URL'));
-					console.log(response);
-				});
+				}
+			}
+
+			_openWelcomePage(){
+				let modal = Polymer.dom(this.root).querySelector('#welcomePage');
+				this.loadPage('welcome-page');
+				$(modal).css('display', 'block');
+				this._closeFirstPage();
+			}
+			_closeWelcomePage(){
+				let modal = Polymer.dom(this.root).querySelector('#welcomePage');
+				$(modal).css('display', 'none');
+			}
+			_openFirstPage(){
+				let modal = Polymer.dom(this.root).querySelector('#firstPage');
+				$(modal).css('display', 'block');
+			}
+			_closeFirstPage(){
+				let modal = Polymer.dom(this.root).querySelector('#firstPage');
+				$(modal).css('display', 'none');
+
+				if(this._user.userID){
+					var database = firebase.database();
+					database.ref('/users/' + this._user.userID).child('welcomePage').set(true);
+				}
 			}
 
 			_openUserProfile(){
@@ -848,7 +950,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			_objLen(obj) {
 				let len = 0;
 				if(obj != undefined){
-				len = Object.keys(obj).length;
+					len = Object.keys(obj).length;
 				}
 				return len;
 			}
@@ -877,14 +979,55 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				
 			}
 
+			userBrowser(){
+				var sBrowser, sUsrAg = window.navigator.userAgent;
+
+				//The order matters here, and this may report false positives for unlisted browsers.
+
+				if (sUsrAg.indexOf("Firefox") > -1) {
+					sBrowser = "Mozilla Firefox";
+					//"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0"
+				} else if (sUsrAg.indexOf("Opera") > -1) {
+					sBrowser = "Opera";
+				} else if (sUsrAg.indexOf("Trident") > -1) {
+					sBrowser = "Microsoft Internet Explorer";
+					//"Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; .NET4.0C; .NET4.0E; Zoom 3.6.0; wbx 1.0.0; rv:11.0) like Gecko"
+				} else if (sUsrAg.indexOf("Edge") > -1) {
+					sBrowser = "Microsoft Edge";
+					//"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299"
+				} else if (sUsrAg.indexOf("Chrome") > -1) {
+					sBrowser = "Google Chrome or Chromium";
+					//"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/66.0.3359.181 Chrome/66.0.3359.181 Safari/537.36"
+				} else if (sUsrAg.indexOf("Safari") > -1) {
+					sBrowser = "Apple Safari";
+					//"Mozilla/5.0 (iPhone; CPU iPhone OS 11_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.0 Mobile/15E148 Safari/604.1 980x1306"
+				} else {
+					sBrowser = "unknown";
+				}
+
+				return sBrowser;
+			}
+
 			sendFeedback(){
 				var subject = this.$.feedbackSubject.value;
 				var message = this.$.feedbackMessage.value;
+				var feedbackCategory = this.$.feedbackCategory.selected;
+
+				var nav = window.navigator;
+				var userPlatform = "";
+				userPlatform += "Browser Name: " + this.userBrowser() + " ==> ";
+				userPlatform += "Browser Version: " + nav.appVersion + " ==> ";
+				userPlatform += "Browser Language: " + nav.language + " ==> ";
+				userPlatform += "Browser Online: " + nav.onLine + " ==> ";
+				userPlatform += "Platform: " + nav.platform;
 
 				var messageVal = this.$.feedbackMessage.validate();
 				var subjectVal = this.$.feedbackSubject.validate();
 
-				if(!subject || !subjectVal){
+				if(feedbackCategory == ""){
+					this.showSnackBar("Feedback Category required!");
+					return;
+				}else if(!subject || !subjectVal){
 					this.showSnackBar("Feedback Subject required!");
 					return;
 				}else if(!message || !messageVal){
@@ -902,13 +1045,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					var data = {
 						subject: subject,
 						message: message,
+						category: feedbackCategory,
 						companyID: this._user.companyID,
 						companyName: this._user.companyName,
 						journalUserID: this._user.userID,
 						journalUserName: this._user.firstName+" "+this._user.lastName,
 						journalUserEmail: this._user.email,
 						feedbackID: feedbackID,
-						dateRegistered: timeInMs
+						dateRegistered: timeInMs,
+						userPlatform: userPlatform
 					}
 
 					// Write the new thought's data
@@ -918,6 +1063,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 					this.$.feedbackSubject.value = "";
 					this.$.feedbackMessage.value = "";
+					this.$.feedbackCategory.selected = "";
 
 					this.showSnackBar("Feedback posted successfully!");
 
@@ -936,36 +1082,73 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					this.addIOSBugfix();
 				}
 				var modal_name = e.currentTarget.getAttribute('data');
+				
+				if(modal_name == "my-notifications"){
+					console.log("opening notifications");
+					this._captureClicks("openedNotificationsPage");
+					this.listclicked = false;
+				}
 				var modal = Polymer.dom(this.root).querySelector('#'+modal_name);
 				this.loadPage(modal_name);
 				modal.style.display = 'block';
+			}
+
+			_openFeedbackModal(e){
+				// ios 11 bug caret position
+				if ( iOS && iOS11 ) {
+					this.addIOSBugfix();
+				}
+				var modal_name = e.currentTarget.getAttribute('data');
+				var modal = Polymer.dom(this.root).querySelector('#'+modal_name);
+				modal.style.display = 'block';
+				this._captureClicks("openedFeedbackPage");
+			}
+			_closeNotificationsModal(e){
+				var modal = Polymer.dom(this.root).querySelector('#my-notifications');
+				modal.style.display = 'none';
+				
+				let database = firebase.database();
+				let seen = false;
+				
+				database.ref('/users/'+this._userID+'/notifications').orderByChild("seen").equalTo(seen).once('value').then((data)=>{
+					var myNotifications = data.val();
+					if(myNotifications === null){
+						console.log("No notifications");
+					}else{
+						this._notificationSeen(myNotifications)
+					}
+					
+				}).catch(function(error) {
+					console.log("Error updating user notifications:", error);
+				});
+
+				database.ref('/users/'+this._userID+'/pldpnotifications').orderByChild("seen").equalTo(seen).once('value').then((data)=>{
+					var myNotifications = data.val();
+					if(myNotifications === null){
+						console.log("No notifications");
+					}else{
+						this._pldpnotificationSeen(myNotifications)
+					}
+					
+				}).catch(function(error) {
+					console.log("Error updating user notifications:", error);
+				});
+				
 			}
 			_closeModal(e){
 				// ios 11 bug caret position
 				if ( iOS && iOS11 ) {
 					this.removeIOSBugfix();
 				}
+
 				var modal_name = e.currentTarget.getAttribute('data');
+				console.log("modal name: ", modal_name);
 				var modal = Polymer.dom(this.root).querySelector('#'+modal_name);
+
 				if(modal_name === 'add-items'){
 					this._removeLoadElement();
 				}
-				else if(modal_name === "my-notifications"){
-					let database = firebase.database();
-					let seen = false;
-					
-					database.ref('/users/'+this._userID+'/notifications').orderByChild("seen").equalTo(seen).once('value').then((data)=>{
-						var myNotifications = data.val();
-						if(myNotifications === null){
-							console.log("No notifications");
-						}else{
-							this._notificationSeen(myNotifications)
-						}
-						
-					}).catch(function(error) {
-						console.log("Error updating user notifications:", error);
-					});
-				}
+				
 				modal.style.display = 'none';
 			}
 			_notificationSeen(nots){
@@ -974,6 +1157,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				$.each(nots, function(n, nt){
 					myNotifications['/users/'+_userID+'/notifications/'+n+'/seen'] = true
+				});
+
+				let database = firebase.database();
+				database.ref().update(myNotifications);
+			}
+
+			_pldpnotificationSeen(nots){
+				var myNotifications = {};
+				var _userID = this._userID;
+
+				$.each(nots, function(n, nt){
+					myNotifications['/users/'+_userID+'/pldpnotifications/'+n+'/seen'] = true
 				});
 
 				let database = firebase.database();
@@ -1204,7 +1399,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				 }
 				 else if(page == 'i-lead'){
 					this._selected = 22;
-				 }
+				 }else if(page == 'filtered-thoughts'){
+					this._selected = 23;
+				}else if(page == 'filtered-articles'){
+					this._selected = 24;
+				}else if(page == 'filtered-podcasts'){
+					this._selected = 25;
+				}else if(page == 'filtered-videos'){
+					this._selected = 26;
+				}else if(page == 'company-analytics'){
+					this._selected = 27;
+				}
 
 				 // sessionStorage.setItem("_companyid", this._companyid);
 			}
@@ -1218,6 +1423,43 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						null,
 						this._showPage404.bind(this),
 						true);
+
+				this._captureClicks(page);
+			}
+			_captureClicks(page){
+				if(this._user != undefined){
+					var database = firebase.database();
+					var userID = this._user.userID;
+					var userName = this._user.firstName + " " + this._user.lastName;
+					var myPhoto;
+					var myCompanyID = this._user.companyID;
+					var myCompanyName = this._user.companyName;
+					var dateRegistered = Date.now();
+
+					if(this._user.photoURL != undefined || this._user.photoURL != ""){
+						myPhoto = this._user.photoURL;
+					}else{
+						myPhoto = "";
+					}
+
+					if(myPhoto == undefined){
+						myPhoto = "";
+					}
+
+					var data = {
+						userID: userID,
+						userName: userName,
+						myPhoto: myPhoto,
+						myCompanyID: myCompanyID,
+						myCompanyName: myCompanyName,
+						dateRegistered: dateRegistered,
+						clickType:"section",
+						clickArea:page
+					}
+
+					database.ref('user-clicks').push(data);
+				}
+				
 			}
 
 			_showPage404() {
@@ -1334,6 +1576,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				if(this._objLen(this._user) > 0){
 					this._userID = this._user.userID;
 
+					if(this._user.welcomePage != undefined) {
+						if(this._user.welcomePage == false){
+							this._openFirstPage();
+						}
+
+					}else{
+						console.log("First time to GLP")
+						this._openFirstPage();
+					}
+
 					if(this._user.photoURL != undefined || this._user.photoURL) {
 						this.photo = this._user.photoURL;
 					}else{
@@ -1357,6 +1609,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					var follow_id = localStorage.getItem("follow_id");
 					var that = this;
 					var myPhoto = "";
+					var followDate = Date.now();
 
 					if(this._user.photoURL != undefined || this._user.photoURL != ""){
 						myPhoto = this._user.photoURL;
@@ -1371,50 +1624,57 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					if((follow_id === null) || (follow_id == undefined)){
 						// console.log("its null");
 					}else{
-						var userRef = database.ref('users/' + follow_id);
-						userRef.on('value', function(data) {
-							var childData = data.val();
-							let journalUserName = childData.firstName + " "+childData.lastName;
+						if(this._user.userID !== follow_id){
+							console.log("user ID: ", this._user.userID);
+							console.log("follow_id: ", follow_id);
+							var userRef = database.ref('users/' + follow_id);
 
-							var photoURL = "";
-							if(childData.photoURL != undefined || childData.photoURL != ""){
-								photoURL = childData.photoURL;
-							}else{
-								photoURL = "";
-							}
+							userRef.on('value', function(data) {
+								var childData = data.val();
+								let journalUserName = childData.firstName + " "+childData.lastName;
 
-							if(photoURL == undefined){
-								photoURL = "";
-							}
+								var photoURL = "";
+								if(childData.photoURL != undefined || childData.photoURL != ""){
+									photoURL = childData.photoURL;
+								}else{
+									photoURL = "";
+								}
 
-							var theirdata = {
-								"firstName":childData.firstName,
-								"lastName":childData.lastName,
-								"companyName":childData.companyName,
-								"photoURL":photoURL
-							}
+								if(photoURL == undefined){
+									photoURL = "";
+								}
 
-							var mydata = {
-								"firstName":that._user.firstName,
-								"lastName":that._user.lastName,
-								"companyName":that._user.companyName,
-								"photoURL":myPhoto
-							}
+								var theirdata = {
+									"firstName":childData.firstName,
+									"lastName":childData.lastName,
+									"companyName":childData.companyName,
+									"dateRegistered": followDate,
+									"photoURL":photoURL
+								}
 
-							var updates = {}
-							updates["users/"+that._user.userID+"/following/"+follow_id]=theirdata;
-							updates["users/"+follow_id+"/follower/"+that._user.userID]=mydata;
+								var mydata = {
+									"firstName":that._user.firstName,
+									"lastName":that._user.lastName,
+									"companyName":that._user.companyName,
+									"dateRegistered": followDate,
+									"photoURL":myPhoto
+								}
 
-							database.ref().update(updates);
-							
-						});
-						// database.ref('/users/' + this._user.userID + '/following').child(follow_id).set(true);
-						
-						// database.ref('/users/' + follow_id + '/follower').child(this._user.userID).set(true);
+								var updates = {}
+								updates["users/"+that._user.userID+"/following/"+follow_id]=theirdata;
+								updates["users/"+follow_id+"/follower/"+that._user.userID]=mydata;
 
-						let countFollowers = database.ref('users').child(follow_id).child('analytics').child('followers');
+								database.ref().update(updates);
+								
+							});
 
-						localStorage.removeItem("follow_id");
+							let countFollowers = database.ref('users').child(follow_id).child('analytics').child('followers');
+
+							localStorage.removeItem("follow_id");
+
+						}else{
+							console.log("cannot follow my self");
+						}
 					}
 
 					if(_platform != 'undefined') this.setDeviceType(_platform);
@@ -1508,7 +1768,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					this.publicapp = true;
 				}
 			}
-
 			_onCompanyDataReceived(newData, oldData) {
 				for (var item in newData) { 
 					this.company = newData[item];

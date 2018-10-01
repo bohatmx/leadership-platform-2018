@@ -18,12 +18,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="ldp-app">
   <template>
-    <firebase-app
+    <!-- Public App -->
+    <!-- <firebase-app
         auth-domain="leadershipplatform-158316.firebaseapp.com"
         database-url="https://leadershipplatform-158316.firebaseio.com"
         api-key="AIzaSyAf_oJi6fgm6-ZrVPeOVdW2DDoeu3v5SxY"
         storage-bucket="leadershipplatform-158316.appspot.com"
-        messaging-sender-id="438289288307">
+        messaging-sender-id="438289288307">  -->
+
+    <!-- Corporate App -->
+    <!-- <firebase-app
+        auth-domain="glp-corporate.firebaseapp.com"
+        database-url="https://glp-corporate.firebaseio.com"
+        api-key="AIzaSyCnpQlwku48ga6bR7Y3Sl94H-fazbzCgus"
+        storage-bucket="glp-corporate.appspot.com"
+        messaging-sender-id="127713036395">
+    </firebase-app> -->
+    
+    <!-- Test App -->    
+    <firebase-app
+        auth-domain="glp-test.firebaseapp.com"
+        database-url="https://glp-test.firebaseio.com"
+        api-key="AIzaSyBJH4pbQEzEpxtEomcnYjlUfsiFC5nqHoQ"
+        storage-bucket="glp-test.appspot.com"
+        messaging-sender-id="805735980290">
     </firebase-app>
 
     <style>
@@ -93,6 +111,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     
         <template id="mainTemplate" is="dom-if" if="{{signedIn}}">
             <firebase-query
+                app-name="[main]"
                 id="qryuser"
                 path="/users"
                 order-by-child="uid"
@@ -138,9 +157,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			if((/macintosh/i).test(_ua) && (nav.platform.match(/MacIntel/i))) plat = 'MacOS';
 			if((/android/i).test(_ua) && (nav.platform.match(/Linux/i))) plat = 'Android';
 			if((/windows nt/i).test(_ua) && (nav.platform.match(/Win32/i))) plat = 'Windows';
+			if((/windows nt/i).test(_ua) && (nav.platform.match(/Win64/i))) plat = 'Windows';
 			if((/windows phone/i).test(_ua)) plat = 'WindowsPhone';
 
 			if(nav.platform.match(/Win32/i)) plat = 'Windows';
+			else if(nav.platform.match(/Win64/i)) plat = 'Windows';
 			else if(nav.platform.match(/MacIntel/i)) plat = 'MacOS';
 			else if(nav.platform.match(/iPhone|iPod|iPad/i)) plat = 'iOS';
 			else if(nav.platform.match(/blackberry/i)) plat = 'BlackBerry';
@@ -230,68 +251,89 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         ready: function(){
             var that = this;
             
-            var appID = "AIzaSyAf_oJi6fgm6-ZrVPeOVdW2DDoeu3v5SxY";
-            var logged = localStorage.getItem("firebase:authUser:"+appID+":[DEFAULT]");
+            // public app id
+            // var appID = "AIzaSyAf_oJi6fgm6-ZrVPeOVdW2DDoeu3v5SxY";
             
-            if(logged) {
-                this.signedIn = true
-            }
-            else this.signedIn = false;
+            // Test app id
+            var appID = "AIzaSyBJH4pbQEzEpxtEomcnYjlUfsiFC5nqHoQ";
 
-            if(this.signedIn === false) this.loadPage('sign-in')
+            // Corporate app id
+            // var appID = "AIzaSyCnpQlwku48ga6bR7Y3Sl94H-fazbzCgus"
+            
+            var logged = localStorage.getItem("firebase:authUser:"+appID+":[DEFAULT]");
 
             // set messaging
             const messaging = firebase.messaging();
+            
+            if(logged) {
+                this.signedIn = true;
+                // Get a reference to the database service
+                var database = firebase.database();
 
-            // Request for Permission
-            this.requestPermission();
+                // Request for Permission
+                this.requestPermission();
 
-            // [START refresh_token]
-            // Callback fired if Instance ID token is updated.
-            messaging.onTokenRefresh(function() {
-                messaging.getToken()
-                .then(function(refreshedToken) {
+                // [START refresh_token]
+                // Callback fired if Instance ID token is updated.
+                messaging.onTokenRefresh(function() {
+                    messaging.getToken()
+                    .then(function(refreshedToken) {
+                        return messaging.getToken();
+                    })
+                    .then(function(currentToken) {
+                        if (currentToken) {
+                            if((/android|windows|windowsphone/i).test(_platform)){
+                                setTokenSentToServer(false);
+                                setTokenToLocalStorage(currentToken);
+                                sendTokenToServer();
+                            }
+                            
+                        }
+                    })
+                    .catch(function(err) {
+                        console.log('Unable to retrieve refreshed token ', err);
+                    });
 
-                    return messaging.getToken();
-                })
-                .then(function(currentToken) {
-                    if (currentToken) {
-                        setTokenSentToServer(false);
-                        setTokenToLocalStorage(currentToken);
-                        sendTokenToServer();
+                    // [END request_permission]
+                    function setTokenToLocalStorage(currentToken) {
+                        var previousToken = window.localStorage.getItem('currentToken');
+
+                        if(previousToken == undefined || previousToken == "undefined" || previousToken == null || previousToken == "null") previousToken = "";
+
+                        if (currentToken) {
+                            var data = {
+                                "uid": that.user.uid,
+                                "previousToken": previousToken,
+                                "currentToken":currentToken
+                            }
+                            
+                            database.ref('/data-modelling/userWriteable/tokenRefresh/'+that.user.uid).set(data);
+                        }
+                        
+                        window.localStorage.setItem('currentToken', currentToken);
                     }
-                })
-                .catch(function(err) {
-                    console.log('Unable to retrieve refreshed token ', err);
+                    function sendTokenToServer() {
+                        if (!isTokenSentToServer()) {
+
+                            // Update user fcmToken
+                            // var updates = {};
+                            // updates['/users/' + this._user.userID+'/fcmToken'] = localStorage.getItem('currentToken');
+                            // setTokenSentToServer(true);
+                        } 
+                    }
+                    function isTokenSentToServer() {
+                        return window.localStorage.getItem('sentToServer') == 1;
+                    }
+                    function setTokenSentToServer(sent) {
+                        window.localStorage.setItem('sentToServer', sent ? 1 : 0);
+                    }
+                    
                 });
+                // [END refresh_token]
+            }
+            else this.signedIn = false;
 
-                // [END request_permission]
-                function setTokenToLocalStorage(currentToken) {
-                    window.localStorage.setItem('currentToken', currentToken);
-                }
-                function sendTokenToServer() {
-                    // Get a reference to the database service
-                    var database = firebase.database();
-
-                    if (!isTokenSentToServer()) {
-
-                        // Update user fcmToken
-                        var updates = {};
-                        updates['/users/' + this._user.userID+'/fcmToken'] = localStorage.getItem('currentToken');
-                        database.ref().update(updates);
-
-                        setTokenSentToServer(true);
-                    } 
-                }
-                function isTokenSentToServer() {
-                    return window.localStorage.getItem('sentToServer') == 1;
-                }
-                function setTokenSentToServer(sent) {
-                    window.localStorage.setItem('sentToServer', sent ? 1 : 0);
-                }
-                
-            });
-            // [END refresh_token]
+            setTimeout(function(){if(that.signedIn === false) that.loadPage('sign-in') }, 1000);
 
             // [START receive_message]
             // Handle incoming messages. Called when:
@@ -299,7 +341,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             // - the user clicks on an app notification created by a sevice worker
             //   `messaging.setBackgroundMessageHandler` handler.
             var msg = messaging.onMessage(function(payload) {
-
+                
                 showSnackBar(payload.notification);
                 
                 // [START_EXCLUDE]
@@ -355,13 +397,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             var database = firebase.database();
 
             if (!this.isTokenSentToServer()) {
-
+                console.log("Token not sent to server.");
                 // Update user fcmToken
-                var updates = {};
-                updates['/users/' + this._user.userID+'/fcmToken'] = localStorage.getItem('currentToken');
-                database.ref().update(updates);
+                // var updates = {};
+                // updates['/users/' + this._user.userID+'/fcmToken'] = localStorage.getItem('currentToken');
+                // database.ref().update(updates);
 
-                this.setTokenSentToServer(true);
+                // this.setTokenSentToServer(true);
             } 
         },
         isTokenSentToServer: function() {
@@ -375,15 +417,42 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 this.signedIn = true;
                 var database = firebase.database();
                 var userRef = database.ref('users').orderByChild("uid").equalTo(this.user.uid);
-
+                
                 var that = this;
+                // set messaging
+                const messaging = firebase.messaging();
+
+                messaging.getToken()
+                .then(function(refreshedToken) {
+                    return messaging.getToken();
+                })
+                .then(function(currentToken) {
+                    if((/android|windows|windowsphone/i).test(_platform)){
+                        var previousToken = window.localStorage.getItem('currentToken');
+                        if(previousToken == undefined || previousToken == "undefined" || previousToken == null || previousToken == "null") previousToken = "";
+
+                        if (currentToken) {
+                            var data = {
+                                "uid": that.user.uid,
+                                "previousToken": previousToken,
+                                "currentToken":currentToken
+                            }
+                            
+                            database.ref('/data-modelling/userWriteable/tokenRefresh/'+that.user.uid).set(data);
+                        }
+                    }
+                    
+                })
+                .catch(function(err) {
+                    console.log('Unable to retrieve refreshed token ', err);
+                });
 
                 userRef.on('child_added', function(snapshot, prevChildKey) {
                     var newUser = snapshot.val();
                     that._user = newUser;
                     that._companyID = that._user.companyID;
                     that._publicid = "-LEiZPT-C2PyLu_YLKNU";
-
+ 
                     that.approveThoughts = false;
 
                     // set user name and logo
@@ -418,7 +487,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 if(newData.follow_id != undefined){
                     localStorage.setItem("follow_id", ""+newData.follow_id);
 
-                    var appID = "AIzaSyAf_oJi6fgm6-ZrVPeOVdW2DDoeu3v5SxY";
+                    // public appID
+                    // var appID = "AIzaSyAf_oJi6fgm6-ZrVPeOVdW2DDoeu3v5SxY";
+
+                    // Test app id
+                    var appID = "AIzaSyBJH4pbQEzEpxtEomcnYjlUfsiFC5nqHoQ";
+
+                    // Corporate app id
+                    // var appID = "AIzaSyCnpQlwku48ga6bR7Y3Sl94H-fazbzCgus"
                     var logged = localStorage.getItem("firebase:authUser:"+appID+":[DEFAULT]");
                     
                     if(logged) {
@@ -448,6 +524,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           for (var item in newData) {
             if(newData[item] != undefined){
                 this._user = newData[item];
+                
                 this._companyID = this._user.companyID;
                 this._publicid = "-LEiZPT-C2PyLu_YLKNU";
 

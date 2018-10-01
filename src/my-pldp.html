@@ -17,6 +17,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
@@ -52,7 +53,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="pldp-styles.html">
 
 <dom-module id="my-pldp"> 
-  <template>
+  <template is="dom-bind" id="app">
+      <firebase-auth id="auth" user="{{_user}}" provider="google" status-known="{{statusKnown}}">
+      </firebase-auth>
+
       <firebase-query
         id="motivationQuery"
         path="/myPLDP/motivation"
@@ -79,6 +83,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <style include="w3-styles"></style>
     <style include="pldp-styles">
+      :host{
+        --paper-tabs-selection-bar:{
+          border-bottom: 6px solid var(--paper-tabs-selection-bar-color, var(--paper-orange-700));
+        }
+        
+      }
+      
       .header-container{
         background-color: var(--app-status-color);
         margin-bottom: 30px;
@@ -134,8 +145,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <header class="header-container">
       <h2>Personal Leadership Development Plan (PLDP)</h2>
     </header>
-    <main>
-      <paper-tabs id="pldpTabs" selected="{{_selected}}">
+    <main class="w3-card">
+      <paper-tabs id="pldpTabs" selected="{{_selected}}" class="w3-card">
         <paper-tab>My Tasks</paper-tab>
         <paper-tab>Favorites</paper-tab>
         <paper-tab>About PLDP</paper-tab>
@@ -147,7 +158,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <div style="width: 100%; padding-top: 10px;" class="w3-row w3-center" id="spinnerMessage">{{loadingmessage}}</div>
         </div> -->
           <div class="action-container fadeInUp">
-            <h3 id="movement">Law of Movement: All movement is governed by integration of Motivation, Direction and Structure</h3>
+            <div class="w3-row w3-center" style="width: 100%;">
+              <h3 id="movement">Law of Movement: All movement is governed by integration of Motivation, Direction and Structure</h3>
+            </div>
             <div class="motivation w3-round w3-margin-small">
               <div class="w3-blue w3-row">
                 <div class="w3-padding-large w3-left">
@@ -317,6 +330,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           user: {
             type: Object
           },
+          _user:{type: Object},
           _companyid: String,
           previouspage: String,
           readPLDP:{
@@ -362,10 +376,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // var toggle = document.querySelector("paper-toggle-button");
         this.$.reminderToggle.addEventListener('change', function () {
           if (this.checked) {
-            console.log("Checked");
             // do something if when checked
           } else {
-            console.log("Un Checked");
             // do something if not checked
           }
         });
@@ -405,9 +417,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           var reminderOn = filteredArray.reminderOn;
           var notificationID = filteredArray.notificationID;
-
-          console.log("pldpID ",pldpID);
-          console.log("notificationID ",notificationID);
 
           // Get a reference to the database service
           var database = firebase.database();
@@ -493,6 +502,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.showSnackBar("Please select reminder time!");
             return;
           };
+          // Validate pldp time
+          if ((reminderDate < timeInMs)){
+              this.showSnackBar("Please enter valid reminder date and time!");
+              return;
+            };
           // Validate thought category
           if ((this.selectedFreq == undefined) || (this.selectedFreq == -1)){
             this.showSnackBar("Please select the frequency!");
@@ -512,9 +526,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var editID = sessionStorage.getItem("editID");
           var notificationIDDel = sessionStorage.getItem("notificationID");
           dateRegistered = sessionStorage.getItem("dateRegistered");
-
-          // change date to string
-          // stringDateRegistered = new Date(dateRegistered).toLocaleString();
 
           database.ref('myPLDP/'+this.moveAction.toLowerCase()+'/'+ editID).remove();
 
@@ -557,7 +568,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             stringReminderDate: strReminderDate,
             reminderFrequency: this.selectedFreq,
             moveAction: this.moveAction,
-            reminderStatus: reminderStatus
+            reminderStatus: reminderStatus,
+            uid: this._user.uid
           };
 
           // Write the new pldp's notification data
@@ -584,7 +596,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           stringReminderDate: strReminderDate,
           reminderFrequency: this.selectedFreq,
           moveAction: this.moveAction,
-          reminderStatus: reminderStatus
+          reminderStatus: reminderStatus,
+          uid: this._user.uid
         };
 
         if(this.moveAction == "Motivation"){
@@ -606,11 +619,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           database.ref().update(updates);
         }
 
+        data.postType = "PLDP Task";
+        data.clickType = "PLDP Task";
+        data.clickArea = "Save Task";
+
+				// database.ref('user-clicks').push(data);
+
         this._resetItems();
 
         this._backPLDP();
         this.showSnackBar("Action added successfully!");
       }
+
       _addPLDP (e){
         let id = e.target.id;
 
@@ -639,10 +659,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }else if(this.moveAction == "Structure"){
           var filteredArray = this.findObjectByKey(this.structureData, "myPLDPID", pldpID);
         }
-
+        
         sessionStorage.setItem("notificationID", filteredArray.notificationID);
         sessionStorage.setItem("dateRegistered", filteredArray.dateRegistered);
-
 
         this.TaskName = filteredArray.title;
         this.$.reminderToggle.checked = filteredArray.reminderOn;
@@ -664,6 +683,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.pldpBack.style.display = "flex";
         this.$.pldpSpeedDial.close();
       }
+      
       _backPLDP(){
         //  e.preventDefault();
         this.$.pldpTabs.style.display = "flex";
@@ -674,6 +694,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.reminderToggle.checked = true;
         this.selectedFreq = "";
         this.TaskName = "";
+
+        var date = new Date();
+
+        var year = this.returnDatePart(date, "year");
+        var month = this.returnDatePart(date, "month");
+        var day = this.returnDatePart(date, "day");
+        var hours = this.returnDatePart(date, "hours");
+        var minutes = this.returnDatePart(date, "minutes");
+
+        this.$.dateScheduled.value = year+"-"+month+"-"+day;
+        this.$.timeScheduled.value = hours+":"+minutes;
+
         sessionStorage.removeItem("editID");
         sessionStorage.removeItem("edit");
       }
@@ -795,6 +827,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var hours = this.returnDatePart(dateScheduled, "hours");
         var minutes = this.returnDatePart(dateScheduled, "minutes");
 
+        console.log("date here: ",year+"-"+month+"-"+day)
+
         return year+"-"+month+"-"+day;
       }
       _defaultTime(){
@@ -805,6 +839,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var day = this.returnDatePart(dateScheduled, "day");
         var hours = this.returnDatePart(dateScheduled, "hours");
         var minutes = this.returnDatePart(dateScheduled, "minutes");
+
+        console.log("time here :",hours+":"+minutes)
 
         return hours+":"+minutes;
       }

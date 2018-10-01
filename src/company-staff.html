@@ -39,6 +39,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <firebase-query
           id="users"
           path="/users"
+          order-by-child="companyID"
+          equal-to="[[_companyid]]"
           data="{{usersData}}">
         </firebase-query>
         <!-- order-by-child="companyID"
@@ -273,9 +275,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </div>
 </div>
         
-    <div class="container search-bar">
+    <!-- <div class="container search-bar">
       <paper-search-bar hide-filter-button="true" placeholder="Search for Staff Members"></paper-search-bar>
-    </div> 
+    </div>  -->
     <div class="add-users-bar w3-card-1">
       <paper-button raised class="custom indigo w3-small" on-tap="newUserDialog"><iron-icon icon="app:person-add"></iron-icon>&nbsp; Add User</paper-button>
       <paper-button raised class="custom indigo w3-small" on-tap="uploadUsersDialog"><iron-icon icon="app:group-add"></iron-icon>&nbsp; Upload Users (xls)</paper-button>
@@ -286,7 +288,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <li class="w3-bar" style="padding: 8px 0;">
             <img class="w3-third w3-padding-small w3-circle" style="width:36px; height: 36px;" src="[[_profilePhoto(item.photoURL)]]">
             <div class="w3-rest w3-bar-item">
-              <span class="w3-medium w3-text-blue">[[item.firstName]] [[item.lastName]] [[item.userID]]</span><span class$="[[_isDisabled(item.disabled)]] w3-tag w3-tiny w3-round">[[_isDisabledText(item.disabled)]]</span><br>
+              <span class="w3-medium w3-text-blue">[[item.firstName]] [[item.lastName]]</span><span class$="[[_isDisabled(item.disabled)]] w3-tag w3-tiny w3-round">[[_isDisabledText(item.disabled)]]</span><br>
               <span>[[item.email]]</span>
             </div>
             

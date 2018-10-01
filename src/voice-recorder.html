@@ -51,17 +51,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <div class="container">
         <div class="recorder-area">
             <iron-image src="../data/mic.png" style="width:auto; height:80px;" preload sizing="contain"></iron-image>
-            <pre id="log"></pre>
+            <div class="w3-center">
+                <div id="msg" class="w3-center w3-padding w3-small">Max 2 minutes.</div>
+                <div id="timeobj" class="w3-center w3-padding w3-xxlarge"></div>
+                <div id="log" class="w3-center w3-padding"></div>
+            </div>
+            <!-- <pre id="log"></pre> -->
             <br>
             <div class="record-btns">
                 <paper-button id="startrecord" style="margin-right: 16px;" class="maroon" on-tap="startRecording" raised>record</paper-button>
                 <paper-button style="background:#eaeaea;" id="stoprecord" class="w3-text-red" on-tap="stopRecording" disabled raised>stop</paper-button>
             </div>
-            <h3>Recordings</h3>
-            <div style="width:100%;" id="hideRemoveRecording" hidden>
-                <paper-button style="color:#810029; background:#eaeaea; margin-bottom: 16px;" raised on-tap="removeRecordings">Remove Recording</paper-button>
-            </div>
+            <h4 class="w3-center">Recording</h4>
             <div id="recordingslist" class="record-btns"></div>
+            <div style="width:100%;" id="hideRemoveRecording" hidden class="w3-center w3-padding">
+                <paper-button style="color:#810029; background:#eaeaea; margin-bottom: 6px;" raised on-tap="removeRecordings">Delete</paper-button>
+            </div>
         </div>  
     </div>
     </template>
@@ -88,6 +93,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             user: {
             type: Object
             },
+            timer: Number,
             _companyid: String,
             previouspage: String,
         };
@@ -106,6 +112,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
     //   recorder js functions
     init() {
+        var that = this;
+        
         try {
         // webkit shim
         // window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -124,16 +132,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
         else
         {
-            this.__log("No web audio support in this browser!");
-            // alert('No web audio support in this browser 0!');
+            // this.__log("No web audio support in this browser!");
+            alert('No web audio support in this browser!');
             return;
         }
             
         processor = audio_context.createScriptProcessor(4096, 2, 2);
         processor.connect(audio_context.destination);
         } catch (e) {
-            this.__log('No web audio support in this browser! '+e);
-            // alert('No web audio support in this browser 1! '+e);
+            // this.__log('No web audio support in this browser! ');
+            alert('No web audio support in this browser!');
         }
     
         if (navigator.getUserMedia) {
@@ -141,16 +149,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             navigator.getUserMedia({audio: true}, this.startUserMedia, function(e) {
                 this.__log('No live audio input');
             });
+
+            this.timerFunction();
+
+            // let recorded = this.wait(8000).then(
+            //     () =>{that.stopRecording()}
+            // );
+
         } else if (navigator.webkitGetUserMedia) {
             this.__log('Recording...');    
             navigator.webkitGetUserMedia({audio: true}, this.startUserMedia, function(e) {
                 this.__log('No live audio input');
             });
+
+            this.timerFunction();
+
+            // let recorded = this.wait(8000).then(
+            //     () =>{that.stopRecording()}
+            // );
         } else if (navigator.mediaDevices.getUserMedia) {
             this.__log('Recording...');    
             navigator.mediaDevices.getUserMedia({audio: true}).then(this.startUserMedia).catch(function(e) {
                 this.__log('No live audio input');
             });
+
+            this.timerFunction();
+
+            // let recorded = this.wait(8000).then(
+            //     () =>{that.stopRecording()}
+            // );
         } else {
             this.__log('No user media support');
         }
@@ -212,6 +239,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var log = this.$.log;
         var recordingslist = this.$.recordingslist;
         this.$.hideRemoveRecording.style = 'display: none;';
+        var that = this;
 
         log.innerHTML = "";
         audioBuffer = [];
@@ -224,6 +252,48 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         button.nextElementSibling.disabled = false;
     }
 
+    wait(delayInMS) {
+        return new Promise(resolve => setTimeout(resolve, delayInMS));
+    }
+
+    timerFunction(){
+        var timeobj = Polymer.dom(this.root).querySelector('#timeobj');
+        // Get starting date and time
+        var timeMillisec = new Date();
+        var countDownDate = new Date(timeMillisec).getTime();
+        var that = this;
+
+        // Update the count down every 1 second
+        this.timer = setInterval(function() {
+            // Get todays date and time
+            var now = new Date().getTime();
+            
+            // Find the distance between now and the count down date
+            var distance = now - countDownDate;
+            
+            // Time calculations for minutes and seconds
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            var minutesText = "";
+            if(minutes == 0) minutesText = "00<sup>m</sup>";
+            else minutesText = "0"+minutes+"<sup>m</sup>"
+
+            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            var secondsText = "";
+            if(seconds < 10) secondsText = "0"+seconds;
+            else secondsText = seconds;
+            
+            // Output the result in an element with id="demo"
+            timeobj.innerHTML = minutesText +" " + secondsText + "<sup>s</sup>";
+            
+            // If the count down is finished, write some text 
+            if (minutes == 2) {
+                clearInterval(that.timer);
+                that.stopRecording();
+            }
+            
+        }, 1000);
+    }
+
     startRecordingAftrInit() {
         audio_context.resume();
         recorder && recorder.record();
@@ -234,10 +304,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var button = this.$.stoprecord;
 
         recorder && recorder.stop();
+        // stop timer
+        clearInterval(this.timer);
+
         button.disabled = true;
 
         button.previousElementSibling.disabled = false;
-        this.__log('Stopped recording.\n');
+        this.__log('Done');
         
         localStream.getAudioTracks()[0].stop();
         
@@ -271,6 +344,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         var uploadTask = storageRef.child('podcasts/' + filename).put(audioBuffer[0], metadata);
 
+        console.log("storage ref: ", storageRef);
+
         // Listen for state changes, errors, and completion of the upload.
         uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
         function(snapshot) {
@@ -286,6 +361,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 break;
             }
         }, function(error) {
+            console.log("error uploading: ", error)
 
         // A full list of error codes is available at
         // https://firebase.google.com/docs/storage/web/handle-errors
