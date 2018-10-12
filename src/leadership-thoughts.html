@@ -10,12 +10,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="manifest" href="/manifest.json">
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
 
 <link rel="lazy-import" href="view-thoughts.html">
+<link rel="lazy-import" href="view-articles.html">
+<link rel="lazy-import" href="view-podcasts.html">
+<link rel="lazy-import" href="leadership-videos.html">
+<link rel="import" href="app-icons.html">
+
 
 <dom-module id="leadership-thoughts">
   <template>
-    <style>
+    <style include="w3-styles">
       @media screen and (max-width: 1010px){
         #videoPlayer{
           width: 100%;
@@ -46,9 +52,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           height: auto;
         }
       }
+
+      paper-button{
+        border-radius: 0px!important;
+        padding: 8px!important;
+      }
     </style>
 
-    <view-thoughts company="[[company]]" user="[[user]]" _companyid="[[_companyid]]" thoughtype="mythoughts" placeholder="Search for My Messages"></view-thoughts>
+    <div>
+        <div class="w3-row w3-white w3-padding-small"><h4>MY POSTS</h4></div>
+        <div class="w3-center w3-black" style="background-color:#222d32!important;">
+          <paper-button pagename="view-thoughts" tabname="messages" class="w3-bar-item w3-button tablink w3-red w3-small w3-hover-red " on-tap="openPosts"><iron-icon icon="smapp:person-pin"></iron-icon><br>Messages</paper-button>
+          <paper-button pagename="view-articles" tabname="articles" class="w3-bar-item w3-button tablink w3-small w3-hover-red " on-tap="openPosts"><iron-icon icon="smapp:remove-red-eye"></iron-icon><br>Articles</paper-button>
+          <paper-button pagename="view-podcasts" tabname="podcasts" class="w3-bar-item w3-button tablink w3-small w3-hover-red " on-tap="openPosts"><iron-icon icon="smapp:mic"></iron-icon><br>Podcasts</paper-button>
+          <paper-button pagename="leadership-videos" tabname="videos" class="w3-bar-item w3-button tablink w3-small w3-hover-red " on-tap="openPosts"><iron-icon icon="smapp:videocam"></iron-icon><br>Videos</paper-button>
+        </div>
+        
+        <div id="messages" class="tab">
+          <view-thoughts company="[[company]]" user="[[user]]" _companyid="[[_companyid]]" thoughtype="mythoughts" placeholder="Search for My Messages"></view-thoughts>
+        </div>
+      
+        <div id="articles" class="tab" style="display:none">
+          <view-articles company="[[company]]" user="[[user]]" _companyid="[[_companyid]]" thoughtype="articles" mypost="[[mypost]]" placeholder="Search for Articles"></view-articles> 
+        </div>
+      
+        <div id="podcasts" class="tab" style="display:none">
+          <view-podcasts user="[[user]]" _companyid="[[_companyid]]" thoughtype="podcasts" mypost="[[mypost]]" placeholder="Search for Podcasts"></view-podcasts>
+        </div>
+
+        <div id="videos" class="tab" style="display:none">
+          <leadership-videos name="leadership-videos" _companyid="[[_companyid]]" user="[[user]]" mypost="[[mypost]]"></leadership-videos>
+        </div>
+      </div>
       
   </template>
 
@@ -60,6 +95,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           user: {
               type: Object
           },
+          mypost:{
+            type: Boolean,
+            value: true
+          },
           company: {
             type: Object
           },
@@ -69,11 +108,39 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       connectedCallback() { 
         super.connectedCallback();
         var resolvedPageUrl = this.resolveUrl('view-thoughts.html');
+        this.openModule(resolvedPageUrl);
+      }
+
+      openModule(resolvedPageUrl){
         Polymer.importHref(
-        resolvedPageUrl,
-        null,
-        'view-thoughts.html',
-        true);
+          resolvedPageUrl,
+          null,
+          'view-thoughts.html',
+          true
+        );
+      }
+
+      openPosts(evt) {
+        var tabName = evt.currentTarget.getAttribute('tabname');
+        var pageName = evt.currentTarget.getAttribute('pagename');
+        var tab = Polymer.dom(this.root).querySelector('#'+tabName);
+
+        var i, x, tablinks;
+        x = Polymer.dom(this.root).querySelectorAll('.tab')
+
+        for (i = 0; i < x.length; i++) {
+            x[i].style.display = "none";
+        }
+        
+        tablinks = Polymer.dom(this.root).querySelectorAll('.tablink');
+        for (i = 0; i < x.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" w3-red", "");
+        }
+        tab.style.display = "block";
+        evt.currentTarget.className += " w3-red";
+
+        var resolvedUrl = this.resolveUrl(pageName+".html");
+        this.openModule(resolvedUrl);
       }
     }
 

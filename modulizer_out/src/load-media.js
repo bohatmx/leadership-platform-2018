@@ -1,0 +1,135 @@
+/**
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+import { Element } from '../../../@polymer/polymer/polymer-element.js';
+
+import '../../../@polymer/paper-icon-button/paper-icon-button.js';
+import '../../../@polymer/paper-spinner/paper-spinner.js';
+import './app-icons.js';
+import '../../../photo-gallery/anime.js';
+import { html } from '../../../@polymer/polymer/lib/utils/html-tag.js';
+class LoadMedia extends Element {
+  static get template() {
+    return html`
+    <style>
+      :host{
+        display: block;
+        
+      }
+      paper-icon-button {
+        color: var(--app-secondary-text);
+      --paper-icon-button-ink-color: var(--app-secondary-text);;
+      }
+      .viewer{
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        position: absolute;
+        width: 100%;
+        min-height: 70vh;
+        height: 100%;
+        z-index: 2400;
+        background-color: #000;
+        user-select: none;
+      }
+      .iframeViewer{
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        height: 450px;
+        width: 100%;
+        max-height: 100%;
+        margin: 20px auto;
+      }
+      .close{
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        background-color: #000;
+        padding: 16px;
+      }
+
+      .hide{
+        display: none;
+      }
+      
+    </style>
+    <div class="viewer" id="viewer">
+      <div class="close">
+        <paper-icon-button icon="app:arrow-back" on-tap="close"></paper-icon-button>
+      </div>
+      <!-- <div id="overlay" class="overlay"> -->
+      <paper-spinner id="spinner" active="[[isloading]]">Loading...</paper-spinner>
+      <!-- </div> -->
+      <iframe class="iframeViewer" id="iframeViewer" src="[[loadsrc]]" autoplay="false" frameborder="0" webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen="" on-load="_closeSpinner">
+      </iframe>
+    </div>
+`;
+  }
+
+  static get is() { return 'load-media'; }
+  ready(){
+    super.ready();
+  }
+  static get properties() {
+    return {
+      user: {
+        type: Object
+      },
+      _companyid: String,
+      loadsrc: {
+        type: String,
+        value: ""
+      },
+      isloading: {
+        type: Boolean,
+        value: true
+      }
+    };
+  }
+  connectedCallback() { 
+    super.connectedCallback();
+  }
+  _closeSpinner(){
+    // let overlay = this.$.overlay;
+    // overlay.className = 'hide';
+    this.isloading = false;
+  }
+  close () {
+    let iframeViewer = this.$.iframeViewer
+    let viewer = this.$.viewer
+    let pos = sessionStorage.getItem('pos')
+
+    this.anime({
+      targets: viewer,
+      opacity: [1, 0],
+      complete () {
+        iframeViewer.src = '';
+        
+        document.body.style.overflow = 'auto';
+        
+        window.scrollTo(0, pos);
+        viewer.className = 'hide';
+      }
+    })
+    // this.selected = -1
+    // this.isFullScreen = false
+    // this.toggleScrollBar(true)
+  }
+
+  anime (properties) {
+    let timing = { duration: 250, easing: 'easeInOutQuad' }
+    window.anime(Object.assign(timing, properties))
+  }
+}
+
+window.customElements.define(LoadMedia.is, LoadMedia);

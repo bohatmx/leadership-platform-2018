@@ -1,0 +1,674 @@
+/**
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+/* <link rel="import" href="../bower_components/polymer/polymer-element.html"> */
+/* Icons */
+/* Iron pages */
+/* Firebase Auth */
+/* <link rel="import" href="/bower_components/polymerfire/firebase-auth.html"> */
+/*
+  FIXME(polymer-modulizer): the above comments were extracted
+  from HTML and may be out of place here. Review them and
+  then delete this comment!
+*/
+import '../../../@polymer/paper-button/paper-button.js';
+
+import '../../../gold-password-input/gold-password-input.js';
+import '../../../@polymer/paper-input/paper-input.js';
+import '../../../@polymer/iron-icon/iron-icon.js';
+import '../../../@polymer/iron-image/iron-image.js';
+import '../../../@polymer/iron-iconset/iron-iconset.js';
+import './app-icons.js';
+import '../../../@polymer/iron-pages/iron-pages.js';
+import '../../../@polymer/iron-selector/iron-selector.js';
+import './term-condition.js';
+import './w3-styles.js';
+import { Polymer } from '../../../@polymer/polymer/lib/legacy/polymer-fn.js';
+import { html } from '../../../@polymer/polymer/lib/utils/html-tag.js';
+import { importHref } from '../../../@polymer/polymer/lib/utils/import-href.js';
+Polymer({
+  _template: html`
+    <firebase-auth id="auth" user="{{user}}" provider="google" status-known="{{statusKnown}}" on-error="handleError">
+    </firebase-auth>
+
+    <style>
+        :host {
+          display: block;
+          -webkit-background-size: cover;
+          -moz-background-size: cover;
+          -o-background-size: cover;
+          background-size: cover!important;
+          background-color: #fff;
+          min-height: 100vh;
+          height: 100%;
+
+            /* Label and underline color when the input is not focused */
+            --paper-input-container-color: #cc0041;
+
+            /* Label and underline color when the input is focused */
+            --paper-input-container-focus-color: #cc0041;
+
+            /* Label and underline color when the input is invalid */
+            --paper-input-container-invalid-color: red;
+        }
+
+        .sign-up-controls{
+          /* Label and underline color when the input is not focused */
+          --paper-input-container-color: #2196F3;
+
+          /* Label and underline color when the input is focused */
+          --paper-input-container-focus-color: #2196F3;
+
+          /* Label and underline color when the input is invalid */
+          --paper-input-container-invalid-color: #cc0041;
+        }
+
+        .w3-btn{
+            min-width: 130px;
+        }
+        .login-btn{
+            width: 80%;
+        }
+        .other-logins{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+        }
+        /* ============ Snack Bar ======================== */
+        #snackbar {visibility: hidden;min-width: 250px;margin-left: -120px;background-color: var(--paper-green-400);color: #fff;text-align: center;border-radius: 2px;padding: 10px;position: fixed;
+        z-index: 99999999999;left: 40%;bottom: 30px;font-size: 14px;white-space: pre-wrap;}
+        #snackbar.show {visibility: visible;-webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;animation: fadein 0.5s, fadeout 0.5s 2.5s;}
+        @-webkit-keyframes fadein {from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;}
+        }
+        @keyframes fadein {from {bottom: 0; opacity: 0;}to {bottom: 30px; opacity: 1;}
+        }
+        @-webkit-keyframes fadeout {from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;}
+        }
+        @keyframes fadeout {from {bottom: 30px; opacity: 1;}to {bottom: 0; opacity: 0;}
+        }
+    </style>
+
+    <style include="w3-styles">
+
+        iron-pages{
+            min-height: 100vh;
+            height: 100%;
+        }
+        .sign-in{
+            max-width: 400px;
+            /* width: 100%; */
+        }
+        iron-image{
+            width: 100%;
+            height: 100px;
+        }
+        .ldp-logo{
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: center;
+        }
+    </style>
+    <app-location route="{{route}}" use-hash-as-path=""></app-location>
+    <app-route route="{{route}}" pattern="/lead/:follow_id/:nextpage" data="{{routeData}}" tail="{{subroute}}">
+   </app-route>
+
+     <!-- list/detail pages -->
+     <iron-pages selected="{{nextpage}}" attr-for-selected="page-name">
+        <div page-name="options">
+          <section style="min-width: 300px;" class="w3-display-middle w3-card w3-padding-24 w3-padding">
+              <section class="ldp-logo">
+                  <iron-image src="../images/glp-logo.png" preload="" sizing="contain"></iron-image>
+              </section>
+              <section>
+                <section>
+                  <paper-input autofocus="" id="email_input" name="email_input" always-float-label="" label="Email" type="email" required="" auto-validate="" tabindex="0"></paper-input>
+                  <gold-password-input class="w3-margin-bottom" id="passwordinput" name="passwordinput" always-float-label="" label="Password" reveal="" suffix="" required="" on-keypress="enterPressAlert"></gold-password-input>
+                  <div class="other-logins w3-margin-bottom">
+                    <paper-button style="min-width: 205px;" class="w3-btn w3-ripple w3-theme w3-round-large w3-padding-16" on-tap="signInEmail">Login</paper-button>
+                  </div>
+                </section>
+                <section class="w3-row-padding other-logins w3-padding">
+                  <paper-button style="min-width: 205px;" raised="" on-tap="signInGoogle" class="w3-btn w3-ripple w3-red w3-round-large w3-padding-16"><iron-iconset name="mygoogle" icons="google" src="/images/google-plus.png" size="24" width="24" class="w3-margin-right">
+                  </iron-iconset>
+                  <iron-icon icon="mygoogle:google" style="background-repeat: no-repeat;" alt="GLP"></iron-icon> Sign in with Google
+                  </paper-button>
+                </section>
+                <section class="w3-row-padding w3-padding-24 w3-center w3-text-blue">
+                  <div class="w3-row other-logins w3-margin-bottom w3-rest">
+                    <div class="w3-text-grey">
+                      <p class="w3-small">You don't have an account?</p>
+                    </div>
+                    <paper-button class="w3-ripple w3-round-large w3-theme" on-tap="signUpPage">Sign Up</paper-button>
+                  </div>
+                  <div class="w3-row">
+                    <a href="#" on-tap="resetPage" style="text-decoration: none;">Forgot your password?</a>
+                  </div>
+                </section>
+              </section>
+          </section>
+        </div>
+        <div page-name="send-reset">
+          <section style="min-width: 300px;" class="w3-display-middle w3-card w3-padding-24 w3-padding sign-in">
+            <section class="ldp-logo">
+              <iron-image src="../images/glp-logo.png" preload="" sizing="contain"></iron-image>
+            </section>
+            <section class="w3-center">
+              <div class="w3-text-dark-grey w3-padding-16">
+                <h3>Forgot your password?</h3>
+              </div>
+              <div class="w3-text-grey">
+                <p>To reset password. enter your email, presss the button and check mail to follow instructions.</p>
+              </div>
+            </section>
+            <section>
+              <paper-input autofocus="" id="resetemail_input" name="resetemail_input" always-float-label="" label="Enter your Email" type="email" required="" auto-validate="" tabindex="0" class="sign-up-controls"></paper-input>
+              <div class="other-logins w3-margin-top">
+                <paper-button style="min-width: 205px;" class="w3-btn w3-ripple w3-blue w3-round-large w3-padding-16" on-tap="sendResetPassword">Reset Password</paper-button>
+              </div>
+            </section>
+
+            <section class="w3-row-padding w3-padding-24 w3-center w3-text-blue">
+              <a href="#" on-tap="optionsPage" style="text-decoration: none;">BACK</a>
+            </section>
+          </section>
+        </div>
+        <div page-name="sign-up">
+          <section style="min-width: 300px;" class="w3-display-middle w3-card w3-padding-24 w3-padding">
+              <section class="ldp-logo">
+                  <iron-image src="../images/glp-logo.png" preload="" sizing="contain"></iron-image>
+              </section>
+              <section>
+                <section class="w3-center">
+                  <div class="w3-text-dark-grey w3-padding-8">
+                    <h3>Sign Up</h3>
+                  </div>
+                </section>
+                <section>
+                  <paper-input class="sign-up-controls" autofocus="" id="firstname" name="firstname" always-float-label="" label="First Name" type="text" required="" auto-validate="" tabindex="0"></paper-input>
+                  <paper-input class="sign-up-controls" autofocus="" id="lastname" name="lastname" always-float-label="" label="Last Name" type="text" required="" auto-validate=""></paper-input>
+                  <paper-input class="sign-up-controls" autofocus="" id="email" name="email" always-float-label="" label="Email" type="email" required="" auto-validate=""></paper-input>
+                  <gold-password-input class="sign-up-controls w3-margin-bottom" id="newpassword" name="newpassword" always-float-label="" label="Password" reveal="" suffix="" required="" on-keypress="enterPressAlert"></gold-password-input>
+                  <div class="w3-text-grey w3-small">
+                    <p>By clicking Sign Up, you agree to <a href="#" on-tap="termsPage" style="text-decoration: none; cursor: pointer;" class="w3-text-blue">GLP's Terms and Conditions</a> .</p>
+                  </div>
+                  <div class="other-logins w3-margin-top">
+                    <paper-button style="min-width: 205px;" class="w3-btn w3-ripple w3-blue w3-round-large w3-padding-16" on-tap="signUp">Sign Up</paper-button>
+                  </div>
+                </section>
+                <section class="w3-row-padding w3-padding w3-center">
+                  <div class="w3-row w3-text-grey w3-small">Or</div>
+                </section>
+                <section class="w3-row-padding w3-padding-16 w3-center w3-text-blue">
+                  <a href="#" on-tap="optionsPage" style="text-decoration: none;">LOG IN</a>
+                </section>
+              </section>
+          </section>
+        </div>
+        <div page-name="terms">
+          <term-condition nextpage="{{nextpage}}"></term-condition>
+        </div>
+    </iron-pages>
+    <div id="snackbar"></div>
+`,
+
+  is: 'sign-in',
+
+  properties: {
+    user: {
+      type: Object
+    },
+    statusKnown: {
+        type: Object
+    },
+    nextpage: {
+      type: String,
+      value: 'options'
+    },
+    base: {
+      type: String,
+      value: window.location.href
+    },
+    url: {
+      type: String,
+      value: '#/lead/user/options'
+    },
+    routeData: {
+      type: String,
+      observer: "_onrouteData"
+    }
+},
+
+  _onrouteData: function(newData, oldData){
+    if(newData != undefined){
+      if(newData.nextpage != undefined){
+        if(newData.follow_id != undefined) localStorage.setItem("follow_id", ""+newData.follow_id);
+
+        this.nextpage = newData.nextpage;
+      }
+    }
+            // console.log(newData.nextpage);
+        },
+
+  handleError: function(e) {
+      console.log(e.detail);
+  },
+
+  enterPressAlert: function(e){
+    var code = (e.keyCode ? e.keyCode : e.which);
+    if(code == 13) { //Enter keycode
+      this.signInEmail();
+    }
+  },
+
+  setInputFocus: function(){
+    this.$.email_input.focus();
+  },
+
+  signInGoogle: function(){
+    let isError = false;
+    let errorMessage = "";
+    var that = this;
+
+    return this.$.auth.signInWithPopup().then(function(response){
+      var profile = firebase.auth().currentUser;
+      var name = profile.displayName;
+      var email = profile.email;
+      var photoURL = profile.photoURL;
+      var uid = profile.uid;
+
+      var database = firebase.database();
+      database.ref('/users').orderByChild("uid").equalTo(uid).once('value').then((data)=>{
+        var isUser = data.val();
+        
+        if(isUser){
+          // console.log("user logged in");
+          var userLoginData = {
+            uid: uid,
+            name: name,
+            email: email,
+            dateRegistered: Date.now(),
+            clickType:"lastlogin"
+          }
+
+          if(isUser.uid == "cEgC7UgFzJSuQ9lUpQtwvex0VDU2"){
+            console.log("Is OneConnect User");
+          }
+
+          database.ref('user-lastlogin').push(userLoginData);
+        }else{
+          // get date and time
+          var timeInMs = Date.now();
+          var datetime = new Date(timeInMs);
+          // format date
+          datetime = that._formate_date(datetime);
+
+          var userID = database.ref().child('users').push().key;
+          var data = {
+            "companyID" : "-LEiZPT-C2PyLu_YLKNU",
+            "companyName" : "Global Leadership Platform",
+            "dateRegistered" : timeInMs,
+            "email" : email,
+            "firstName" : name,
+            "lastName" : "",
+            "password" : "",
+            "stringDateRegistered" : datetime,
+            "userDescription" : "I-Leader",
+            "uid" : uid,
+            "userID" : userID,
+            "userType" : 3,
+            "inviteSent": true,
+            "companyID_userType" : "-LEiZPT-C2PyLu_YLKNU_"+3,
+            "photoURL": photoURL
+          }
+
+          // Write the new rating data
+          var updates = {};
+          updates['/users/' + userID] = data;
+
+          database.ref().update(updates, function(error) {
+            if (error) {
+              // The write failed...
+              console.log("Error updating new user 1");
+            } else {
+              // Data saved successfully!
+              window.location = "./i-lead";
+              console.log("New user 1 updated successfully.")
+            }
+          });
+
+          var userLoginData = {
+            uid: uid,
+            name: name,
+            email: email,
+            dateRegistered: Date.now(),
+            clickType:"lastlogin"
+          }
+
+          database.ref('user-lastlogin').push(userLoginData);
+        }
+                    
+                }).catch(function(error) {
+                    console.log("Error updating user notifications:", error);
+      });
+
+      localStorage.setItem("LoggedIn", true);
+    }).catch(function(error) {
+        localStorage.setItem("LoggedIn", false);
+        // Handle Errors here.
+        var errorCode = error.code;
+        errorMessage = error.message;
+        isError = true;
+        // ...
+    });
+
+    if(isError == true){
+      this.showSnackBar(errorMessage);
+      return;
+    }
+    this.nextpage="options";
+  },
+
+  signInEmail: function(){
+    var email = this.$.email_input.value;
+    var password = this.$.passwordinput.value;
+    var emailVal = this.$.email_input.validate();
+    var passVal = this.$.passwordinput.validate();
+
+    var that = this;
+
+    if(!email || !emailVal){
+      this.showSnackBar("Email is required!");
+      return;
+    }else if(!password || !passVal){
+      this.showSnackBar("Password is required!");
+      return;
+    }else{
+      sessionStorage.setItem("loginError", "");
+      sessionStorage.setItem("isError", false);
+
+      firebase.auth().signInWithEmailAndPassword(email, password).then(function(response){
+        that.$.email_input.value = "";
+        that.$.passwordinput.value = "";
+        
+        localStorage.setItem("LoggedIn", true);
+
+        var profile = firebase.auth().currentUser;
+        var name = profile.displayName;
+        var email = profile.email;
+        var photoURL = profile.photoURL;
+        var uid = profile.uid;
+
+        if(name == null) name = email;
+
+        var database = firebase.database();
+        database.ref('/users').orderByChild("uid").equalTo(uid).once('value').then((data)=>{
+        var isUser = data.val();
+          
+          if(isUser){
+            // console.log("user logged in 11111");
+            var userLoginData = {
+              uid: uid,
+              name: name,
+              email: email,
+              dateRegistered: Date.now(),
+              clickType:"lastlogin"
+            }
+
+            console.log("user: ",isUser)
+
+            if(isUser.uid == "cEgC7UgFzJSuQ9lUpQtwvex0VDU2"){
+              console.log("Is OneConnect User");
+            }
+
+            database.ref('user-lastlogin').push(userLoginData);
+          }else{
+            // get date and time
+            var timeInMs = Date.now();
+            var datetime = new Date(timeInMs);
+            // format date
+            datetime = that._formate_date(datetime);
+
+            var userID = database.ref().child('users').push().key;
+            var data = {
+              "companyID" : "-LEiZPT-C2PyLu_YLKNU",
+              "companyName" : "Global Leadership Platform",
+              "dateRegistered" : timeInMs,
+              "email" : email,
+              "firstName" : name,
+              "lastName" : "",
+              "password" : "",
+              "stringDateRegistered" : datetime,
+              "userDescription" : "I-Leader",
+              "uid" : uid,
+              "userID" : userID,
+              "userType" : 3,
+              "inviteSent": true,
+              "companyID_userType" : "-LEiZPT-C2PyLu_YLKNU_"+3,
+              "photoURL": photoURL
+            }
+
+            // Write the new rating data
+            var updates = {};
+            updates['/users/' + userID] = data;
+
+            database.ref().update(updates, function(error) {
+              if (error) {
+                // The write failed...
+                console.log("Error updating new user 2");
+              } else {
+                // Data saved successfully!
+                window.location = "./i-lead";
+                console.log("New user 2 updated successfully.")
+              }
+            });
+
+            var userLoginData = {
+              uid: uid,
+              name: name,
+              email: email,
+              dateRegistered: Date.now(),
+              clickType:"lastlogin"
+            }
+
+            database.ref('user-lastlogin').push(userLoginData);
+          }
+          
+        }).catch(function(error) {
+          console.log("Error updating user notifications:", error);
+        });
+      }).catch(function(error) {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        localStorage.setItem("LoggedIn", false);
+        sessionStorage.setItem("loginError", errorMessage);
+        sessionStorage.setItem("isError", true);
+
+        that.showSnackBar(errorMessage);
+        that.$.email_input.value = "";
+        that.$.passwordinput.value = "";
+        that.nextpage="options";
+        // ...
+      });
+      
+    } 
+  },
+
+  resetPage: function(){
+    this.nextpage="send-reset";
+  },
+
+  optionsPage: function(){
+    this.nextpage="options";
+  },
+
+  signUpPage: function(){
+    this.nextpage="sign-up";
+  },
+
+  termsPage: function(){
+    var resolvedPageUrl = this.resolveUrl('term-condition.html');
+    importHref(
+      resolvedPageUrl,
+      null,
+      'term-condition.html',
+      true
+    );
+    this.nextpage="terms";
+  },
+
+  sendResetPassword: function(){
+    var email = this.$.resetemail_input.value;
+    var emailVal = this.$.resetemail_input.validate();
+
+    var that = this;
+
+    if(!email || !emailVal){
+      this.showSnackBar("Email is required!");
+      return;
+    }
+
+    var actionCodeSettings = {
+      url: window.location.origin
+    };
+
+    firebase.auth().sendPasswordResetEmail(email, actionCodeSettings).then(function(){
+        that.$.resetemail_input.value = "";
+        that.showSnackBar("A password reset link has been mailed to your account.");
+        
+        that.$.email_input.value = "";
+        that.$.passwordinput.value = "";
+        that.nextpage="options";
+      }).catch(function(error) {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+
+        that.showSnackBar(errorMessage);
+      });
+    
+  },
+
+  signUp: function(){
+    var firstname = this.$.firstname.value;
+    var lastname = this.$.lastname.value;
+    var email = this.$.email.value;
+    var emailVal = this.$.email.validate();
+
+    var password = this.$.newpassword.value;
+    var passVal = this.$.newpassword.validate();
+
+    var that = this;
+
+    // Validate firstname
+    if ((firstname == undefined) || (firstname.trim() == "")){
+      this.showSnackBar("Please enter the First name!");
+      return;
+    }
+
+    // Validate lastname
+    if ((lastname == undefined) || (lastname.trim() == "")){
+      this.showSnackBar("Please enter the Last name!");
+      return;
+    }
+
+    if(!email || !emailVal){
+      this.showSnackBar("Email is required!");
+      return;
+    }else if(!password || !passVal){
+      this.showSnackBar("Password is required!");
+      return;
+    }else{
+      firebase.auth().createUserWithEmailAndPassword(email, password).then(function(user){
+        var uid = user.uid;
+        // get date and time
+        var timeInMs = Date.now();
+        var datetime = new Date(timeInMs);
+        // format date
+        datetime = that._formate_date(datetime);
+
+        var database = firebase.database();
+        var userID = database.ref().child('users').push().key;
+
+        var data = {
+          "companyID" : "-LEiZPT-C2PyLu_YLKNU",
+          "companyName" : "Global Leadership Platform",
+          "dateRegistered" : timeInMs,
+          "email" : email,
+          "firstName" : firstname,
+          "lastName" : lastname,
+          "password" : password,
+          "stringDateRegistered" : datetime,
+          "userDescription" : "I-Leader",
+          "uid" : uid,
+          "userID" : userID,
+          "userType" : 3,
+          "inviteSent": true,
+          "companyID_userType" : "-LEiZPT-C2PyLu_YLKNU_"+3
+        }
+
+        // Write the new rating data
+        var updates = {};
+        updates['/users/' + userID] = data;
+
+        that.$.firstname.value = "";
+        that.$.lastname.value = "";
+        that.$.email.value = "";
+        that.$.newpassword.value = "";
+
+        database.ref().update(updates, function(error) {
+          if (error) {
+            // The write failed...
+            console.log("Error updating new user 3");
+          } else {
+            // Data saved successfully!
+            window.location = "./i-lead";
+            console.log("New user 3 updated successfully.")
+          }
+        });
+
+        database.ref('user-signup').push(data);
+
+          //you can save the user data here.
+      }).catch(function(error) {
+        // Handle Errors here.
+        var errorCode = error.code; 
+        var errorMessage = error.message;
+      });
+      
+    }
+    
+  },
+
+  showSnackBar: function(msg){
+    var x = this.$.snackbar;
+    x.innerHTML = msg;
+    x.className = "show";
+    setTimeout(function(){ x.className = x.className.replace("show", ""); }, 5000);
+  },
+
+  _formate_date: function(dt){
+            var date = new Date(dt);
+            var day = date.getDate() < 10 ? '0'+date.getDate() : date.getDate();
+            var hours = date.getHours() < 10 ? '0'+date.getHours() : date.getHours();
+            var minutes = date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes();
+            var locale = 'en-us';
+            var month = date.toLocaleString(locale, { month: "long" });
+            var year = date.getFullYear();
+            var am_pm = date.getHours() >= 12 ? "PM" : "AM"
+
+            return day+' '+month+' '+year+' '+hours+':'+minutes+" "+am_pm;
+        }
+});
+
+// firebase.auth().onAuthStateChanged(function(user) {
+//   // console.log(user);
+// });

@@ -1,0 +1,879 @@
+/**
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+/* Iron pages */
+/* Firebase Auth */
+/* Firebase Query */
+/* <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html"> */
+/*
+  FIXME(polymer-modulizer): the above comments were extracted
+  from HTML and may be out of place here. Review them and
+  then delete this comment!
+*/
+import { Element } from '../../../@polymer/polymer/polymer-element.js';
+
+import '../../../@polymer/iron-pages/iron-pages.js';
+import '../../../@polymer/iron-selector/iron-selector.js';
+import '../../../@polymer/iron-icons/iron-icons.js';
+import '../../../@polymer/paper-input/paper-textarea.js';
+import '../../../@polymer/paper-input/paper-input.js';
+import '../../../@polymer/paper-button/paper-button.js';
+import '../../../@polymer/paper-toggle-button/paper-toggle-button.js';
+import '../../../@polymer/paper-dropdown-menu/paper-dropdown-menu.js';
+import '../../../@polymer/iron-form/iron-form.js';
+import '../../../@polymer/paper-dialog/paper-dialog.js';
+import '../../../datetime-picker/datetime-picker.js';
+import '../../../datetime-picker/date-picker.js';
+import '../../../datetime-picker/time-picker.js';
+import '../../../@polymer/paper-icon-button/paper-icon-button.js';
+import '../../../@polymer/paper-tabs/paper-tabs.js';
+import '../../../@polymer/paper-tabs/paper-tab.js';
+import '../../../@polymer/paper-spinner/paper-spinner.js';
+import '../../../@polymer/paper-item/paper-item.js';
+import '../../../paper-fab-speed-dial/paper-fab-speed-dial.js';
+import '../../../paper-fab-speed-dial/paper-fab-speed-dial-action.js';
+import '../../../@polymer/paper-listbox/paper-listbox.js';
+import '../../../polymerfire/firebase-app.js';
+import '../../../polymerfire/firebase-auth.js';
+import '../../../polymerfire/firebase-query.js';
+import '../../../polymerfire/firebase-database-behavior.js';
+import './about-pldp.js';
+import './pldp-favorites.js';
+import './my-icons.js';
+import './pldp-styles.js';
+import { dom } from '../../../@polymer/polymer/lib/legacy/polymer.dom.js';
+const $_documentContainer = document.createElement('template');
+
+$_documentContainer.innerHTML = `<dom-module id="my-pldp"> 
+  <template is="dom-bind" id="app">
+      <firebase-auth id="auth" user="{{_user}}" provider="google" status-known="{{statusKnown}}">
+      </firebase-auth>
+
+      <firebase-query id="motivationQuery" path="/myPLDP/motivation" order-by-child="journalUserID_Active" equal-to="[[user.userID]]_true" data="{{motivationData}}">
+      </firebase-query>
+
+      <firebase-query id="directionQuery" path="/myPLDP/direction" order-by-child="journalUserID_Active" equal-to="[[user.userID]]_true" data="{{directionData}}">
+      </firebase-query>
+
+      <firebase-query id="structureQuery" path="/myPLDP/structure" order-by-child="journalUserID_Active" equal-to="[[user.userID]]_true" data="{{structureData}}">
+      </firebase-query>
+
+    <style include="w3-styles"></style>
+    <style include="pldp-styles">
+      :host{
+        --paper-tabs-selection-bar:{
+          border-bottom: 6px solid var(--paper-tabs-selection-bar-color, var(--paper-orange-700));
+        }
+        
+      }
+      
+      .header-container{
+        background-color: var(--app-status-color);
+        margin-bottom: 30px;
+        padding: 4px 8px;
+        color: var(--app-secondary-text);
+        font-size: 8pt;
+      }
+
+      paper-fab-speed-dial{
+        bottom: 0px;
+        right: 12px;
+        position: fixed;
+      }
+
+      paper-fab-speed-dial-action{
+        cursor: pointer;
+      }
+
+      paper-fab-speed-dial-action .flex .label{
+        background-color: #0b908b;
+        color:#fff;
+        box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+      }
+
+      .datetime{
+        display: -webkit-flex;
+        display: flex;
+        flex-direction: row;
+      }
+      .dateScheduled{
+        margin-right: 18px;
+        /* border-bottom: 1px solid; */
+        flex-grow: 6;
+      }
+
+      .w3-margin-small{
+        margin:3px;
+      }
+
+      .timeScheduled{
+        /* border-bottom: 1px solid; */
+        flex-grow: 4;
+      }
+
+      main{
+        min-height: 100vh;
+      }
+
+      .spinner{width: 60%; height: 100vh; display: flex; position: absolute; align-items: center; justify-content: center;}
+
+    </style>
+
+    <header class="header-container">
+      <h2>Personal Leadership Development Plan (PLDP)</h2>
+    </header>
+    <main class="w3-card">
+      <paper-tabs id="pldpTabs" selected="{{_selected}}" class="w3-card">
+        <paper-tab>My Tasks</paper-tab>
+        <paper-tab>Favorites</paper-tab>
+        <paper-tab>About PLDP</paper-tab>
+      </paper-tabs>
+      <iron-pages selected="{{_selected}}">
+        <div page-name="actions">
+        <!-- <div class="spinner">
+          <paper-spinner  active="{{isloading}}"></paper-spinner>
+          <div style="width: 100%; padding-top: 10px;" class="w3-row w3-center" id="spinnerMessage">{{loadingmessage}}</div>
+        </div> -->
+          <div class="action-container fadeInUp">
+            <div class="w3-row w3-center" style="width: 100%;">
+              <h3 id="movement">Law of Movement: All movement is governed by integration of Motivation, Direction and Structure</h3>
+            </div>
+            <div class="motivation w3-round w3-margin-small">
+              <div class="w3-blue w3-row">
+                <div class="w3-padding-large w3-left">
+                  <iron-icon icon="my-icons:directions-run"></iron-icon>
+                </div>
+                <div class="w3-padding-large w3-rest w3-xlarge">Motivation</div>
+              </div>
+              <div class="motivation-content">
+                <template is="dom-repeat" items="[[motivationData]]" as="item" sort="_sort" observe="dateRegistered">
+                  <div class="pl-content card">
+                    <p id="p[[item.dateRegistered]]" data="[[item.myPLDPID]]" move="[[item.moveAction]]" on-tap="_editPLDP">{{ item.title }}</p>
+                    <div class="btn-actions">
+                      <div class="reminderBadge" id="remMotiv[[item.myPLDPID]]" style\$="{{_checkReminder(item.reminderOn)}}">
+                        <div class="reminderlabel">
+                          <div><paper-icon-button icon="myicons:notifications-active" on-tap="_editPLDP" id="motivNotify[[item.dateRegistered]]" data="[[item.myPLDPID]]" move="[[item.moveAction]]"></paper-icon-button></div>
+                          <label on-tap="_editPLDP" id="motivReminder[[item.dateRegistered]]" data="[[item.myPLDPID]]" move="[[item.moveAction]]">[[_formate_date(item.reminderDate)]]</label>
+                        </div>
+                      </div>
+                      <paper-icon-button id="del[[item.dateRegistered]]" data="[[item.myPLDPID]]" move="[[item.moveAction]]" icon="myicons:cancel" style="color: gray" on-tap="_deleteOneTask">
+                      </paper-icon-button>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+            <div class="direction w3-margin-small">
+              <div class="w3-indigo w3-row">
+                <div class="w3-padding-large w3-left">
+                    <iron-icon icon="my-icons:directions"></iron-icon>
+                </div>
+                <div class="w3-padding-large w3-rest w3-xlarge">Direction</div>
+              </div>
+              <div class="direction-content">
+                <template is="dom-repeat" items="[[directionData]]" as="item" sort="_sort" observe="dateRegistered">
+                  <div class="pl-content card">
+                    <p id="p[[item.dateRegistered]]" data="[[item.myPLDPID]]" move="[[item.moveAction]]" on-tap="_editPLDP">{{ item.title }}</p>
+                    <div class="btn-actions">
+                      <div class="reminderBadge" id="remDir[[item.myPLDPID]]" style\$="{{_checkReminder(item.reminderOn)}}">
+                        <div class="reminderlabel">
+                          <div><paper-icon-button icon="myicons:notifications-active" on-tap="_editPLDP" id="dirNotify[[item.dateRegistered]]" data="[[item.myPLDPID]]" move="[[item.moveAction]]"></paper-icon-button></div>
+                          <label on-tap="_editPLDP" id="dirReminder[[item.dateRegistered]]" data="[[item.myPLDPID]]" move="[[item.moveAction]]">[[_formate_date(item.reminderDate)]]</label>
+                        </div>
+                      </div>
+                      <paper-icon-button id="del[[item.dateRegistered]]" data="[[item.myPLDPID]]" move="[[item.moveAction]]" icon="myicons:cancel" style="color: gray" on-tap="_deleteOneTask">
+                      </paper-icon-button>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+            <div class="structure w3-margin-small">
+              <div class="w3-deep-purple w3-row">
+                <div class="w3-padding-large w3-left">
+                  <iron-icon icon="my-icons:device-hub"></iron-icon>
+                </div>
+                <div class="w3-padding-large w3-rest w3-xlarge">Structure</div>
+              </div>
+              <div class="structure-content">
+                <template is="dom-repeat" items="[[structureData]]" as="item" sort="_sort" observe="dateRegistered">
+                  <div class="pl-content card">
+                    <p id="p[[item.dateRegistered]]" data="[[item.myPLDPID]]" move="[[item.moveAction]]" on-tap="_editPLDP">{{ item.title }}</p>
+                    <div class="btn-actions">
+                      <div class="reminderBadge" id="remStructure[[item.myPLDPID]]" style\$="{{_checkReminder(item.reminderOn)}}">
+                        <div class="reminderlabel">
+                          <div><paper-icon-button icon="myicons:notifications-active" on-tap="_editPLDP" id="structureNotify[[item.dateRegistered]]" data="[[item.myPLDPID]]" move="[[item.moveAction]]"></paper-icon-button></div>
+                          <label on-tap="_editPLDP" id="structureReminder[[item.dateRegistered]]" data="[[item.myPLDPID]]" move="[[item.moveAction]]">[[_formate_date(item.reminderDate)]]</label>
+                        </div>
+                      </div>
+                      <paper-icon-button id="del[[item.dateRegistered]]" data="[[item.myPLDPID]]" move="[[item.moveAction]]" icon="myicons:cancel" style="color: gray" on-tap="_deleteOneTask">
+                      </paper-icon-button>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div page-name="attachments">
+          <pldp-favorites _companyid="[[_companyid]]" user="[[user]]"></pldp-favorites>
+        </div>
+        <div page-name="about">
+          <about-pldp></about-pldp>
+        </div>
+        <div class="actionPage" page-name="add">
+          <iron-form id="pldpForm" class="w3-card w3-padding-small">
+            <div id="pldpBack" class="row background-indigo">
+              <paper-icon-button style="color: #fff;" icon="app:arrow-back" on-tap="_backPLDP"></paper-icon-button>
+              <p class="w3-text-white">{{moveAction}} Action</p>
+            </div>
+            <form>
+              <div class="action">
+                <paper-textarea autofocus="" id="taskName" label="Take action" value="{{ TaskName }}" tabindex="0" always-float-label=""></paper-textarea>
+              </div><br>
+              <div class="reminder">
+                  <label><small>Reminder</small></label>
+                  <paper-toggle-button checked="" id="reminderToggle"></paper-toggle-button><br>
+              </div>
+              <label><small>Schedule Date &amp; TIme</small></label><br>
+              <div class="datetime">
+                <paper-input class="dateScheduled" id="dateScheduled" name="dateScheduled" always-float-label="" label="Date" type="date" auto-validate="" value\$="[[_defaultDate()]]"></paper-input>
+                <paper-input class="timeScheduled" id="timeScheduled" name="timeScheduled" always-float-label="" label="Time" type="time" auto-validate="" value\$="[[_defaultTime()]]"></paper-input>
+              </div>
+              <br>
+              <paper-dropdown-menu id="dropdown_menu" label="Frequency" value="{{selectedFreq}}" no-animations="true" style="width: -webkit-fill-available;">
+                <paper-listbox id="frequenyList" style="min-width: 290px;" slot="dropdown-content" attr-for-selected="value" selected="{{selectedFreq}}">
+                  <paper-item value="Does not repeat">Does not repeat</paper-item>
+                  <paper-item value="Hourly">Hourly</paper-item>
+                  <paper-item value="Daily">Daily</paper-item>
+                  <paper-item value="Weekly">Weekly</paper-item>
+                  <paper-item value="Monthly">Monthly</paper-item>
+                </paper-listbox>
+              </paper-dropdown-menu>
+              <div class="w3-padding-small w3-center">
+                <paper-button raised="" class="w3-red" on-tap="_backPLDP">Close</paper-button>
+                <paper-button raised="" class="w3-blue" on-tap="_saveTask">Save</paper-button>
+              </div>
+            </form>
+          </iron-form>
+        </div>
+      </iron-pages>
+
+      <paper-fab-speed-dial id="pldpSpeedDial" with-backdrop="" style="z-index: 200">
+        <paper-fab-speed-dial-action id="add_motivation" icon="my-icons:directions-run" on-tap="_addPLDP">Motivation</paper-fab-speed-dial-action>
+        <paper-fab-speed-dial-action id="add_direction" icon="my-icons:directions" on-tap="_addPLDP">Direction</paper-fab-speed-dial-action>
+        <paper-fab-speed-dial-action id="add_structure" icon="my-icons:device-hub" on-tap="_addPLDP">Structure</paper-fab-speed-dial-action>
+      </paper-fab-speed-dial>
+
+    </main>
+    <div id="snackbar"></div>
+    <paper-dialog id="confirmDeleteOne">
+      <p id="confirmDeleteOneTask" class="dialogText">Discard selected action?</p>
+      <div class="buttons">
+        <paper-button dialog-dismiss="">Cancel</paper-button>
+        <paper-button on-tap="deleteOneTask">Discard</paper-button>
+      </div>
+    </paper-dialog>
+  </template>
+
+  
+</dom-module>`;
+
+document.head.appendChild($_documentContainer.content);
+class MyPldp extends Element {
+  static get is() { return 'my-pldp'; }
+  ready () {
+    super.ready();
+    
+    this._reminderOn();
+  }
+  static get properties() {
+    return {
+      user: {
+        type: Object
+      },
+      _user:{type: Object},
+      _companyid: String,
+      previouspage: String,
+      readPLDP:{
+        type: Boolean,
+        reflectToAttribute: true,
+        value: true
+      },
+      moveAction: String,
+      _selected: {
+        type: Number,
+        reflectToAttribute: true,
+        value: 0
+      },
+      motivationData: {
+        type: Object,
+        observer: '_onmotivationDataReceived'
+      },
+      directionData: {
+        type: Object,
+        observer: '_ondirectionDataReceived'
+      },
+      structureData: {
+        type: Object,
+        observer: '_onstructureDataReceived'
+      }
+    };
+  }
+  connectedCallback() { 
+    super.connectedCallback();
+    if(this.readPLDP) this._selected = 0;
+    else this._selected = 2;
+
+    if(this._selected == 3) this.$.pldpTabs.style.display = "none";
+
+    this.$.pldpBack.style.display = "none";
+  }
+  _sort(a, b) {  
+            if (a.dateRegistered > b.dateRegistered) return -1;
+            if (a.dateRegistered < b.dateRegistered) return 1;
+            return 0;
+        }
+  _reminderOn(){
+    // var toggle = document.querySelector("paper-toggle-button");
+    this.$.reminderToggle.addEventListener('change', function () {
+      if (this.checked) {
+        // do something if when checked
+      } else {
+        // do something if not checked
+      }
+    });
+
+  }
+  _deleteOneTask(e) {
+    var pldpID = dom(this.root).querySelector('#'+e.target.id).data;
+    var moveAction = dom(this.root).querySelector('#'+e.target.id).move;
+
+    if(moveAction == "Motivation"){
+      var filteredArray = this.findObjectByKey(this.motivationData, "myPLDPID", pldpID);
+    }else if(moveAction == "Direction"){
+      var filteredArray = this.findObjectByKey(this.directionData, "myPLDPID", pldpID);
+    }else if(moveAction == "Structure"){
+      var filteredArray = this.findObjectByKey(this.structureData, "myPLDPID", pldpID);
+    }
+
+    sessionStorage.setItem("moveAction", moveAction);
+    sessionStorage.setItem("myPldpID", pldpID);
+
+    this.$.confirmDeleteOneTask.innerHTML = "Discard "+filteredArray.title+"?";
+
+    this.$.confirmDeleteOne.open();
+  }
+  deleteOneTask(e) {
+    var moveAction = sessionStorage.getItem("moveAction");
+    var pldpID = sessionStorage.getItem("myPldpID");
+
+    if(pldpID.length > 2){
+      if(moveAction == "Motivation"){
+        var filteredArray = this.findObjectByKey(this.motivationData, "myPLDPID", pldpID);
+      }else if(moveAction == "Direction"){
+        var filteredArray = this.findObjectByKey(this.directionData, "myPLDPID", pldpID);
+      }else if(moveAction == "Structure"){
+        var filteredArray = this.findObjectByKey(this.structureData, "myPLDPID", pldpID);
+      }
+
+      var reminderOn = filteredArray.reminderOn;
+      var notificationID = filteredArray.notificationID;
+
+      // Get a reference to the database service
+      var database = firebase.database();
+
+      var userID = this.user.userID;
+
+      var notifications = database.ref("users/"+this.user.userID+"/notifications").orderByChild("newNotificationID").limitToLast(20).on("child_added", function(snapshot) {
+        var key = snapshot.key;
+        var notificationItemID = snapshot.val().notificationItemID;
+        var newNotificationID = snapshot.val().newNotificationID;
+
+        if(notificationItemID == notificationID){
+          database.ref("users/"+userID+"/notifications/"+ newNotificationID).remove();
+        }
+
+      });
+
+      // if reminder notification exists
+      if(reminderOn == true) database.ref('pldpNotifications/'+ notificationID).remove();
+
+      // delete pldp
+      database.ref('myPLDP/'+moveAction.toLowerCase()+'/'+ pldpID).remove();
+
+      this.showSnackBar("Deleted successfully!");
+    
+      this.$.confirmDeleteOne.close();
+    }
+  }
+  _saveTask(){
+    var journalUserID = this.user.userID;
+    var journalUserName = this.user.firstName+" "+this.user.lastName;
+
+    var companyID = this.user.companyID;
+    var companyName = this.user.companyName;
+
+    var confirmedDate = this.$.dateScheduled.value;
+    var selectedTime = this.$.timeScheduled.value;
+
+    var timeInMs = Date.now();
+    var datetime = new Date(timeInMs);
+
+    var dateRegistered = Date.parse(datetime);
+    // reminder Status Sent, Unsent
+    var reminderStatus = "Sent";
+
+    // change date to string
+    var stringDateRegistered = new Date(datetime).toLocaleString();
+    
+    // set task active for this user
+    var journalUserID_Active = journalUserID + "_true";
+
+    // user type
+    var userType = sessionStorage.getItem("user"+this.user.userType);
+    var concatDateTime = confirmedDate + " "+selectedTime;
+
+    var getDatePart = this.splitDate(confirmedDate, "-");
+
+    var actualDate = getDatePart[1]+"/"+getDatePart[2]+"/"+getDatePart[0]+" "+selectedTime+":00";
+
+    var fullReminderDateStr = new Date(actualDate);
+    var reminderDate = Date.parse(fullReminderDateStr);
+    var strReminderDate = this.formatDate(actualDate);
+
+    if(reminderDate > dateRegistered) reminderStatus = "Unsent"
+    else reminderStatus = "Sent";
+
+    // Get a reference to the database service
+    var database = firebase.database();
+
+    if(!this.TaskName || this.TaskName == ""){
+      this.showSnackBar("Task action is required!");
+      return;
+    };
+
+    if(this.$.reminderToggle.checked == true){
+      // Validate thought date
+      if ((confirmedDate == undefined) || (confirmedDate.trim() == "")){
+        this.showSnackBar("Please select reminder date!");
+        return;
+      };
+      // Validate pldp time
+      if ((selectedTime == undefined)){
+        this.showSnackBar("Please select reminder time!");
+        return;
+      };
+      // Validate pldp time
+      if ((reminderDate < timeInMs)){
+          this.showSnackBar("Please enter valid reminder date and time!");
+          return;
+        };
+      // Validate thought category
+      if ((this.selectedFreq == undefined) || (this.selectedFreq == -1)){
+        this.showSnackBar("Please select the frequency!");
+        return;
+      };
+    }else{
+      if ((this.selectedFreq == undefined) || (this.selectedFreq == -1)){
+        this.selectedFreq = "";
+      };
+    };
+
+    // if editing - delete task
+    // delete pldp task
+    var edit = sessionStorage.getItem("edit");
+
+    if(edit == "true"){
+      var editID = sessionStorage.getItem("editID");
+      var notificationIDDel = sessionStorage.getItem("notificationID");
+      dateRegistered = sessionStorage.getItem("dateRegistered");
+
+      database.ref('myPLDP/'+this.moveAction.toLowerCase()+'/'+ editID).remove();
+
+      if(notificationIDDel != undefined){
+        if(notificationIDDel.length > 0)
+        database.ref('pldpNotifications/'+ notificationIDDel).remove();
+      }
+    }
+
+    var newPLDP = "";
+
+    if(this.moveAction == "Motivation"){
+      newPLDP = this.$.motivationQuery.ref.push().key;
+    }else if(this.moveAction == "Direction"){
+      newPLDP = this.$.directionQuery.ref.push().key;
+    }else if(this.moveAction == "Structure"){
+      newPLDP = this.$.structureQuery.ref.push().key;
+    };
+
+    var notificationID = "";
+
+    if(this.$.reminderToggle.checked == true){
+      notificationID = database.ref().child('pldpNotifications').push().key;
+
+      var dataNotify = {
+        active: true,
+        companyID: companyID,
+        myPLDPID: newPLDP,
+        notificationID: notificationID,
+        companyName: companyName,
+        dateRegistered: dateRegistered,
+        journalUserID: journalUserID,
+        journalUserName: journalUserName,
+        journalUserID_Active: journalUserID_Active,
+        stringDateRegistered: stringDateRegistered,
+        title: this.TaskName,
+        userType: userType,
+        reminderOn: this.$.reminderToggle.checked,
+        reminderDate: reminderDate,
+        stringReminderDate: strReminderDate,
+        reminderFrequency: this.selectedFreq,
+        moveAction: this.moveAction,
+        reminderStatus: reminderStatus,
+        uid: this._user.uid
+      };
+
+      // Write the new pldp's notification data
+      var updatesNotify = {};
+      updatesNotify['/pldpNotifications/' + notificationID] = dataNotify;
+      database.ref().update(updatesNotify);
+    }
+
+    var data = {
+      active: true,
+      companyID: companyID,
+      myPLDPID: newPLDP,
+      notificationID: notificationID,
+      companyName: companyName,
+      dateRegistered: dateRegistered,
+      journalUserID: journalUserID,
+      journalUserName: journalUserName,
+      journalUserID_Active: journalUserID_Active,
+      stringDateRegistered: stringDateRegistered,
+      title: this.TaskName,
+      userType: userType,
+      reminderOn: this.$.reminderToggle.checked,
+      reminderDate: reminderDate,
+      stringReminderDate: strReminderDate,
+      reminderFrequency: this.selectedFreq,
+      moveAction: this.moveAction,
+      reminderStatus: reminderStatus,
+      uid: this._user.uid
+    };
+
+    if(this.moveAction == "Motivation"){
+      // Write the new pldp's data
+      var updates = {};
+      updates['/myPLDP/motivation/' + newPLDP] = data;
+      database.ref().update(updates);
+    }
+    if(this.moveAction == "Direction"){
+      // Write the new pldp's data
+      var updates = {};
+      updates['/myPLDP/direction/' + newPLDP] = data;
+      database.ref().update(updates);
+    }
+    if(this.moveAction == "Structure"){
+      // Write the new pldp's data
+      var updates = {};
+      updates['/myPLDP/structure/' + newPLDP] = data;
+      database.ref().update(updates);
+    }
+
+    data.postType = "PLDP Task";
+    data.clickType = "PLDP Task";
+    data.clickArea = "Save Task";
+
+            // database.ref('user-clicks').push(data);
+
+    this._resetItems();
+
+    this._backPLDP();
+    this.showSnackBar("Action added successfully!");
+  }
+
+  _addPLDP (e){
+    let id = e.target.id;
+
+    this._resetItems();
+
+    if(id == "add_motivation") this.moveAction = "Motivation";
+    else if(id == "add_direction") this.moveAction = "Direction";
+    else if(id == "add_structure") this.moveAction = "Structure";
+
+    this.$.pldpTabs.style.display = "none";
+    this._selected = 3;
+    this.$.pldpBack.style.display = "flex";
+    this.$.pldpSpeedDial.close();
+  }
+  _editPLDP (e){
+    var pldpID = dom(this.root).querySelector('#'+e.target.id).data;
+    this.moveAction = dom(this.root).querySelector('#'+e.target.id).move;
+
+    sessionStorage.setItem("editID", pldpID);
+    sessionStorage.setItem("edit", "true");
+
+    if(this.moveAction == "Motivation"){
+      var filteredArray = this.findObjectByKey(this.motivationData, "myPLDPID", pldpID);
+    }else if(this.moveAction == "Direction"){
+      var filteredArray = this.findObjectByKey(this.directionData, "myPLDPID", pldpID);
+    }else if(this.moveAction == "Structure"){
+      var filteredArray = this.findObjectByKey(this.structureData, "myPLDPID", pldpID);
+    }
+    
+    sessionStorage.setItem("notificationID", filteredArray.notificationID);
+    sessionStorage.setItem("dateRegistered", filteredArray.dateRegistered);
+
+    this.TaskName = filteredArray.title;
+    this.$.reminderToggle.checked = filteredArray.reminderOn;
+    this.selectedFreq = filteredArray.reminderFrequency;
+    
+    var reminderDate = new Date(filteredArray.reminderDate);
+
+    var year = this.returnDatePart(reminderDate, "year");
+    var month = this.returnDatePart(reminderDate, "month");
+    var day = this.returnDatePart(reminderDate, "day");
+    var hours = this.returnDatePart(reminderDate, "hours");
+    var minutes = this.returnDatePart(reminderDate, "minutes");
+
+    this.$.dateScheduled.value = year+"-"+month+"-"+day;
+    this.$.timeScheduled.value = hours+":"+minutes;
+
+    this.$.pldpTabs.style.display = "none";
+    this._selected = 3;
+    this.$.pldpBack.style.display = "flex";
+    this.$.pldpSpeedDial.close();
+  }
+  
+  _backPLDP(){
+    //  e.preventDefault();
+    this.$.pldpTabs.style.display = "flex";
+    this.$.pldpBack.style.display = "none";
+    this._selected = 0;
+  }
+  _resetItems(){
+    this.$.reminderToggle.checked = true;
+    this.selectedFreq = "";
+    this.TaskName = "";
+
+    var date = new Date();
+
+    var year = this.returnDatePart(date, "year");
+    var month = this.returnDatePart(date, "month");
+    var day = this.returnDatePart(date, "day");
+    var hours = this.returnDatePart(date, "hours");
+    var minutes = this.returnDatePart(date, "minutes");
+
+    this.$.dateScheduled.value = year+"-"+month+"-"+day;
+    this.$.timeScheduled.value = hours+":"+minutes;
+
+    sessionStorage.removeItem("editID");
+    sessionStorage.removeItem("edit");
+  }
+  findObjectByKey(array, key, value) {
+      for (var i = 0; i < array.length; i++) {
+          if (array[i][key] === value) {
+              return array[i];
+          }
+      }
+      return null;
+  }
+  _checkReminder(obj){
+    if(obj == true){
+      return "display: inline;";
+    }else{
+      return "display: none;";
+    } 
+  }
+ showSnackBar(msg){
+    var x = this.$.snackbar;
+
+    x.innerHTML = msg;
+    x.className = "show";
+    setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+  }
+  _onmotivationDataReceived(newData, oldData){
+    // var that = this;
+
+            // if(newData.length > 0){
+            // 	this.isloading = false;
+            // 	this.loadingmessage = "";
+            // } 
+
+            // setTimeout(function(){
+            // 	that.isloading = false;
+
+            // 	if(newData.length == 0) that.loadingmessage = "No posts found";
+            // 	else that.loadingmessage = "";
+
+            // },40000)
+  }
+  _ondirectionDataReceived(newData, oldData){
+  
+  }
+  _onstructureDataReceived(newData, oldData){
+
+  }
+  formatDate(date) {
+    var d = new Date(date),
+    month = '' + (d.getMonth() + 1),
+    day = '' + d.getDate(),
+    year = d.getFullYear(),
+    hours = '' + d.getHours(),
+    minutes = '' + d.getMinutes(),
+    seconds = '' + d.getSeconds(),
+    milliseconds = '' + d.getMilliseconds();
+
+    var today = new Date(),
+    thisYear = today.getFullYear();
+
+    // get week day name Sunday - Saturday
+    var dayName = this.getDayMonthStr(d.getDay(), "day", false);
+
+    // get month name
+    var monthName = this.getDayMonthStr(d.getMonth(), "month", false);
+
+    // add preceding zeros where needed
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+    if (hours.length < 2) hours = '0' + hours;
+    if (minutes.length < 2) minutes = '0' + minutes;
+    if (seconds.length < 2) seconds = '0' + seconds;
+    if (milliseconds.length < 2) milliseconds = '0' + milliseconds;
+
+    // format reminder date
+    if(thisYear == year){
+      var reminderDate = monthName+" "+day+", "+hours+":"+minutes;
+    }
+    else{
+      var reminderDate = monthName+" "+day+", "+year+", "+hours+":"+minutes;
+    }
+
+    return reminderDate;
+    // return [year, month, day].join('-');
+  }
+  getDayMonthStr(val, dateParam, long){
+    // days
+    var days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    var daysShort = ["Sun","Mon","Tue","Wed","Thur","Fri","Sat"];
+
+    // Months
+    var monthNames = ["January", "February", "March", "April", "May", "June","July", "August", "September","October", "November", "December"];
+    var monthNamesShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun","Jul", "Aug", "Sep","Oct", "Nov", "Dec"];
+
+    if(dateParam == "day" && long == true){
+      // return day in long format
+      return days[val];
+    }
+    else if(dateParam == "day" && long == false){
+      // return days in short
+      return daysShort[val];
+    }
+    if(dateParam == "month" && long == true){
+      // return month in long format
+      return monthNames[val];
+    }
+    else if(dateParam == "month" && long == false){
+      // return month in short
+      return monthNamesShort[val];
+    }
+    
+  }
+  _defaultDate(){
+    var dateScheduled = new Date();
+    
+    var year = this.returnDatePart(dateScheduled, "year");
+    var month = this.returnDatePart(dateScheduled, "month");
+    var day = this.returnDatePart(dateScheduled, "day");
+    var hours = this.returnDatePart(dateScheduled, "hours");
+    var minutes = this.returnDatePart(dateScheduled, "minutes");
+
+    console.log("date here: ",year+"-"+month+"-"+day)
+
+    return year+"-"+month+"-"+day;
+  }
+  _defaultTime(){
+    var dateScheduled = new Date();
+
+    var year = this.returnDatePart(dateScheduled, "year");
+    var month = this.returnDatePart(dateScheduled, "month");
+    var day = this.returnDatePart(dateScheduled, "day");
+    var hours = this.returnDatePart(dateScheduled, "hours");
+    var minutes = this.returnDatePart(dateScheduled, "minutes");
+
+    console.log("time here :",hours+":"+minutes)
+
+    return hours+":"+minutes;
+  }
+  returnDatePart(date, part) {
+    var d = new Date(date),
+    month = '' + (d.getMonth() + 1),
+    day = '' + d.getDate(),
+    year = d.getFullYear(),
+    hours = '' + d.getHours(),
+    minutes = '' + d.getMinutes(),
+    seconds = '' + d.getSeconds(),
+    milliseconds = '' + d.getMilliseconds();
+
+    var today = new Date(),
+    thisYear = today.getFullYear();
+
+    // get week day name Sunday - Saturday
+    var dayName = this.getDayMonthStr(d.getDay(), "day", true);
+
+    // get month name
+    var monthName = this.getDayMonthStr(d.getMonth(), "month", true);
+
+    // add preceding zeros where needed
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+    if (hours.length < 2) hours = '0' + hours;
+    if (minutes.length < 2) minutes = '0' + minutes;
+    if (seconds.length < 2) seconds = '0' + seconds;
+    if (milliseconds.length < 2) milliseconds = '0' + milliseconds;
+
+    if(part == "year") {
+      return year;
+    }
+    else if(part == "month"){
+      return month;
+    }
+    else if(part == "day"){
+      return day;
+    }
+    else if(part == "hours"){
+      return hours;
+    }
+    else if(part == "minutes"){
+      return minutes;
+    }
+    else if(part == "seconds"){
+      return seconds;
+    }
+  }
+  _formate_date(dt){
+            var date = new Date(dt);
+            var day = date.getDate() < 10 ? '0'+date.getDate() : date.getDate();
+            var hours = date.getHours() < 10 ? '0'+date.getHours() : date.getHours();
+            var minutes = date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes();
+            var locale = 'en-us';
+            var month = date.toLocaleString(locale, { month: "short" });
+            var year = date.getFullYear();
+
+            return month+' '+day+', '+year+', '+hours+':'+minutes;
+        }
+  splitDate(date, char){
+    return date.split(char);
+  }
+ 
+}
+
+
+window.customElements.define(MyPldp.is, MyPldp);

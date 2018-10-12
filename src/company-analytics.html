@@ -18,7 +18,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <style>
     </style>
 
-  <view-analytics user="[[user]]" _companyid="[[_companyid]]"></view-analytics>
+  <view-analytics user="[[user]]" _companyid="[[_companyid]]" logo="[[logo]]"></view-analytics>
 
 </template>
 
@@ -29,6 +29,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         return {
           user: {type: Object},
           _companyid: String,
+          logo: String
         };
       }
       connectedCallback() { 

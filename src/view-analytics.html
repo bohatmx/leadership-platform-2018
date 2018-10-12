@@ -22,6 +22,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <!-- Firebase Query -->
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+
+<link rel="import" href="my-pdfscript.html">
 
 <link rel="import" href="w3-styles.html">
 <link rel="import" href="my-icons.html">
@@ -40,6 +43,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             order-by-child="total"
             limit-to-last="{{minData}}"
             data="{{activeUsersData}}">
+        </firebase-query>
+
+        <firebase-query
+            id="qry_noofusers"
+            path="/company-analytics/{{_companyid}}/counts"
+            data="{{noOfUsersData}}">
         </firebase-query>
     </template>
 
@@ -121,6 +130,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <paper-item data="Dec"  value="Dec" on-tap="_monthSelect">Dec</paper-item>
                 </paper-listbox>
             </paper-dropdown-menu>
+            <template is="dom-if" if="[[user.reportadmin]]">
+                <paper-button raised class="w3-green" on-tap="_createPDF">Create PDF</paper-button>
+            </template>
         </div>
     </div>
     
@@ -237,6 +249,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <h4>Impressions</h4>
                 <div class="w3-row w3-padding">
                     <table class="w3-table-all w3-hoverable w3-card">
+                        <tr class="w3-padding">
+                            <td style="width:20px;"><iron-icon class="w3-left w3-text-grey" icon="my-icons:person"></iron-icon></td>
+                            <td>Total No. of Users</td>
+                            <td>{{_currentNoOfUsers}}</td>
+                        </tr>
                         <tr class="w3-padding">
                             <td style="width:20px;"><iron-icon class="w3-left w3-text-green" icon="my-icons:group"></iron-icon></td>
                             <td>Total Active Users</td>
@@ -365,6 +382,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Number,
             value:0
           },
+          _currentNoOfUsers:{
+            type: Number,
+            value:0
+          },
           _currentLikes:{
             type: Number,
             value:0
@@ -385,6 +406,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               type: Object,
               observer: "_overallDataReceived"
           },
+          noOfUsersData: {
+              type: Object,
+              observer: "_noOfUsersDataReceived"
+          },
           activeUsersData: {
               type: Object,
               observer: "_activeUsersDataReceived"
@@ -392,6 +417,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           appCompanies: {
               type: Object,
               observer: "_appCompaniesReceived"
+          },
+          logo: {
+              type: String
           },
           minData:{
               type: Number,
@@ -405,6 +433,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             return res
           }else {
               return ""+nos;
+          }
+          return res;
+      }
+      _getUserNames(nos){
+          var res = ""
+          if(nos == undefined){
+            return res
+          }else {
+              return ""+nos.data.journalUserName;
           }
           return res;
       }
@@ -478,6 +515,215 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (a.companyName < b.companyName) return -1;
         if (a.companyName > b.companyName) return 1;
         return 0;
+      }
+
+    dynamicSort(property) {
+        var sortOrder = 1;
+
+        if(property[0] === "-") {
+            sortOrder = -1;
+            property = property.substr(1);
+        }
+
+        return function (a,b) {
+            if (a.total > b.total) return -1;
+            if (a.total < b.total) return 1;      
+        }
+    }
+
+    findObjectByKey(array, key, value) {
+        for (var i = 0; i < array.length; i++) {
+            if (array[i][key] === value) {
+                    return array[i];
+            }
+        }
+        return null;
+    }
+    _activeUsers(){
+        var usersdata = this.activeUsersData;
+        var bodyData = [];
+
+        // console.log(bodyData.length)
+
+        for (var i = 0; i < usersdata.length; i++) {
+            var dataRow = [];
+            var dataRow2 = [
+                {
+                    style:'tableText',
+                    table: {
+                        widths: [ '*', '*', '*', '*', '*' ],
+                        body: [
+                            [{text: this._getNos(this.activeUsersData[i].thoughts), style:'textHeader'}, {text: this._getNos(this.activeUsersData[i].articles), style:'textHeader'}, {text: this._getNos(this.activeUsersData[i].videos), style:'textHeader'},{text: this._getNos(this.activeUsersData[i].podcasts), style:'textHeader'}, {text: this._getNos(this.activeUsersData[i].comments), style:'textHeader'}],
+                            ['Messages', 'Articles', 'Videos', 'Podcasts', 'Comments']
+                        ]
+                    },
+                    layout: 'noBorders'
+                }
+            ];
+
+            dataRow.push({text: this._getUserNames(this.activeUsersData[i]), style: 'userHeader'})
+            bodyData.push(dataRow)
+            bodyData.push(dataRow2)
+        }
+        
+        return bodyData;
+
+        // console.log(bodyData.length)
+
+        // var dd = {
+        //     content: [
+        //         {
+        //             table: {
+        //                 headerRows: 1,
+        //                 widths: [ '*'],
+        //                 body: bodyData
+        //             },
+		// 	        layout: {
+        //                 fillColor: function (i, node) {
+        //                     return (i % 2 === 0) ? '#E8E8E8' : null;
+        //                 }
+        //             }
+        //         }
+        //     ]
+        // }
+
+        // pdfMake.createPdf(dd).open();
+
+    }
+      _createPDF(){
+        var that = this;
+        var reportPeriod = "";
+        var reportCompany = "";
+        this.activeUsersData.sort(that.dynamicSort("total"));
+        
+        if((this.selectedMonth == "All") || (this.selectedMonth == undefined) ){
+            reportPeriod = "2018";
+        }else{
+            reportPeriod = this.selectedMonth+" 2018";
+        }
+
+        if(this.user.reportadmin == true){
+            if(this.selectedCompany == undefined){
+                reportCompany = this.user.companyName;
+            }else{
+                reportCompany = this.selectedCompany;
+            }
+        }else{
+            reportCompany = this.user.companyName;
+        }
+
+        var pdfname = reportCompany+" Analytics Report - "+reportPeriod+".pdf";
+        
+        var docDefinition = {
+            content: [
+                {
+                    image: this.logo,
+                    height: 105,
+                    width: 264,
+                    alignment: 'center'
+                },
+                {text: reportCompany, style: 'reportTitle'},
+                {text: 'Analytics Report - '+reportPeriod, style: 'header'},
+                {text: 'Posts', style: 'subheader'},
+                {
+                    style: 'postsText',
+                    table: {
+                        headerRows: 1,
+                        widths: [ '*', '*' ],
+                        body: [
+                            [{text: 'Messages', style: 'subheader' }, {text: 'Videos', style: 'subheader' }],
+                            [{text: that._currentThoughts, style: 'subheader' }, {text: that._currentVideos, style: 'subheader' }],
+                            [{text: 'Articles', style: 'subheader' }, {text: 'Podcasts', style: 'subheader' }],
+                            [{text: that._currentArticles, style: 'subheader' }, {text: that._currentPodcasts, style: 'subheader' }]
+                        ]
+                    },
+			        layout: {
+                        fillColor: function (i, node) {
+                            return (i % 2 === 0) ? '#E8E8E8' : null;
+                        }
+                    },
+                },
+                // {text: 'User Engagement', style: 'header'},
+                {text: 'Impressions', style: 'subheader'},
+                {
+                    style:'tableZebra',
+                    table: {
+                        headerRows: 1,
+                        widths: [ '*', '*' ],
+                        body: [
+                            ['Total No. of Users', that._currentNoOfUsers],
+                            ['Active Users', that._currentActiveUsers],
+                            ['Posts', that._currentPosts],
+                            ['Comments', that._currentComments],
+                            ['Likes', that._currentLikes],
+                            ['PLDP Tasks Created', that._currentTasks]
+                        ]
+                    },
+			        layout: {
+                        fillColor: function (i, node) {
+                            return (i % 2 === 0) ? '#E8E8E8' : null;
+                        }
+                    },
+                },
+                {text: 'Top 6 Active Users', style: 'subheader'},
+                {
+                    table: {
+                        headerRows: 1,
+                        widths: [ '*'],
+                        body: that._activeUsers()
+                    },
+			        layout: {
+                        fillColor: function (i, node) {
+                            return (i % 2 === 0) ? '#E8E8E8' : null;
+                        }
+                    }
+                }
+            ],
+            styles: {
+                reportTitle: {
+                    fontSize: 18,
+                    bold: true,
+                    margin: [0, 14, 0, 6],
+                    alignment: 'center',
+                    color: '#2196F3'
+                },
+                header: {
+                    fontSize: 16,
+                    bold: true,
+                    margin: [0, 12, 0, 8],
+                    alignment: 'center'
+                },
+                subheader: {
+                    fontSize: 13,
+                    bold: true,
+                    margin: [0, 14, 0, 6]
+                },
+                tableText: {
+                    fontSize: 10,
+                    color: '#303030',
+                    alignment:'center',
+                },
+                tableZebra: {
+                    fontSize: 10,
+                    color: '#303030'
+                },
+                textHeader: {
+                    fontSize: 12,
+                    color: '#202020',
+                    bold: true
+                },
+                userHeader: {
+                    fontSize: 12,
+                    color: '#2196F3',
+                    bold: true
+                },
+                postsText: {
+                    alignment: 'center'
+                }
+            }
+        };
+
+        pdfMake.createPdf(docDefinition).download(pdfname);
       }
 
       _overallDataReceived(newData, oldData){
@@ -574,6 +820,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         setTimeout(function(){
 			that.isloading = false;
         },10000)
+          
+      }
+      _noOfUsersDataReceived(newData, oldData){
+          console.log("users loaded")
+          var that = this;
+        //   var chart = Polymer.dom(that.root).querySelector("#overall-chart");
+
+        if(newData.length > 0){
+            for(var x in newData){
+                if(newData[x]['$key'] == 'noofusers'){
+                    this._currentNoOfUsers = newData[x]['$val']
+                }
+            }
+        }else{
+            this._currentNoOfUsers = 0;
+        }
           
       }
       _profilePhoto(photo){

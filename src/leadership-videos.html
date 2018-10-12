@@ -39,22 +39,37 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="leadership-videos">
 	<template>
 			<template is="dom-if" if="[[_companyid]]">
-				<firebase-query
-					id="videos"
-					path="/videos"
-					order-by-child="company_status"
-					equal-to="general_true"
-					limit-to-last="{{minData}}"
-					data="{{videosData}}">
-				</firebase-query>
+				
+				<template is="dom-if" if="[[!mypost]]">
+					<firebase-query
+						id="videos"
+						path="/videos"
+						order-by-child="companyID_status"
+						equal-to="[[_companyid]]_approved"
+						limit-to-last="{{minData}}"
+						data="{{videosData}}">
+					</firebase-query>
 
-				<!-- <firebase-query
-					path="/videos"
-					order-by-child="company_status"
-					equal-to="general_true"
-					limit-to-last="{{minData}}"
-					data="{{videosData1}}">
-				</firebase-query> -->
+					<firebase-query
+						id="videosG"
+						path="/videos"
+						order-by-child="dailyThoughtType_status"
+						equal-to="2_approved"
+						limit-to-last="{{minData}}"
+						data="{{videosData}}">
+					</firebase-query>
+				</template>
+
+				<template is="dom-if" if="[[mypost]]">
+					<firebase-query
+						id="myvideos"
+						path="/videos"
+						order-by-child="postOwner"
+						equal-to="[[user.userID]]"
+						limit-to-last="{{minData}}"
+						data="{{videosData}}">
+					</firebase-query>
+				</template>
 
 			</template>
 				<style include="w3-styles"></style>
@@ -133,7 +148,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			<paper-search-bar hide-filter-button="true" placeholder="Search for Videos"></paper-search-bar>
 		</div> -->
 		<div class="container">
-			<paper-dialog id="pldpDialog">
+			<paper-dialog id="pldpDialog" hidden="[[isloading]]">
 				<h2><paper-icon-button icon="myicons:event-note" class="blue"></paper-icon-button>My PLDP</h2>
 				<hr>
 				<paper-dialog-scrollable>
@@ -153,7 +168,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 		<div class="spinner" style="position: fixed;">
 			<paper-spinner  active="{{isloading}}"></paper-spinner>
 			<div style="width: 100%; padding-top: 10px;" class="w3-row w3-center" id="spinnerMessage">{{loadingmessage}}</div>
-		</div>
+		</div>	
+		
 		<div id="preview-profile" class="ldp-modal w3-animate-zoom">
 			<div class="ldp-modal-content w3-round max-modal-width">
 				<div>
@@ -165,12 +181,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				</div>
 			</div>
 		</div>
-			<div class="video-cards-wrapper w3-margin-top" id="thoughts-Holder">
-				
-				<div class="container list-side fadeInUp w3-row">
+		<section class="thought-card" id="thoughts-Holder">
+				<div class="main-card" style="width:100%;">
 					<template id="videosList" is="dom-repeat" items="[[videosData]]" as="item" sort="_sort" observe="dateScheduled">
-						<div class="video-item">
-							<div class="vid-item w3-animate-zoom" data="[[item]]">
+						<div class="modal-div">
+							<div class="vidi-item card-container w3-animate-zoom" data="[[item]]">
 								<div class="w3-card w3-white" style="border-radius:2px; border:1px solid #bbb">
 									<!-- <span class="w3-button w3-display-topright w3-red w3-medium w3-hide closer-for-modal">&times;</span> -->
 									<div class="container card-header w3-row">
@@ -187,7 +202,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 											[[_formate_date(item.dateScheduled)]]
 										</div>
 									</div>
-								<div class="w3-row w3-padding-small">
+								<div class="w3-row" style="padding-top: 8px;">
 									<div class="w3-center" style="width:auto; height: 220px">
 										<template is="dom-if" if="[[isEqual(item.UploadExternal, 'external')]]">
 											<img id="img[[item.dateRegistered]]" src$="[[getYoutubeThumbnail(item.url)]]" alt="LP" 
@@ -202,9 +217,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 										</template>
 										<!--  -->
 									</div>
-									<div class="w3-text-dark-grey">
+									<div class="w3-text-dark-grey w3-padding-small">
 										<template is="dom-if" if="[[isEqual(item.userID, user.userID)]]">
-											<edit-post user="[[user]]" itemid="[[item.videoID]]" ref="videos"></edit-post>
+											<edit-post user="[[user]]" itemid="[[item.videoID]]" ref="videos" item="[[item]]"></edit-post>
 										</template>
 										<div class="w3-padding" id="col[[item.dateRegistered]]" name="[[item.dateRegistered]]" on-click="_handleClick" data="[[item.url]]" uploadtype="[[item.UploadExternal]]" onmouseover="" style="cursor: pointer;">
 											[[_getVideoName(item.storageName)]]
@@ -219,7 +234,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 											</div>
 										</div>
 									</div>
-
+	
 								</div>
 								<!-- <div id="div[[item.dateRegistered]]" name="[[item.dateRegistered]]" on-click="_handleClick" data="[[item.url]]" uploadtype="[[item.UploadExternal]]" onmouseover="" style="cursor: pointer; width: 100%; height: 220px; z-index: 99; position: absolute;">
 								</div> -->
@@ -254,13 +269,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 							</div>
 						</div> 
 					</template>
-
 					<div class="w3-row w3-center" style="width: 100%">
 						<div class="w3-row w3-text-green" style="width: 100%"><paper-button hidden="{{loadmore}}" on-tap="_loadMorePosts">Watch More Videos</paper-button></div>
 						<div class="w3-row" style="width: 100%"><paper-spinner  active="{{isloadingmore}}"></paper-spinner></div>
 					</div>
 				</div>
-			</div>
+			</section>
 	</template>
 
 	<script>
@@ -315,7 +329,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					isloadingmore: {
 						type: Boolean,
 						value: false
-					}
+					},
+					mypost:{
+						type: Boolean,
+						value: false
+					},
 				};
 			}
 			isFollowing(journalUserID){
@@ -440,7 +458,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				var that = this;
 				var thoughtCard = Polymer.dom(that.root).querySelector("#thoughts-Holder");
 
-				$(thoughtCard).find('.vid-item').each(function(i, e){
+				$(thoughtCard).find('.vidi-item').each(function(i, e){
 					var followBTN = $(e).find('.followBTN')[0];
 					var itemID = $(followBTN).prop('data');
 					let filteredArray = that.findObjectByKey(that.videosData, "videoID", itemID);
@@ -492,7 +510,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				setTimeout(function(){
 					that.isloading = false;
 
-					if(newData.length == 0) that.loadingmessage = "No posts found";
+					if(newData.length == 0) that.loadingmessage = "";
 					else that.loadingmessage = "";
 
 				},20000)
@@ -569,7 +587,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 			_handleClick(e){
 
-				var clickedParent = $(e.target).parents('.vid-item');
+				var clickedParent = $(e.target).parents('.vidi-item');
 
 				this.cbitem = clickedParent[0].data;
 				this.cbitemID = this.cbitem.videoID; 

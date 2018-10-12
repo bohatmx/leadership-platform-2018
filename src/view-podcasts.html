@@ -52,22 +52,39 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 		<template is="dom-if" if="[[_companyid]]">
 
 				<template is="dom-if" if="[[isEqual(thoughtype, 'podcasts')]]">
-				<firebase-query
-					id="podcasts"
-					path="/podcasts"
-					order-by-child="company_status"
-					equal-to="general_true"
-					limit-to-last="{{minData}}"
-					data="{{podcastsData}}">
-				</firebase-query>
 
-				<!-- <firebase-query
-					path="/podcasts"
-					order-by-child="company_status"
-					equal-to="general_true"
-					limit-to-last="{{minData}}"
-					data="{{podcastsData1}}">
-				</firebase-query> -->
+					<template is="dom-if" if="[[!mypost]]">
+						<firebase-query
+							id="podcasts"
+							path="/podcasts"
+							order-by-child="companyID_status"
+							equal-to="[[_companyid]]_approved"
+							limit-to-last="{{minData}}"
+							data="{{podcastsData}}">
+						</firebase-query>
+
+						<firebase-query
+							id="podcastsG"
+							path="/podcasts"
+							order-by-child="dailyThoughtType_status"
+							equal-to="2_approved"
+							limit-to-last="{{minData}}"
+							data="{{podcastsData}}">
+						</firebase-query>
+						<!-- order-by-child="company_status"
+							equal-to="general_true" -->
+					</template>
+				
+					<template is="dom-if" if="[[mypost]]">
+						<firebase-query
+							id="mypodcasts"
+							path="/podcasts"
+							order-by-child="postOwner"
+							equal-to="[[user.userID]]"
+							limit-to-last="{{minData}}"
+							data="{{podcastsData}}">
+						</firebase-query>
+					</template>
 
 			</template>
 			<template is="dom-if" if="[[isEqual(thoughtype, 'filteredpodcasts')]]">
@@ -259,51 +276,54 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			</div>
 		</div>
 		<section class="thought-card" id="thoughts-Holder">
-				<div class="spinner" style="position: fixed;">
-					<paper-spinner  active="{{isloading}}"></paper-spinner>
-					<div style="width: 100%; padding-top: 10px;" class="w3-row w3-center" id="spinnerMessage">{{loadingmessage}}</div>
-				</div>
+			<div class="spinner" style="position: fixed;">
+				<paper-spinner  active="{{isloading}}"></paper-spinner>
+				<div style="width: 100%; padding-top: 10px;" class="w3-row w3-center" id="spinnerMessage">{{loadingmessage}}</div>
+			</div>
 			<div class="main-card" style="width:100%;">
 				<template id="podcastsList" is="dom-repeat" items="[[podcastsData]]" as="item" sort="_sort" observe="dateScheduled">
-					<div class="podcast-item" id="modal-[[item.podcastID]]">
-						<div class="modal-div w3-animate-zoom">
-							<div class="w3-card w3-white" style="border-radius:2px; border:1px solid #bbb">
-								<span class="w3-button w3-display-topright w3-red w3-medium w3-hide closer-for-modal">&times;</span>
-								<div class="container card-header w3-row">
-									<div class="card-avatar w3-left" style$="[[_profilePhoto(item.photoURL)]] cursor: pointer;" data$="[[_setProfileInfo(item.userName, item.userID, item.companyName, item.companyID, item.photoURL)]]" on-tap="_previewProfile"></div>
-									<div class="container card-company-container">
-										<div class="row card-postedby w3-medium">
-											<div>[[item.userName]]</div>
-											<paper-button on-tap="followUser" data="[[item.podcastID]]" 
-											class$="followBTN [[isFollowingStyle(item.userID)]]">[[isFollowing(item.userID)]]</paper-button>
+					<!-- <div class="podcast-item" id="modal-[[item.podcastID]]"> -->
+						<div class="modal-div" id="modal-[[item.podcastID]]">
+							<div class="card-container w3-animate-zoom" data="[[item]]">
+									<div class="w3-card w3-white" style="border-radius:2px; border:1px solid #bbb">
+									<span class="w3-button w3-display-topright w3-red w3-medium w3-hide closer-for-modal">&times;</span>
+									<div class="container card-header w3-row">
+										<div class="card-avatar w3-left" style$="[[_profilePhoto(item.photoURL)]] cursor: pointer;" data$="[[_setProfileInfo(item.userName, item.userID, item.companyName, item.companyID, item.photoURL)]]" on-tap="_previewProfile"></div>
+										<div class="container card-company-container">
+											<div class="row card-postedby w3-medium">
+												<div>[[item.userName]]</div>
+												<paper-button on-tap="followUser" data="[[item.podcastID]]" 
+												class$="followBTN [[isFollowingStyle(item.userID)]]">[[isFollowing(item.userID)]]</paper-button>
+											</div>
+											<div class="row card-company">[[item.companyName]]</div>
 										</div>
-										<div class="row card-company">[[item.companyName]]</div>
+										<div class="thought-date">
+											[[_formate_date(item.dateScheduled)]]
+										</div>
 									</div>
-									<div class="thought-date">
-										[[_formate_date(item.dateScheduled)]]
+									<div class="w3-row w3-relative" id="modal-content-[[item.podcastID]]">
+										<template is="dom-if" if="[[isEqual(item.userID, user.userID)]]">
+											<edit-post user="[[user]]" itemid="[[item.podcastID]]" ref="podcasts" item="[[item]]"></edit-post>
+										</template>
+										<div title="[[_getPodcastName(item.storageName)]]" class="w3-left w3-padding-small" id="listen[[item.dateRegistered]]" on-tap="_handleClick" data="[[item.url]]" itemid="[[item.podcastID]]">
+											<img src="/images/[[item.podcastDescription]].png" style="width: 60px">
+										</div>
+										<div class="w3-rest">
+											<div title="[[_getPodcastName(item.storageName)]]" class="w3-text-dark-grey w3-padding-small" id="col[[item.dateRegistered]]" name="[[item.dateRegistered]]" on-tap="_handleClick" data="[[item.url]]" itemid="[[item.podcastID]]">
+												<div>[[_getPodcastName(item.storageName)]]</div>
+											</div>
+											<div class="row w3-small w3-padding-small w3-text-grey" style="font-style: italic;">[[item.author]]</div>
+											<div class="w3-text-red w3-medium w3-right">
+												<paper-button id="pldp[[item.dateRegistered]]" class="w3-text-red w3-medium" data="[[item.podcastID]]" on-tap="_openPLDP">My PLDP</paper-button>
+											</div>
+										</div>
 									</div>
+									<comments-box user="[[user]]" item="[[item]]" thetype="[[item.podcastDescription]]" entityid="[[item.podcastID]]" firebaseref="podcasts"></comments-box>
 								</div>
-								<div class="w3-row w3-relative" id="modal-content-[[item.podcastID]]">
-									<template is="dom-if" if="[[isEqual(item.userID, user.userID)]]">
-										<edit-post user="[[user]]" itemid="[[item.podcastID]]" ref="podcasts"></edit-post>
-									</template>
-									<div title="[[_getPodcastName(item.storageName)]]" class="w3-left w3-padding-small" id="listen[[item.dateRegistered]]" on-tap="_handleClick" data="[[item.url]]" itemid="[[item.podcastID]]">
-										<img src="/images/[[item.podcastDescription]].png" style="width: 60px">
-									</div>
-									<div class="w3-rest">
-										<div title="[[_getPodcastName(item.storageName)]]" class="w3-text-dark-grey w3-padding-small" id="col[[item.dateRegistered]]" name="[[item.dateRegistered]]" on-tap="_handleClick" data="[[item.url]]" itemid="[[item.podcastID]]">
-											<div>[[_getPodcastName(item.storageName)]]</div>
-										</div>
-										<div class="row w3-small w3-padding-small w3-text-grey" style="font-style: italic;">[[item.author]]</div>
-										<div class="w3-text-red w3-medium w3-right">
-											<paper-button id="pldp[[item.dateRegistered]]" class="w3-text-red w3-medium" data="[[item.podcastID]]" on-tap="_openPLDP">My PLDP</paper-button>
-										</div>
-									</div>
-								</div>
-								<comments-box user="[[user]]" item="[[item]]" thetype="[[item.podcastDescription]]" entityid="[[item.podcastID]]" firebaseref="podcasts"></comments-box>
 							</div>
+							
 						</div>
-					</div>
+					<!-- </div> -->
 				</template>
 				<div class="w3-row w3-center" style="width: 100%" hidden="[[isEqual(thoughtype, 'filteredpodcasts')]]">
 					<div class="w3-row w3-text-green" style="width: 100%"><paper-button hidden="{{loadmore}}" on-tap="_loadMorePosts">Listen to More Podcasts</paper-button></div>
@@ -400,7 +420,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					isloadingmore: {
 						type: Boolean,
 						value: false
-					}
+					},
+					mypost:{
+						type: Boolean,
+						value: false
+					},
 				};
 			}
 			connectedCallback() { 
@@ -645,7 +669,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				setTimeout(function(){
 					that.isloading = false;
 
-					if(newData.length == 0) that.loadingmessage = "No posts found";
+					if(newData.length == 0) that.loadingmessage = "";
 					else that.loadingmessage = "";
 
 				},20000)

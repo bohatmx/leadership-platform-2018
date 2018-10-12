@@ -1,0 +1,192 @@
+/**
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+/* Firebase Query */
+/*
+  FIXME(polymer-modulizer): the above comments were extracted
+  from HTML and may be out of place here. Review them and
+  then delete this comment!
+*/
+import '../../../@polymer/paper-button/paper-button.js';
+
+import '../../../@polymer/paper-input/paper-input.js';
+import '../../../@polymer/iron-image/iron-image.js';
+import './play-media.js';
+import '../../../polymerfire/firebase-query.js';
+import '../../../polymerfire/firebase-database-behavior.js';
+import { html } from '../../../@polymer/polymer/lib/utils/html-tag.js';
+import { dom } from '../../../@polymer/polymer/lib/legacy/polymer.dom.js';
+import { importHref } from '../../../@polymer/polymer/lib/utils/import-href.js';
+import { Element } from '../../../@polymer/polymer/polymer-element.js';
+
+class WelcomePage extends Element {
+  static get template() {
+    return html`
+    <style include="w3-styles"></style>
+    <style include="shared-styles">
+        :host {
+            display: block;
+        }
+        .modal-list{
+            max-height: 66vh; 
+            overflow-y: auto;
+        }
+        a{
+            text-decoration: none;
+            text-transform: none;
+            display: block;
+            cursor: pointer;
+        }
+        /* width */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            border-radius: 10px;
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+        }
+    </style>
+
+    <firebase-query id="qrytutorials" path="/tutorials/public" data="{{tutorialsData}}">
+    </firebase-query>
+    <div>
+        <div class="w3-large" style="padding:30px 15px 8px 15px">
+            <b class="w3-text-blue">Global Leadership Platform (GLP) Tutorials</b>
+        </div>
+        <div class="modal-list w3-padding">
+            <div class="w3-row">
+                <span>Learn more about the platform, it’s purpose and how the various functions work.</span>
+            </div>
+            <br>
+            <ul class="w3-ul w3-card-2 w3-hoverable w3-margin-bottom">
+                <template id="resultList" is="dom-repeat" items="[[tutorialsData]]" as="item" sort="_sort" observe="id">
+                    <li class="w3-bar" style="padding: 8px 0; cursor: pointer;" id="id[[item.id]]" url="[[item.url]]" title="[[item.title]]" on-tap="_openTutorial">
+                        <div class="w3-bar-item">
+                            <div class="w3-row"><span class="w3-small">[[item.id]])&nbsp;</span><span class="w3-medium">[[item.title]]</span>
+                                <!-- <span id="id[[item.id]]" class="w3-text-blue" url="[[item.url]]" title="[[item.title]]" on-click="_openTutorial">&nbsp;Click here</span> -->
+                            </div>
+                            
+                        </div>
+                    </li>
+                </template>
+            </ul>
+        </div>
+    </div>
+    <div id="play-media" class="ldp-modal w3-animate-zoom">
+        <div class="ldp-modal-content w3-round max-modal-width">
+          <div>
+            <span id="close-media" data="play-media" on-click="_closeMediaModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white" style="z-index:999999;">×</span>
+            <div class="w3-medium" style="padding:20px 50px">
+              <b class="w3-text-dark-grey"><iron-icon icon="app:play-circle-outline"></iron-icon>&nbsp;[[media_title]]</b>
+            </div>
+            <div class="w3-row">
+              <play-media loadsrc="{{loadsrc}}"></play-media>
+            </div>
+          </div>
+        </div>
+    </div>
+`;
+  }
+
+  static get is() { return 'welcome-page'; }
+  ready(){
+      super.ready();
+  }
+  static get properties() {
+      return {
+          
+      };
+  }
+  _sort(a, b) {  
+      if (a.id < b.id) return -1;
+      if (a.id > b.id) return 1;
+      return 0;
+  }
+  _openTutorial(e){
+			var mediaClicked = dom(this.root).querySelector('#'+e.currentTarget.id).url;
+      var mediaTitle = dom(this.root).querySelector('#'+e.currentTarget.id).getAttribute("title");
+
+      var src = this.getMediaURL(mediaClicked);
+      this.media_title = mediaTitle;
+
+      this.loadsrc = src;
+      this._openMediaModal();
+
+      // var obj = {
+          // itemID: itemID,
+          // title: podcastTitle,
+          // ref: src
+      // }
+
+      // this._captureClicks("listenedTo", obj);
+  }
+  getMediaURL(url){
+      var res = "";
+      var checkHTTP;
+
+      if(url.includes("youtu")){
+          var youtubeID = this.getYoutubeID(url);
+          res = "https://www.youtube.com/embed/"+youtubeID;
+      }else{
+          checkHTTP = url.indexOf("http:");
+          if(checkHTTP == -1) res = url;
+          else res = url.replace("http:", "https:");
+      }
+      
+      return res;
+  }
+  getYoutubeID(youtubeURL) {
+      var str = youtubeURL;
+      var n = str.indexOf("=");
+      var x = str.indexOf("&");
+      var res = "";
+  
+      if(n == -1){
+      n = str.indexOf("youtu.be");
+      if(x == -1) res = str.substring(n+9);
+      else res = str.substring(n+9, x);
+      }else{
+      if(x == -1) res = str.substring(n+1);
+      else res = str.substring(n+1, x);
+      }
+      
+      return res;
+  }
+
+  getYoutubeThumbnail(youtubeURL) {
+      var res = this.getYoutubeID(youtubeURL);
+      return "https://img.youtube.com/vi/"+res+"/0.jpg";
+  }
+  _openMediaModal(){
+      var modal = dom(this.root).querySelector('#play-media');
+      this.loadPage('play-media');
+			modal.style.display = 'block';
+  }
+
+  _closeMediaModal(){
+      this.loadsrc = "";
+      var modal = dom(this.root).querySelector('#play-media');
+      modal.style.display = 'none';
+  }
+
+  loadPage(page){
+      var resolvedPageUrl = this.resolveUrl(page + '.html');
+      importHref(
+          resolvedPageUrl,
+          null,
+          page + '.html',
+          true
+      );
+  }
+}
+window.customElements.define(WelcomePage.is, WelcomePage);

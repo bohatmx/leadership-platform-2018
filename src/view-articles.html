@@ -48,39 +48,36 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 	<template>
 		<template is="dom-if" if="[[_companyid]]">
 			<template is="dom-if" if="[[isEqual(thoughtype, 'articles')]]">
-				<firebase-query
-					id="articles"
-					path="/news"
-					order-by-child="companyID_status"
-					equal-to="[[_companyid]]_approved"
-					limit-to-last="{{minData}}"
-					data="{{articlesData}}">
-				</firebase-query>
+				<template is="dom-if" if="[[mypost]]">
+					<firebase-query
+						id="myarticles"
+						path="/news"
+						order-by-child="journalUserID"
+						equal-to="[[user.userID]]"
+						limit-to-last="{{minData}}"
+						data="{{articlesData}}">
+					</firebase-query>
+				</template>
 
-				<firebase-query
-					id="articlesG"
-					path="/news"
-					order-by-child="dailyThoughtType_status"
-					equal-to="2_approved"
-					limit-to-last="{{minData}}"
-					data="{{articlesData}}">
-				</firebase-query>
-
-				<!-- <firebase-query
-					path="/news"
-					order-by-child="dailyThoughtType_status"
-					equal-to="[[_companyid]]_approved"
-					limit-to-last="{{minData}}"
-					data="{{articlesData1}}">
-				</firebase-query>
-				
-				<firebase-query
-					path="/news"
-					order-by-child="dailyThoughtType_status"
-					equal-to="2_approved"
-					limit-to-last="{{minData}}"
-					data="{{articlesData2}}">
-				</firebase-query> -->
+				<template is="dom-if" if="[[!mypost]]">
+					<firebase-query
+						id="articles"
+						path="/news"
+						order-by-child="companyID_status"
+						equal-to="[[_companyid]]_approved"
+						limit-to-last="{{minData}}"
+						data="{{articlesData}}">
+					</firebase-query>
+	
+					<firebase-query
+						id="articlesG"
+						path="/news"
+						order-by-child="dailyThoughtType_status"
+						equal-to="2_approved"
+						limit-to-last="{{minData}}"
+						data="{{articlesData}}">
+					</firebase-query>
+				</template>
 			</template>
 			<template is="dom-if" if="[[isEqual(thoughtype, 'filteredarticles')]]">
 				<firebase-query
@@ -227,6 +224,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				<paper-spinner  active="{{isloading}}"></paper-spinner>
 				<div style="width: 100%; padding-top: 10px;" class="w3-row w3-center" id="spinnerMessage">{{loadingmessage}}</div>
 			</div>
+			
 			<div class="main-card" style="width:100%;">
 				<template id="articlesList" is="dom-repeat" items="[[articlesData]]" as="item" sort="_sort" observe="dateScheduled">
 					<div class="modal-div w3-animate-zoom">
@@ -288,24 +286,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				<div class="w3-row w3-center" style="width: 100%" hidden="[[isEqual(thoughtype, 'filteredarticles')]]">
 					<div class="w3-row w3-text-green" style="width: 100%"><paper-button hidden="{{loadmore}}" on-tap="_loadMorePosts">Read More Articles</paper-button></div>
-					<div class="w3-row" style="width: 100%"><paper-spinner  active="{{isloadingmore}}"></paper-spinner></div>
+					<div class="w3-row" style="width: 100%">					
+						<paper-spinner active="{{isloadingmore}}"></paper-spinner>
+					</div>
 				</div>
+
+				<paper-dialog id="deleteDialog" hidden="[[isloading]]">
+					<paper-icon-button icon="myicons:cancel" class="red"></paper-icon-button><h3 id="discardTitle">Discard Article?</h3>
+					<hr>
+						<p id="thoughtTitle" class="thought-rate-title"></p>
+						<p id="thoughtAuthor" class="thought-rate-title paper-font-caption"></p>
+					<hr>
+					<div class="buttons">
+						<paper-button dialog-dismiss>CANCEL</paper-button>
+						<paper-button on-tap="deleteArticle">DISCARD</paper-button>
+					</div>
+				</paper-dialog>
 			</div>
 		</section>
 
-		<div class="container">
-			<paper-dialog id="deleteDialog">
-				<paper-icon-button icon="myicons:cancel" class="red"></paper-icon-button><h3 id="discardTitle">Discard Article?</h3>
-				<hr>
-					<p id="thoughtTitle" class="thought-rate-title"></p>
-					<p id="thoughtAuthor" class="thought-rate-title paper-font-caption"></p>
-				<hr>
-				<div class="buttons">
-					<paper-button dialog-dismiss>CANCEL</paper-button>
-					<paper-button on-tap="deleteArticle">DISCARD</paper-button>
-				</div>
-			</paper-dialog>
-		</div>
+		
+
 		<div id="snackbar"></div>
 	</template>
 
@@ -409,7 +410,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					isloadingmore: {
 						type: Boolean,
 						value: false
-					}
+					},
+					mypost:{
+						type: Boolean,
+						value: false
+					},
 				};
 			}
 			connectedCallback() { 

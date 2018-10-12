@@ -1,0 +1,138 @@
+/**
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+import { Element } from '../../../@polymer/polymer/polymer-element.js';
+
+import '../../../vaadin-tabs/vaadin-tabs.js';
+import '../../../@polymer/iron-pages/iron-pages.js';
+import './pldp-thoughts.js';
+import './pldp-articles.js';
+import './pldp-podcasts.js';
+import './pldp-videos.js';
+import './app-icons.js';
+import './pldp-styles.js';
+import './w3-styles.js';
+import { html } from '../../../@polymer/polymer/lib/utils/html-tag.js';
+class PldpFavorites extends Element {
+  static get template() {
+    return html`
+    <style>
+        :host {
+            display: block;
+        }
+        .read-article-body{
+            font-family: sans-serif;
+            white-space: pre-line;
+            text-indent: 0%;
+        }
+        .card-shadow{
+            background-color: #fff;
+            box-shadow: 5px 5px 25px 0px rgba(46,61,73,0.2);
+            padding: 8px;
+            margin: 8px;
+            border-radius: 5px;
+        }
+        
+        @-webkit-keyframes fadeInUp{
+            0%{opacity:0;-webkit-transform:translateY(20px);transform:translateY(20px)}
+            100%{opacity:1;-webkit-transform:translateY(0);transform:translateY(0)}
+        }
+        @keyframes fadeInUp{
+            0%{opacity:0;-webkit-transform:translateY(20px);-ms-transform:translateY(20px);transform:translateY(20px)}
+            100%{opacity:1;-webkit-transform:translateY(0);-ms-transform:translateY(0);transform:translateY(0)}
+        }
+        .fadeInUp{
+            -webkit-animation-name:fadeInUp;
+            animation-name:fadeInUp;
+            opacity: 0;
+            -webkit-animation-duration: 0.5s;
+            animation-duration: 0.5s;
+            -webkit-animation-fill-mode: forwards;
+            animation-fill-mode: forwards;
+            animation-timing-function: ease-in;
+        }
+
+    </style>
+    <style include="w3-styles"></style>
+
+    <section>
+        <header>
+            <div class="horizontal justified">
+                <vaadin-tabs selected="{{page}}">
+                    <vaadin-tab aria-label="Thoughts">
+                        <iron-icon icon="app:message" class="w3-text-teal w3-padding"></iron-icon>
+                        <p>Messages</p>
+                    </vaadin-tab>
+                    <vaadin-tab aria-label="Articles">
+                        <iron-icon icon="app:remove-red-eye" class="w3-text-blue w3-padding"></iron-icon>
+                        <p>Articles</p>
+                    </vaadin-tab>
+                    <vaadin-tab aria-label="Podcasts">
+                        <iron-icon icon="app:mic" class="w3-text-green w3-padding"></iron-icon>
+                        <p>Podcasts</p>
+                    </vaadin-tab>
+                    <vaadin-tab aria-label="Videos">
+                        <iron-icon icon="app:videocam" class="w3-text-red w3-padding"></iron-icon>
+                        <p>Videos</p>
+                    </vaadin-tab>
+                </vaadin-tabs>
+            </div>
+        </header>
+        <main>
+            <iron-pages selected="[[page]]">
+                <page class="fadeInUp">
+                    <pldp-thoughts _companyid="[[_companyid]]" user="[[user]]"></pldp-thoughts>
+                </page>
+                <page class="fadeInUp">
+                    <pldp-articles _companyid="[[_companyid]]" user="[[user]]"></pldp-articles>
+                </page>
+                <page class="fadeInUp">
+                    <pldp-podcasts _companyid="[[_companyid]]" user="[[user]]"></pldp-podcasts>
+                </page>
+                <page class="fadeInUp">
+                    <pldp-videos _companyid="[[_companyid]]" user="[[user]]"></pldp-videos>
+                </page>
+            </iron-pages>
+        </main>
+    </section>
+`;
+  }
+
+  static get is() { return 'pldp-favorites'; }
+  static get properties() {
+    return {
+      user: {
+        type: Object
+      },
+      _companyid: String,
+      previouspage: String,
+      pldpData: {
+        type: Object,
+        observer: '_onpldpDataDataReceived'
+      }
+    };
+  }
+  _onpldpDataDataReceived(newData, oldData){
+    this.pldpData.sort(function(a, b) {
+      
+    var nameA = a.dateRegistered; // ignore upper and lowercase
+    var nameB = b.dateRegistered; // ignore upper and lowercase
+    if (nameA < nameB) {
+      return 1;
+    }
+    if (nameA > nameB) {
+      return -1;
+    }
+
+    // names must be equal
+    return 0;
+    });
+  }
+}
+window.customElements.define(PldpFavorites.is, PldpFavorites);

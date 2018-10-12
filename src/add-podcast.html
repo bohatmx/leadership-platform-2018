@@ -447,11 +447,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var topLeader_status = "false";
 
         if(datetimeMilli > dateScheduled){
-          checkStatus = sessionStorage.getItem("APPROVED");
+          var checkStatus = sessionStorage.getItem("APPROVED");
           console.log(checkStatus);
           // return;
         }else{
-          checkStatus = sessionStorage.getItem("UNPUBLISHED");
+          var checkStatus = sessionStorage.getItem("UNPUBLISHED");
           console.log(checkStatus);
           // return;
         }
