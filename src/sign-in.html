@@ -21,9 +21,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <!-- Iron pages -->
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
 
 <!-- Firebase Auth -->
-<!-- <link rel="import" href="/bower_components/polymerfire/firebase-auth.html"> -->
+<link rel="import" href="/bower_components/polymerfire/firebase-auth.html">
 <link rel="lazy-import" href="term-condition.html">
 
 <link rel="import" href="w3-styles.html" async>
@@ -267,6 +269,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
       setInputFocus: function(){
         this.$.email_input.focus();
+      },
+      checkUserDomain(){
+        
       },
       signInGoogle: function(){
         let isError = false;

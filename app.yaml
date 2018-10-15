@@ -4,37 +4,37 @@ threadsafe: yes
 
 handlers:
 - url: /bower_components
-  static_dir: build/es5-bundled/bower_components
+  static_dir: build/es6-unbundled/bower_components
   secure: always
 
 - url: /images
-  static_dir: build/es5-bundled/images
+  static_dir: build/es6-unbundled/images
   secure: always
 
 - url: /data
-  static_dir: build/es5-bundled/data
+  static_dir: build/es6-unbundled/data
   secure: always
 
 - url: /src
-  static_dir: build/es5-bundled/src
+  static_dir: build/es6-unbundled/src
   secure: always
 
 - url: /manifest.json
-  static_files: build/es5-bundled/manifest.json
-  upload: build/es5-bundled/manifest.json
+  static_files: build/es6-unbundled/manifest.json
+  upload: build/es6-unbundled/manifest.json
   secure: always
 
 - url: /service-worker.js
-  static_files: build/es5-bundled/service-worker.js
-  upload: build/es5-bundled/service-worker.js
+  static_files: build/es6-unbundled/service-worker.js
+  upload: build/es6-unbundled/service-worker.js
   secure: always
 
 - url: /firebase-messaging-sw.js
-  static_files: build/es5-bundled/firebase-messaging-sw.js
-  upload: build/es5-bundled/firebase-messaging-sw.js
+  static_files: build/es6-unbundled/firebase-messaging-sw.js
+  upload: build/es6-unbundled/firebase-messaging-sw.js
   secure: always
 
 - url: /.*
-  static_files: build/es5-bundled/index.html
-  upload: build/es5-bundled/index.html
+  static_files: build/es6-unbundled/index.html
+  upload: build/es6-unbundled/index.html
   secure: always

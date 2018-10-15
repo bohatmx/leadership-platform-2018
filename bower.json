@@ -55,7 +55,9 @@
     "js-xlsx": "^0.12.1",
     "l2t-paper-color": "Link2Twenty/l2t-paper-color#^1.0.2",
     "paper-badge": "PolymerElements/paper-badge#^2.1.0",
-    "google-chart": "GoogleWebComponents/google-chart#^2.0.0"
+    "google-chart": "GoogleWebComponents/google-chart#^2.0.0",
+    "web-component-tester": "Polymer/web-component-tester#^6.5.0",
+    "firebase": "^5.5.3"
   },
   "resolutions": {
     "polymer": "^2.0.0"

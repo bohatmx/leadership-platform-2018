@@ -512,7 +512,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 							<filtered-articles name="filtered-articles" _companyid="[[_companyid]]" user="[[_user]]"></filtered-articles>
 							<filtered-podcasts name="filtered-podcasts" _companyid="[[_companyid]]" user="[[_user]]"></filtered-podcasts>
 							<filtered-videos name="filtered-videos" _companyid="[[_companyid]]" user="[[_user]]"></filtered-videos>
-							<company-analytics name="company-analytics" _companyid="[[_companyid]]" user="[[_user]]"></company-analytics>
+							<company-analytics name="company-analytics" logo="{{companyLogo}}" _companyid="[[_companyid]]" user="[[_user]]"></company-analytics>
 						</iron-pages>
 						
 					</div>
@@ -535,7 +535,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				<div class="w3-container">
 					<span id="close-feedback" data="send-feedback" on-click="_closeModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white">&times;</span>
 					<div class="w3-large" style="padding:20px 15px">
-						<b class="w3-text-dark-grey"><iron-icon icon="app:message"></iron-icon> Send us Feedback</b>
+						<b class="w3-text-blue"><iron-icon icon="app:message"></iron-icon> Send us Feedback</b>
 					</div>
 					<div class="w3-row">
 						<div class="w3-row w3-padding"><label id="labelFeedback" class="w3-medium w3-text-grey">Feedback Category:</label></div>
@@ -709,8 +709,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				this._setCompanyTypeSidebar();
 				this._setAccountDefaults();
 
-				// const app2 = firebase.app("[SHARED]");
-
+				// const app = firebase.app("[DEFAULT]");
+				// var database = firebase.database(app);
+				// console.log("App2: ", app2);
 				// console.log("Firebase: ", firebase.database(app2).app);
 			}
 
