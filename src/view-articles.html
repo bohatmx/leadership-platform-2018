@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!--
 @license
 Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
@@ -1377,4 +1378,1385 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 		window.customElements.define(ViewArticles.is, ViewArticles);
 	</script>
+=======
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="manifest" href="/manifest.json">
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+
+<link rel="import" href="../bower_components/paper-search/paper-search-bar.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+
+<!-- iron elements  -->
+<link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../bower_components/paper-styles/shadow.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+
+<!-- paper rating -->
+<link rel="import" href="../bower_components/l2t-paper-rating/l2t-paper-rating.html">
+
+<!-- Firebase Auth -->
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+
+<!-- Firebase Query -->
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-database-behavior.html">
+<!-- <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html"> -->
+
+<link rel="import" href="thought-card-attachments.html">
+<link rel="import" href="comments-box.html">
+<link rel="import" href="app-icons.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="preview-profile.html">
+
+<dom-module id="view-articles">
+	<template>
+		<template is="dom-if" if="[[_companyid]]">
+			<template is="dom-if" if="[[isEqual(thoughtype, 'articles')]]">
+				<template is="dom-if" if="[[mypost]]">
+					<firebase-query
+						id="myarticles"
+						path="/news"
+						order-by-child="journalUserID"
+						equal-to="[[user.userID]]"
+						limit-to-last="{{minData}}"
+						data="{{articlesData}}">
+					</firebase-query>
+				</template>
+
+				<template is="dom-if" if="[[!mypost]]">
+					<firebase-query
+						id="articles"
+						path="/news"
+						order-by-child="companyID_status"
+						equal-to="[[_companyid]]_approved"
+						limit-to-last="{{minData}}"
+						data="{{articlesData}}">
+					</firebase-query>
+	
+					<firebase-query
+						id="articlesG"
+						path="/news"
+						order-by-child="dailyThoughtType_status"
+						equal-to="2_approved"
+						limit-to-last="{{minData}}"
+						data="{{articlesData}}">
+					</firebase-query>
+				</template>
+			</template>
+			<template is="dom-if" if="[[isEqual(thoughtype, 'filteredarticles')]]">
+				<firebase-query
+					id="filteredarticles"
+					path="/news"
+					equal-to="[[filterid]]"
+					data="{{articlesData}}">
+				</firebase-query>
+			</template>
+		</template>
+			<style include="w3-styles"></style>
+			<style include="shared-styles">
+				:host {
+					/* Label and underline color when the input is focused */
+					--paper-input-container-focus-color: #fff;
+
+					/* Label and underline color when the input is invalid */
+					--paper-input-container-invalid-color: red;
+
+					/* Input foreground color */
+					--paper-input-container-label:{
+						font-size: 12px;
+						margin-bottom: 4px;
+						color: #757575;
+					};
+					--paper-input-container-input-focus:{
+						font-size: 14px;
+						margin-bottom: 4px;
+						color: var(--app-primary-text);
+					};
+				}
+				.rate-color-post {
+					--rating-icon-color: var(--app-primary-color);
+					--rating-ink-color: var(--app-primary-color);
+				}
+				.rate-color {
+					--rating-icon-color: #9e9e9e;
+					--rating-ink-color: #9e9e9e;
+				}
+				.thought-card{
+					display: flex;
+					flex-direction: row;
+				}
+				.comments-box{
+					display: -webkit-flex;
+					display: flex;
+					padding: 10px 16px;
+				}
+				.comments-info{
+					display: -webkit-flex;
+					display: flex;
+					flex-direction: column;
+					max-width: 80%;
+				}
+				.comment-details{
+					display: -webkit-flex;
+					display: flex;
+					flex-direction: row;
+					margin-bottom: 6px;
+				}
+				.comment-author{
+					margin-right: 16px;
+					color: var(--app-primary-color);
+				}
+				.pageComments{
+					padding: 0 8px;
+					background-color: #f7f7f7;
+				}
+				.comment-date{
+					color: #9e9e9e !important;
+				}
+				.comment-msg{
+				 color: var(--app-primary-text);
+				}
+				.comment-input{
+					background-color: #ffffff;
+					padding: 0 16px;
+					border-radius: 2px;
+				}
+				.comment-area{
+					display: flex;
+					flex-direction: row;
+					padding-bottom: 10px;
+					padding-top: 10px;
+				}
+				.comment-input{
+					flex-grow: 8;
+					margin-left: -10px;
+				}
+				.comment-btn{
+					margin: 10px;
+					color: var(--app-primary-color);
+				}
+				@media screen and (max-width: 900px) {
+					.main-card{
+						margin: 0px;
+					}
+				}
+
+				.pldp-link{
+					text-decoration: none;
+					text-transform: uppercase;
+					text-align: -webkit-center;
+					display: flex;
+					align-items: center;
+					color: var(--paper-dialog-button-color, var(--primary-color));
+					-webkit-user-select: none;
+					user-select: none;
+					padding: 0 8px 0 2px;
+				}
+
+			</style>
+		<div id="media"></div>
+		<!-- <div class="container search-bar" hidden="[[isEqual(thoughtype, 'filteredarticles')]]">
+				<paper-search-bar hide-filter-button="true" placeholder="[[placeholder]]"></paper-search-bar>
+		</div> -->
+		
+		<div id="add-items" class="w3-modal w3-animate-zoom padding-modal-top">
+			<div class="w3-modal-content w3-round max-modal-width">
+				<div class="w3-container">
+					<span id="spanCloseItemModal" on-click="_closeItemsModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white">&times;</span>
+					<div class="w3-large" style="padding:20px 15px">
+						<b class="w3-text-blue"><h3>[[itemName]]</h3></b>
+					</div>
+					<div id="item-holder" class="w3-row w3-padding w3-border w3-round-small w3-margin-bottom">
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="preview-profile" class="ldp-modal w3-animate-zoom">
+			<div class="ldp-modal-content w3-round max-modal-width">
+				<div>
+					<span id="close-followers" data="preview-profile" on-click="_closeProfileModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white" style="z-index: 999;">&times;</span>
+					<div class="w3-row">
+						<preview-profile _userid="{{_userid}}" userobj="{{userobj}}"></preview-profile>
+					</div>
+				</div>
+			</div>
+		</div>
+	
+		<section class="thought-card" id="thoughts-Holder">
+			<div class="spinner" style="position: fixed;">
+				<paper-spinner  active="{{isloading}}"></paper-spinner>
+				<div style="width: 100%; padding-top: 10px;" class="w3-row w3-center" id="spinnerMessage">{{loadingmessage}}</div>
+			</div>
+			
+			<div class="main-card" style="width:100%;">
+				<template id="articlesList" is="dom-repeat" items="[[articlesData]]" as="item" sort="_sort" observe="dateScheduled">
+					<div class="modal-div w3-animate-zoom">
+						<div class="card-container fadeInUp">
+								<span class="w3-button w3-red w3-display-topright w3-medium w3-hide closer-for-modal" style="z-index:9999999;right:0; width: 22px; height: 25px;">&times;</span>
+							<div class="container card-header w3-row">
+								<div class="card-avatar w3-left" style$="[[_profilePhoto(item.photoURL)]] cursor: pointer;" data$="[[_setProfileInfo(item.journalUserName, item.journalUserID, item.companyName, item.companyID, item.photoURL)]]" on-tap="_previewProfile"></div>
+								<div class="container card-company-container">
+									<div class="row card-postedby w3-medium">
+										<div>[[item.journalUserName]]</div>
+										<paper-button on-tap="followUser" data="[[item.newsID]]" 
+											class$="followBTN [[isFollowingStyle(item.journalUserID)]]">[[isFollowing(item.journalUserID)]]</paper-button>
+									</div>
+									<div class="row card-company">[[item.companyName]]</div>
+								</div>
+								<div class="thought-date">
+									[[_formate_date(item.dateScheduled)]]
+								</div>
+								
+								<template is="dom-if" if="[[isEqual(item.journalUserID, user.userID)]]">
+									<div class="w3-dropdown-hover w3-display-topright" style="cursor:pointer;">
+										<iron-icon data="delSettings" on-tap="_openButtonModal" icon="myicons:settings" style="padding:8px!important;"></iron-icon>
+										<div id="delSettings" class="w3-dropdown-content w3-bar-block w3-card-4" style="z-index:999;right:0;">
+											<ul class="w3-ul w3-hoverable" style="cursor:pointer;">
+												<li indexed="add-article" caption="Edit Article" on-tap="_loadElement1" id="edit[[item.dateRegistered]]" data="[[item.newsID]]" class="w3-text-dark-grey">
+													<paper-icon-button icon="create"></paper-icon-button>
+													&nbsp;Edit
+												</li>
+												<li class="w3-text-red" on-tap="_deleteArticle" id="del[[item.dateRegistered]]" data="[[item.newsID]]">
+													<paper-icon-button icon="delete"></paper-icon-button>
+													&nbsp;Delete
+												</li>
+											</ul>
+										</div>
+									</div>
+								</template>
+							</div>
+						
+							<div class="container">
+								<div class="row"><!-- No empty text node--><a href="[[articleLink(item.manualOrExternal, item.articleLink)]]" target="[[targetLink(item.manualOrExternal)]]" name="name">
+									<div id="article[[item.dateRegistered]]" class="thought-img" style$="[[_photo(item.photos)]]" on-click="_openArticle" onmouseover="" data="[[_setArticleData(item.subtitle, item.title, item.body, item.photos)]]" itemid="[[item.newsID]]">
+									<div class="thought-title">
+										
+									</div>
+									<div class="thought-author">
+									</div>
+									</div></a><!-- No empty text node-->
+								</div>
+							</div>
+							<div class="horizontal justified w3-padding-small"><!-- No empty text node-->
+								<div class="w3-row"><a id="article1[[item.dateRegistered]]" href="[[articleLink(item.manualOrExternal, item.articleLink)]]" target="[[targetLink(item.manualOrExternal)]]" name="name" style="text-decoration: none;" class="article-title" on-click="_openArticle" data="[[_setArticleData(item.subtitle, item.title, item.body, item.photos)]]" itemid="[[item.newsID]]">[[item.title]]</a><!-- No empty text node--></div>
+								<div class="w3-row"><a id="article2[[item.dateRegistered]]" href="[[articleLink(item.manualOrExternal, item.articleLink)]]" target="[[targetLink(item.manualOrExternal)]]" name="name" style="text-decoration: none;" class="article-author" on-click="_openArticle" data="[[_setArticleData(item.subtitle, item.title, item.body, item.photos)]]" itemid="[[item.newsID]]">[[item.subtitle]]</a><!-- No empty text node--></div>
+							</div>
+							<thought-card-attachments itemid="[[item.newsID]]" item="[[item]]" user="[[user]]" thetype="news" thoughtype="[[thoughtype]]"></thought-card-attachments>
+							<comments-box user="[[user]]" firebaseref="news" item="[[item]]" thetype="Article" entityid="[[item.newsID]]"></comments-box>
+						</div>
+					</div>
+				</template>
+
+				<div class="w3-row w3-center" style="width: 100%" hidden="[[isEqual(thoughtype, 'filteredarticles')]]">
+					<div class="w3-row w3-text-green" style="width: 100%"><paper-button hidden="{{loadmore}}" on-tap="_loadMorePosts">Read More Articles</paper-button></div>
+					<div class="w3-row" style="width: 100%">					
+						<paper-spinner active="{{isloadingmore}}"></paper-spinner>
+					</div>
+				</div>
+
+				<paper-dialog id="deleteDialog" hidden="[[isloading]]">
+					<paper-icon-button icon="myicons:cancel" class="red"></paper-icon-button><h3 id="discardTitle">Discard Article?</h3>
+					<hr>
+						<p id="thoughtTitle" class="thought-rate-title"></p>
+						<p id="thoughtAuthor" class="thought-rate-title paper-font-caption"></p>
+					<hr>
+					<div class="buttons">
+						<paper-button dialog-dismiss>CANCEL</paper-button>
+						<paper-button on-tap="deleteArticle">DISCARD</paper-button>
+					</div>
+				</paper-dialog>
+			</div>
+		</section>
+
+		
+
+		<div id="snackbar"></div>
+	</template>
+
+	<script>
+		class ViewArticles extends Polymer.Element {
+			static get is() { return 'view-articles'; }
+			ready(){
+				super.ready();
+				var that = this;
+
+				// window.onscroll = function() {
+				// 	var pageHeight=document.documentElement.offsetHeight,
+				// 	windowHeight=window.innerHeight,
+				// 	scrollPosition=window.scrollY || window.pageYOffset || document.body.scrollTop + (document.documentElement && document.documentElement.scrollTop || 0);
+
+				// 	if (pageHeight <= windowHeight+scrollPosition) {
+				// 		that.minData += 6;
+				// 	}
+				// };
+			}
+			static get properties() {
+				return {
+					user: {
+						type: Object
+					},
+					minData: {
+						type: Number,
+						value: 6
+					},
+					scrollPos:{
+						type: Number,
+						value: 0
+					},
+					_userid: {
+						type: String,
+						notify: true
+					},
+					filterid:{
+						type:String,
+						notify:true
+					},
+					company:{
+						type: Object
+					},
+					articlesData: {
+						type: Object,
+						observer: '_onarticlesDataReceived'
+					},
+					articlesData1: {
+						type: Object,
+						observer: '_onarticlesData1Received'
+					},
+					articlesData2: {
+						type: Object,
+						observer: '_onarticlesData2Received'
+					},
+					commentsData: {
+						type: Object,
+						observer: '_oncommentsData'
+					},
+					_companyid: String,
+					thoughtype: String,
+					placeholder: String,
+					_selected: String,
+					_selectedComRate: String,
+					_selectedComRates: {
+						type: Number,
+						value: 0
+					},
+					isloading: {
+						type: Boolean,
+						value: true,
+						notify: true
+					},
+					loadingmessage:{
+						type: String,
+						value: 'Loading...'
+					},
+					opened: {
+						type: Boolean,
+						reflectToAttribute: true,
+						value: true
+					},
+					lastSelected: {
+						type: String,
+						value: ''
+					},
+					openedComRate: {
+						type: Boolean,
+						reflectToAttribute: true,
+						value: true
+					},
+					lastSelectedComRate: {
+						type: String,
+						value: ''
+					},
+					loadmore: {
+						type: Boolean,
+						value: true
+					},
+					isloadingmore: {
+						type: Boolean,
+						value: false
+					},
+					mypost:{
+						type: Boolean,
+						value: false
+					},
+				};
+			}
+			connectedCallback() { 
+				super.connectedCallback();
+				
+			}
+			isFollowing(journalUserID){
+				if(this.user.following != undefined){
+					if(this.user.following){
+					let following =  this.user.following;
+					let isfollowing = following[journalUserID];
+
+					return isfollowing ? 'Following' : 'Follow';
+					}else return "Follow";
+				}else return "Follow";
+				
+			}
+
+			isFollowingStyle(journalUserID){
+				let userID = this.user.userID;
+
+				if(userID === journalUserID){
+					return "w3-hide";
+				}
+				else{
+					if(this.user.following){
+						let following =  this.user.following;
+						let isfollowing = following[journalUserID];
+
+						return isfollowing ? 'following' : '';
+					}
+					else {return "";}
+
+				}
+				
+			}
+			followUser(e){
+				let database = firebase.database();
+				let itemID = e.target.data;
+
+				let filteredArray = this.findObjectByKey(this.articlesData, "newsID", itemID);
+
+				let following = e.target.innerHTML;
+				let userID = this.user.userID;
+				var that = this;
+				var myPhoto = "";
+
+				let journalUserID = filteredArray.journalUserID;
+				let journalUserName = filteredArray.journalUserName;
+				var followDate = Date.now();
+
+				if(this.user.photoURL != undefined || this.user.photoURL != ""){
+					myPhoto = this.user.photoURL;
+				}else{
+					myPhoto = "";
+				}
+
+				if(myPhoto == undefined){
+					myPhoto = "";
+				}
+
+				if(following == "Follow"){
+					$(e.target).addClass('following');
+
+					e.target.innerHTML = "Following";
+					that.updateFollowBTN(journalUserID, following);
+
+					var photoURL = "";
+					if(filteredArray.photoURL != undefined || filteredArray.photoURL != ""){
+						photoURL = filteredArray.photoURL;
+					}else{
+						photoURL = "";
+					}
+
+					if(photoURL == undefined){
+						photoURL = "";
+					}
+
+					var theirdata = {
+						"firstName":filteredArray.journalUserName,
+						"lastName":"",
+						"companyName":filteredArray.companyName,
+						"dateRegistered":followDate,
+						"photoURL":photoURL,
+						"userID":journalUserID
+					}
+
+					var mydata = {
+						"firstName":that.user.firstName,
+						"lastName":that.user.lastName,
+						"companyName":that.user.companyName,
+						"dateRegistered": followDate,
+						"photoURL":myPhoto,
+						"userID": userID
+					}
+
+					var updates = {}
+					updates["users/"+userID+"/following/"+journalUserID]=theirdata;
+					updates["users/"+journalUserID+"/follower/"+userID]=mydata;
+					updates["followers/"+journalUserID+"/"+userID]=mydata;
+
+					return database.ref().update(updates).then(() =>{
+						return console.log("Following");
+					});
+
+				}else{
+					that.isFollowingStyle(journalUserID);
+
+					$(e.target).removeClass('following');
+					e.target.innerHTML = "Follow";
+					that.updateFollowBTN(journalUserID, following);
+
+					var updates = {}
+					updates["users/"+userID+"/following/"+journalUserID]=null;
+					updates["users/"+journalUserID+"/follower/"+userID]=null;
+					updates["followers/"+journalUserID+"/"+userID]=null;
+
+					return database.ref().update(updates).then(() =>{
+						return console.log("Unfollowed");
+					});
+					
+				}
+
+			}
+			updateFollowBTN(journalUserID, following){
+				var that = this;
+				var thoughtCard = Polymer.dom(that.root).querySelector("#thoughts-Holder");
+
+				$(thoughtCard).find('.modal-div').each(function(i, e){
+					var followBTN = $(e).find('.followBTN')[0];
+					var itemID = $(followBTN).prop('data');
+					let filteredArray = that.findObjectByKey(that.articlesData, "newsID", itemID);
+					let thoughtUserID = filteredArray.journalUserID;
+
+					if(thoughtUserID === journalUserID){
+						if(following == "Follow"){
+							$(followBTN).addClass('following');
+							followBTN.innerHTML = "Following";
+						}else{
+							that.isFollowingStyle(journalUserID);
+							$(followBTN).removeClass('following');
+							followBTN.innerHTML = "Follow";
+						}
+					}
+				});
+			}
+
+			_loadMorePosts(){
+				this.scrollPos = window.scrollY;
+				this.isloadingmore = true;
+				this.minData += 6;
+			}
+
+			_onarticlesData1Received(newData, oldData){
+				var objLen = this._objLen(newData);
+				if(objLen > 6){
+					this.articlesData = newData;
+					// this.articlesData = Object.assign(this.articlesData, newData);
+					this.$.articlesList.render();
+				}
+			}
+			_onarticlesData2Received(newData, oldData){
+				var objLen = this._objLen(newData);
+				if(objLen > 6){
+					this.articlesData = newData;
+					// this.articlesData = Object.assign(this.articlesData, newData);
+					this.$.articlesList.render();
+				}
+			}
+
+			_onarticlesDataReceived(newData, oldData){
+				var that = this;
+
+				if(newData.length > 0){
+					this.isloading = false;
+					this.loadingmessage = "";
+					this.loadmore = false;
+					this.isloadingmore = false;
+					setTimeout(function(){
+						window.scrollTo({
+							top: that.scrollPos,
+							behavior: "instant"
+						});
+					}, 1000);
+				} 
+
+				setTimeout(function(){
+					that.isloading = false;
+
+					if(newData.length == 0) that.loadingmessage = "";
+					else that.loadingmessage = "";
+
+				},20000)
+					
+			}
+			_sort(a, b) {  
+				if (a.dateScheduled > b.dateScheduled) return -1;
+				if (a.dateScheduled < b.dateScheduled) return 1;
+				return 0;
+			}
+			articleLink(manualOrExternal, articleLink){
+				if((manualOrExternal !== undefined) || (manualOrExternal !== "undefined")){
+				if (manualOrExternal == "externalLink") return articleLink;
+					return "read-articles";
+				}
+				
+				return "read-articles";
+			}
+			targetLink(manualOrExternal){
+				if (manualOrExternal == "externalLink") return "_blank";
+				return "_self";
+			}
+			_captureClicks(journalID, res, obj){
+				var database = firebase.database();
+				var userID = this.user.userID;
+				var userName = this.user.firstName + " " + this.user.lastName;
+				var myPhoto;
+				var myCompanyID = this.user.companyID;
+				var myCompanyName = this.user.companyName;
+				var dateRegistered = Date.now();
+				var postType = "articles";
+
+				if(this.user.photoURL != undefined || this.user.photoURL != ""){
+					myPhoto = this.user.photoURL;
+				}else{
+					myPhoto = "";
+				}
+
+				if(myPhoto == undefined){
+					myPhoto = "";
+				}
+
+				var filteredArray = this.findObjectByKey(this.articlesData, "newsID", journalID);
+
+				var journalID = journalID;
+				var journalUserID = filteredArray.journalUserID;
+				var journalUserName = filteredArray.journalUserName;
+				var journalCompanyID = filteredArray.companyID;
+				var journalCompanyName = filteredArray.companyName;
+				var journalDateRegistered = filteredArray.dateRegistered;
+				var journalPhotoURL;
+				
+				if(filteredArray.photoURL != undefined || filteredArray.photoURL != ""){
+					journalPhotoURL = filteredArray.photoURL;
+				}else{
+					journalPhotoURL = "";
+				}
+
+				if(journalPhotoURL == undefined){
+					journalPhotoURL = "";
+				}
+
+				var data = {
+					userID: userID,
+					userName: userName,
+					myPhoto: myPhoto,
+					myCompanyID: myCompanyID,
+					myCompanyName: myCompanyName,
+					dateRegistered: dateRegistered,
+					postType: postType,
+					journalID: journalID,
+					journalUserID: journalUserID,
+					journalUserName: journalUserName,
+					journalCompanyID: journalCompanyID,
+					journalCompanyName: journalCompanyName,
+					journalDateRegistered: journalDateRegistered,
+					journalPhotoURL: journalPhotoURL,
+					clickType:"posts",
+					clickArea:res,
+					clickItem:obj
+				}
+
+				database.ref('user-clicks').push(data);
+			}
+			_oncommentsData(){
+				this.commentsData.sort(function(a, b) {
+				var nameA = a.dateRegistered; // ignore upper and lowercase
+				var nameB = b.dateRegistered; // ignore upper and lowercase
+				if (nameA < nameB) {
+					return 1;
+				}
+				if (nameA > nameB) {
+					return -1;
+				}
+				return 0;
+				});
+					
+			}
+			_setArticleData(a, t, b, p){
+				var photo = this._photoURL(p);
+				var a = {
+							body: b,
+							photo: photo,
+							author: a,
+							title: t
+					}
+				return a;
+			}
+			_setData(title, subtitle, id){
+				// set thought data to be rated
+				let a = {
+							Title: title,
+							Subtitle: subtitle,
+							ID: id
+					}
+				return a;
+			}
+			_photoURL(photos){
+				let photo_url = "../../data/land.jpg";
+
+				for (var item in photos) { 
+					photo_url = ""+photos[item].url+"";
+				}
+
+				return photo_url;
+			}
+
+			_formate_date(dt){
+				var date = new Date(dt);
+				var day = date.getDate() < 10 ? '0'+date.getDate() : date.getDate();
+				var hours = date.getHours() < 10 ? '0'+date.getHours() : date.getHours();
+				var minutes = date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes();
+				var locale = 'en-us';
+				var month = date.toLocaleString(locale, { month: "long" });
+				var year = date.getFullYear();
+				var am_pm = date.getHours() >= 12 ? "PM" : "AM"
+
+				return day+' '+month+' '+year+' '+hours+':'+minutes+" "+am_pm;
+			}
+
+			_openArticle(e){
+				var a = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
+				var itemid = Polymer.dom(this.root).querySelector('#'+e.target.id).itemid;
+
+				sessionStorage.setItem("bookAuthor",a.author);
+				sessionStorage.setItem("bookTitle",a.title);
+				sessionStorage.setItem("bookBody",a.body);
+				sessionStorage.setItem("bookPhoto",a.photo);
+
+				var obj = {
+					itemID: itemid,
+					title: a.title,
+					ref: a.author
+				}
+
+				this._captureClicks(itemid, "readArticle", obj);
+			}
+			_sortComments(obj){
+				if(obj != undefined){
+					return Object.keys(obj).map(function(key) {
+						return obj[key];
+					});
+				}
+			}
+			isArray (value) {
+			return value && typeof value === 'object' && value.constructor === Array;
+			};
+			isObject (value) {
+			return value && typeof value === 'object' && value.constructor === Object;
+			};
+			toggleComRate(e){
+				var selectedElem = e.target.id;
+				let news_ID = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
+
+				var pages = Polymer.dom(this.root).querySelector('#page'+news_ID);
+				pages.selectNext();
+			}
+			toggle(e){
+				var a = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
+
+				var selectedElem = e.target.id;
+
+				this.opened = Polymer.dom(this.root).querySelector('#collapse'+a).opened;
+						
+				var res = selectedElem.substring(0, 3);
+				
+				if(res == 'blu'){
+					this._selected = 'page-1-'+a;
+				}else if(res == 'gre'){
+					this._selected = 'page-2-'+a;
+				}else if(res == 'cam'){
+					this._selected = 'page-3-'+a;
+				}else if(res == 'red'){
+					this._selected = 'page-4-'+a;
+				}
+
+				if((this.lastSelected == this._selected) && (this.opened)){
+					Polymer.dom(this.root).querySelector('#collapse'+a).toggle();
+				}
+
+				if((this.lastSelected == this._selected) && (!this.opened)){
+					Polymer.dom(this.root).querySelector('#collapse'+a).toggle();
+				}
+
+				if((this.lastSelected != this._selected) && (!this.opened)){
+					Polymer.dom(this.root).querySelector('#collapse'+a).toggle();
+				}
+
+				this.lastSelected = this._selected;
+
+			}
+			_getVideoName(storageName){
+				let strName = '';
+				strName = storageName.slice(storageName.lastIndexOf('/')+1);
+				strName = strName.replace(new RegExp('_', 'g'), ' ');
+				return strName;
+			}
+			_loadElement1(e){
+				var elem = Polymer.dom(this.root).querySelector('#'+e.target.id);
+				var caption = elem.getAttribute('caption');
+				var name = elem.getAttribute('indexed');
+				this.itemName = caption;
+
+				this.addedit = 1;
+				let editnewsID =elem.data;
+
+				let filteredArray = this.findObjectByKey(this.articlesData, "newsID", editnewsID);
+
+				let editArticleStr = JSON.stringify(filteredArray);
+				
+				sessionStorage.setItem("addedit", this.addedit);
+				sessionStorage.setItem("editnewsID", editnewsID);
+				sessionStorage.setItem("editArticleStr", editArticleStr);
+
+				this._openItemsModal();
+				
+				this._myLoadElement(name, name+".html");
+			}
+			_openItemsModal(){
+				var modal = Polymer.dom(this.root).querySelector('#add-items');
+				modal.style.display = 'block';
+			}
+
+			_closeItemsModal(){
+				var modal = Polymer.dom(this.root).querySelector('#add-items');
+				this._removeElement();
+				modal.style.display = 'none';
+			}
+			_myLoadElement(elementName, htmlImport) {
+				// Let's remove last loaded element if exists
+				this._removeElement();
+
+				var container = Polymer.dom(this.root).querySelector('#item-holder');
+				var __companyid = this._companyid;
+				var __user = this.user;
+				var previousPage = this.previousPage;
+				var company = this.company;
+
+				let pos = window.scrollY;
+
+				sessionStorage.setItem('pos', pos);
+
+				window.scrollTo(0, 0);
+
+				// Now we load it on-the-fly
+				Polymer.importHref(this.resolveUrl(htmlImport), function (e) {
+					// Create a new instance
+					var myElement = document.createElement(elementName);
+					// And add it to the container
+					container.appendChild(myElement);
+					// Lets set a dummy property just to show how to do it
+					myElement._companyid = __companyid;
+					myElement.user = __user;
+					myElement.company = company;
+
+					myElement.addedit = 1;
+
+					
+				});
+			}
+			
+			_loadElement(){
+				// var name = e.target.getAttribute('elem');
+				this._myLoadElement("load-media", "load-media.html");
+			}
+			_removeElement () {
+				var container = Polymer.dom(this.root).querySelector('#item-holder');
+				// element.removeChild(element.firstChild);
+
+				var element = container.querySelector("*");
+				if (element) {
+					element.parentNode.removeChild(element);
+				}
+			}
+			_videoClick(e){      
+				var videoClicked = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
+
+				var src = this.getMediaURL(videoClicked);
+
+				this.loadsrc = src;
+				this._loadElement();
+			}
+			_getPodcastName(storageName){
+				let strName = '';
+				strName = storageName.slice(storageName.lastIndexOf('/')+1);
+				strName = strName.replace(new RegExp('_', 'g'), ' ');
+				return strName;
+			}
+
+			_togglerCR(e){
+				var elem = e.currentTarget;
+				//this._popModal({target:e.currentTarget});
+				$(elem).siblings().removeClass('w3-text-blue').addClass('w3-text-grey');
+				$(elem).toggleClass('w3-text-blue w3-text-grey')
+			}
+
+			_toArray(obj) {
+				if(obj != undefined){
+					return Object.keys(obj).map(function(key) {
+						return obj[key];
+				});
+				}
+				
+			}
+			_objLen(obj) {
+				let len = 0;
+				if(obj != undefined){
+					len = Object.keys(obj).length;
+				}
+				return len;
+			}
+			_photo(photos){
+				let photo_url = "background-image: url('../data/land.jpg');";
+
+				for (var item in photos) { 
+					photo_url = "background-image: url('"+photos[item].url+"');";
+				}
+
+				return photo_url;
+			}
+			_profilePhoto(photo){
+				let photo_url = "background-image: url('../images/default-user.png');";
+
+				if(photo == undefined){
+					photo_url = "background-image: url('../images/default-user.png');";
+				}else if(photo == ""){
+					photo_url = "background-image: url('../images/default-user.png');";
+				}else{
+					photo_url = "background-image: url('"+photo+"');";
+				}
+
+				return photo_url;
+			}
+			_setProfileInfo(journalUserName, journalUserID, companyName, companyID, photoURL){
+				if(photoURL == "" || photoURL == undefined) photoURL = "../images/default-user.png";
+				var a = {
+					journalUserName: journalUserName,
+					journalUserID: journalUserID,
+					companyName: companyName,
+					companyID: companyID,
+					photoURL: photoURL
+				}
+				return a;
+			}
+			_previewProfile(e){
+				var data = e.currentTarget.getAttribute('data');
+				this.userobj = JSON.parse(data);
+				this._userid = this.userobj.journalUserID;
+				this._openProfileModal();
+			}
+			_openProfileModal(){
+				var modal = Polymer.dom(this.root).querySelector('#preview-profile');
+				modal.style.display = 'block';
+			}
+			_closeProfileModal(){
+				var modal = Polymer.dom(this.root).querySelector('#preview-profile');
+				modal.style.display = 'none';
+			}
+			formatDate(date) {
+				var d = new Date(date),
+				month = '' + (d.getMonth() + 1),
+				day = '' + d.getDate(),
+				year = d.getFullYear(),
+				hours = '' + d.getHours(),
+				minutes = '' + d.getMinutes(),
+				seconds = '' + d.getSeconds(),
+				milliseconds = '' + d.getMilliseconds();
+
+				var today = new Date(),
+				thisYear = today.getFullYear();
+
+				// get week day name Sunday - Saturday
+				var dayName = this.getDayMonthStr(d.getDay(), "day", true);
+
+				// get month name
+				var monthName = this.getDayMonthStr(d.getMonth(), "month", true);
+
+				// add preceding zeros where needed
+				if (month.length < 2) month = '0' + month;
+				if (day.length < 2) day = '0' + day;
+				if (hours.length < 2) hours = '0' + hours;
+				if (minutes.length < 2) minutes = '0' + minutes;
+				if (seconds.length < 2) seconds = '0' + seconds;
+				if (milliseconds.length < 2) milliseconds = '0' + milliseconds;
+
+				// format thoughts date
+				// Monday, 04 December 2017 14:21:56
+				var thoughtDate = dayName+", "+day+" "+monthName+" "+year+" "+hours+":"+minutes+":"+seconds;
+
+				return thoughtDate;
+				// return [year, month, day].join('-');
+			}
+			formatRateTime(date) {
+				var d = new Date(date),
+				month = '' + (d.getMonth() + 1),
+				day = '' + d.getDate(),
+				year = d.getFullYear(),
+				hours = d.getHours() > 12 ? d.getHours() - 12 : d.getHours(),
+				am_pm = d.getHours() >= 12 ? "PM" : "AM",
+				minutes = '' + d.getMinutes(),
+				seconds = '' + d.getSeconds(),
+				milliseconds = '' + d.getMilliseconds();
+
+				var today = new Date(),
+				thisYear = today.getFullYear();
+
+				// get week day name Sunday - Saturday
+				var dayName = this.getDayMonthStr(d.getDay(), "day", true);
+
+				// get month name
+				var monthName = this.getDayMonthStr(d.getMonth(), "month", false);
+
+				// add preceding zeros where needed
+				if (month.length < 2) month = '0' + month;
+				if (day.length < 2) day = '0' + day;
+				// if (hours.length < 2) hours = '0' + hours;
+				hours = hours < 10 ? "0" + hours : hours;
+				if (minutes.length < 2) minutes = '0' + minutes;
+				if (seconds.length < 2) seconds = '0' + seconds;
+				if (milliseconds.length < 2) milliseconds = '0' + milliseconds;
+
+				// format thoughts date
+				// 04 Dec 02:21:PM
+				var thoughtDate = day+" "+monthName+" "+hours+":"+minutes+":"+am_pm;
+
+				return thoughtDate;
+				// return [year, month, day].join('-');
+			}
+			timeSince(date) {
+				if (typeof date !== 'object') {
+					date = new Date(date);
+				}
+
+				var seconds = Math.floor((new Date() - date) / 1000);
+				var intervalType;
+
+				var interval = Math.floor(seconds / 31536000);
+				if (interval >= 1) {
+					intervalType = 'year';
+				} else {
+					interval = Math.floor(seconds / 2592000);
+					if (interval >= 1) {
+						intervalType = 'month';
+					} else {
+						interval = Math.floor(seconds / 86400);
+						if (interval >= 1) {
+							intervalType = 'day';
+						} else {
+							interval = Math.floor(seconds / 3600);
+							if (interval >= 1) {
+								intervalType = "hour";
+							} else {
+								interval = Math.floor(seconds / 60);
+								if (interval >= 1) {
+									intervalType = "minute";
+								} else {
+									interval = seconds;
+									intervalType = "second";
+								}
+							}
+						}
+					}
+				}
+
+				if (interval > 1 || interval === 0) {
+					intervalType += 's';
+				}
+
+				return interval + ' ' + intervalType+' ago';
+			};
+			getDayMonthStr(val, dateParam, long){
+				// days
+				var days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+				var daysShort = ["Sun","Mon","Tue","Wed","Thur","Fri","Sat"];
+
+				// Months
+				var monthNames = ["January", "February", "March", "April", "May", "June","July", "August", "September","October", "November", "December"];
+				var monthNamesShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun","Jul", "Aug", "Sep","Oct", "Nov", "Dec"];
+
+				if(dateParam == "day" && long == true){
+					// return day in long format
+					return days[val];
+				}
+				else if(dateParam == "day" && long == false){
+					// return days in short
+					return daysShort[val];
+				}
+				if(dateParam == "month" && long == true){
+					// return month in long format
+					return monthNames[val];
+				}
+				else if(dateParam == "month" && long == false){
+					// return month in short
+					return monthNamesShort[val];
+				}
+				
+			}
+			_openPLDP(e){
+				var newsID = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
+				sessionStorage.setItem("PLDP_ArticleAdd", newsID);
+				this.$.pldpDialog.open();
+			}
+			getMediaURL(url){
+				var res = "";
+				if(url.includes("youtu")){
+					var youtubeID = this.getYoutubeID(url);
+					res = "https://www.youtube.com/embed/"+youtubeID;
+				}else{
+					res = url;
+				}
+
+				return res;
+			}
+			getYoutubeID(youtubeURL) {
+					var str = youtubeURL;
+					var n = str.indexOf("=");
+					var x = str.indexOf("&");
+					var res = "";
+			
+					if(n == -1){
+						n = str.indexOf("youtu.be");
+						if(x == -1) res = str.substring(n+9);
+						else res = str.substring(n+9, x);
+					}else{
+						if(x == -1) res = str.substring(n+1);
+						else res = str.substring(n+1, x);
+					}
+					
+					return res;
+			}
+			getYoutubeThumbnail(youtubeURL) {
+				var res = this.getYoutubeID(youtubeURL);
+				return "https://img.youtube.com/vi/"+res+"/0.jpg";
+			}
+			findObjectByKey(array, key, value) {
+					for (var i = 0; i < array.length; i++) {
+							if (array[i][key] === value) {
+									return array[i];
+							}
+					}
+					return null;
+			}
+			closePLDPDialog(){
+				this._addToPLDP();
+				sessionStorage.removeItem("PLDP_ArticleAdd");
+				this.$.pldpDialog.close();
+			}
+			_addToPLDP(){
+				let PLDP_ThoughtAdd = sessionStorage.getItem("PLDP_ArticleAdd");
+
+				let filteredArray = this.findObjectByKey(this.articlesData, "newsID", PLDP_ThoughtAdd);
+
+				// remove the key
+				delete filteredArray['$key'];
+
+				// add PLDP user to the thought object
+				filteredArray.PLDPUserID = this.user.userID;
+				filteredArray.PLDPUserName = this.user.firstName+" "+this.user.lastName;
+
+				// instantiate db
+				let database = firebase.database();
+
+				// create new record
+				let newThought = database.ref().child('/myPLDP/news').push().key;
+
+				// delete the thought if already exists
+				let ref = database.ref('myPLDP/news');
+				ref.orderByChild('newsID').equalTo(PLDP_ThoughtAdd)
+						.once('value').then(function(snapshot) {
+								snapshot.forEach(function(childSnapshot) {
+								if(newThought === childSnapshot.key){
+									console.log("Got the new ID");
+								}else{
+									// remove each old child
+									ref.child(childSnapshot.key).remove();
+								}
+						});
+				});
+				
+				let updates = {};
+				updates['/myPLDP/news/' + newThought] = filteredArray;
+				database.ref().update(updates);
+			}
+			_deleteThoughtImg(e){
+				var thoughtPhotoID = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
+				var deldailyThoughtID = Polymer.dom(this.root).querySelector('#'+e.target.id).dataval;
+						
+				sessionStorage.setItem("thoughtPhotoID", thoughtPhotoID);
+				sessionStorage.setItem("deldailyThoughtID", deldailyThoughtID);
+				sessionStorage.setItem("deleteType", "photo");
+
+				this.$.discardTitle.innerHTML = "Discard Photo";
+				this.$.thoughtTitle.innerHTML = 'Delete selected photo?';
+				this.$.thoughtAuthor.innerHTML = '';
+
+				this.$.deleteDialog.open();
+			}
+			_deleteThoughtURL(e){
+				var thoughtURLID = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
+				var deldailyThoughtID = Polymer.dom(this.root).querySelector('#'+e.target.id).dataval;
+						
+				sessionStorage.setItem("thoughtURLID", thoughtURLID);
+				sessionStorage.setItem("deldailyThoughtID", deldailyThoughtID);
+				sessionStorage.setItem("deleteType", "url");
+
+				this.$.discardTitle.innerHTML = "Discard Article Link";
+				this.$.thoughtTitle.innerHTML = 'Delete selected article link?';
+				this.$.thoughtAuthor.innerHTML = '';
+
+				this.$.deleteDialog.open();
+			}
+			_deleteThoughtPodcast(e){
+				var thoughtPodcastID = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
+				var deldailyThoughtID = Polymer.dom(this.root).querySelector('#'+e.target.id).dataval;
+				var podcastID = Polymer.dom(this.root).querySelector('#'+e.target.id).datapod;
+						
+				sessionStorage.setItem("thoughtPodcastID", thoughtPodcastID);
+				sessionStorage.setItem("podcastID", podcastID);
+				sessionStorage.setItem("deldailyThoughtID", deldailyThoughtID);
+				sessionStorage.setItem("deleteType", "podcast");
+
+				this.$.discardTitle.innerHTML = "Discard Podcast Link";
+				this.$.thoughtTitle.innerHTML = 'Delete selected podcast link?';
+				this.$.thoughtAuthor.innerHTML = '';
+
+				this.$.deleteDialog.open();
+			}
+			_deleteThoughtVideo(e){
+				var thoughtVideoID = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
+				var deldailyThoughtID = Polymer.dom(this.root).querySelector('#'+e.target.id).dataval;
+				var videoID = Polymer.dom(this.root).querySelector('#'+e.target.id).datavid;
+						
+				sessionStorage.setItem("thoughtVideoID", thoughtVideoID);
+				sessionStorage.setItem("videoID", videoID);
+				sessionStorage.setItem("deldailyThoughtID", deldailyThoughtID);
+				sessionStorage.setItem("deleteType", "video");
+
+				this.$.discardTitle.innerHTML = "Discard Video Link";
+				this.$.thoughtTitle.innerHTML = 'Delete selected video link?';
+				this.$.thoughtAuthor.innerHTML = '';
+
+				this.$.deleteDialog.open();
+			}
+			_deleteArticle(e){
+				var newsID = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
+						
+				sessionStorage.setItem("delnewsID", newsID);
+				sessionStorage.setItem("deleteType", "article");
+
+				var filteredArray = this.findObjectByKey(this.articlesData, "newsID", newsID);
+
+				this.$.thoughtTitle.innerHTML = '"'+filteredArray.title+'"';
+				this.$.thoughtAuthor.innerHTML = filteredArray.subtitle;
+
+				this.$.deleteDialog.open();
+			}
+			deleteArticle(){
+				var deleteType = sessionStorage.getItem("deleteType");
+				var newsID = sessionStorage.getItem("delnewsID");
+
+				// delete Thought
+				if(deleteType == "article"){
+					// Get a reference to the database service
+					var database = firebase.database();
+
+					// delete thoughts
+					database.ref('news/'+ newsID).remove();
+
+					this.showSnackBar("Article deleted successfully!");
+
+					sessionStorage.removeItem("delnewsID");
+				}
+				else if(deleteType == "photo"){
+					var thoughtPhotoID = sessionStorage.getItem("thoughtPhotoID");
+					// Get a reference to the database service
+					var database = firebase.database();
+
+					// delete thoughts
+					database.ref('dailyThoughts/'+dailyThoughtID+'/photos/'+ thoughtPhotoID).remove();
+
+					this.showSnackBar("Photo deleted successfully!");
+
+					sessionStorage.removeItem("thoughtPhotoID");
+					sessionStorage.removeItem("deldailyThoughtID");
+				}
+				else if(deleteType == "url"){
+					var thoughtURLID = sessionStorage.getItem("thoughtURLID");
+					// Get a reference to the database service
+					var database = firebase.database();
+
+					// delete url
+					database.ref('dailyThoughts/'+dailyThoughtID+'/urls/'+ thoughtURLID).remove();
+
+					this.showSnackBar("Article deleted successfully!");
+
+					sessionStorage.removeItem("thoughtURLID");
+					sessionStorage.removeItem("deldailyThoughtID");
+				}
+				else if(deleteType == "podcast"){
+					var thoughtPodcastID = sessionStorage.getItem("thoughtPodcastID");
+					var podcastID = sessionStorage.getItem("podcastID");
+					// Get a reference to the database service
+					var database = firebase.database();
+
+					// delete podcast from thought
+					database.ref('dailyThoughts/'+dailyThoughtID+'/podcasts/'+ thoughtPodcastID).remove();
+
+					// delete podcast
+					database.ref('podcasts/'+ podcastID).remove();
+
+					this.showSnackBar("Podcast deleted successfully!");
+
+					sessionStorage.removeItem("thoughtPodcastID");
+					sessionStorage.removeItem("podcastID");
+					sessionStorage.removeItem("deldailyThoughtID");
+				}
+				else if(deleteType == "video"){
+					var thoughtVideoID = sessionStorage.getItem("thoughtVideoID");
+					var videoID = sessionStorage.getItem("videoID");
+					// Get a reference to the database service
+					var database = firebase.database();
+
+					// delete podcast from thought
+					database.ref('dailyThoughts/'+dailyThoughtID+'/videos/'+ thoughtVideoID).remove();
+
+					// delete podcast
+					database.ref('videos/'+ videoID).remove();
+
+					this.showSnackBar("Video deleted successfully!");
+
+					sessionStorage.removeItem("thoughtVideoID");
+					sessionStorage.removeItem("videoID");
+					sessionStorage.removeItem("deldailyThoughtID");
+				}
+				
+				sessionStorage.removeItem("deleteType");
+				this.$.deleteDialog.close();
+			}
+			showSnackBar(msg){
+				var x = this.$.snackbar;
+
+				x.innerHTML = msg;
+				x.className = "show";
+				setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+			}
+			isEqual(a, b) {
+				return a === b;
+			}
+		}
+
+		window.customElements.define(ViewArticles.is, ViewArticles);
+	</script>
+>>>>>>> 56623b88b09b0bb71f891e1c7b5953dc04793f14
 </dom-module>

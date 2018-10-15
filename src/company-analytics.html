@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!--
 @license
 Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
@@ -48,3 +49,55 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     window.customElements.define(CompanyAnalytics.is, CompanyAnalytics);
   </script>
 </dom-module>
+=======
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="manifest" href="/manifest.json">
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<link rel="lazy-import" href="view-analytics.html">
+
+<dom-module id="company-analytics">
+  <template>
+    <style>
+    </style>
+
+  <view-analytics user="[[user]]" _companyid="[[_companyid]]" logo="[[logo]]"></view-analytics>
+
+</template>
+
+  <script>
+    class CompanyAnalytics extends Polymer.Element {
+      static get is() { return 'company-analytics'; }
+      static get properties() {
+        return {
+          user: {type: Object},
+          _companyid: String,
+          logo: String
+        };
+      }
+      connectedCallback() { 
+        super.connectedCallback();
+        var resolvedPageUrl = this.resolveUrl('view-analytics.html');
+        Polymer.importHref(
+            resolvedPageUrl,
+            null,
+            'view-analytics.html',
+            true
+        );
+      }
+
+    }
+
+    window.customElements.define(CompanyAnalytics.is, CompanyAnalytics);
+  </script>
+</dom-module>
+>>>>>>> 56623b88b09b0bb71f891e1c7b5953dc04793f14
