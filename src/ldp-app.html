@@ -19,12 +19,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="ldp-app">
   <template>
     <!-- Public App -->
-    <!-- <firebase-app
+    <firebase-app
         auth-domain="leadershipplatform-158316.firebaseapp.com"
         database-url="https://leadershipplatform-158316.firebaseio.com"
         api-key="AIzaSyAf_oJi6fgm6-ZrVPeOVdW2DDoeu3v5SxY"
         storage-bucket="leadershipplatform-158316.appspot.com"
-        messaging-sender-id="438289288307">  -->
+        messaging-sender-id="438289288307"> 
 
     <!-- Corporate App -->
     <!-- <firebase-app
@@ -36,13 +36,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </firebase-app> -->
     
     <!-- Test App -->    
-    <firebase-app
+    <!-- <firebase-app
         auth-domain="glp-test.firebaseapp.com"
         database-url="https://glp-test.firebaseio.com"
         api-key="AIzaSyBJH4pbQEzEpxtEomcnYjlUfsiFC5nqHoQ"
         storage-bucket="glp-test.appspot.com"
         messaging-sender-id="805735980290">
-    </firebase-app>
+    </firebase-app> -->
 
     <style>
       :host {display: block;background-color: #f6f6f6;}
@@ -119,13 +119,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 data="{{userdata}}">
             </firebase-query>
 
-            <!-- <template is="dom-if" if="[[isEqual(user.uid,_user.uid)]]"> -->
             <my-app notcompanyadmin="{{notcompanyadmin}}" approvethoughts="[[approveThoughts]]" addthoughts = "[[addThoughts]]" addarticle = "[[addArticle]]" hidecompany = "[[hidecompany]]" mythoughts = "[[myThoughts]]" _user="[[_user]]" _companyid="[[_user.companyID]]" hidemenu="[[hidemenu]]" hidesubmenu="[[hidesubmenu]]" _publicid="[[_publicid]]"></my-app>
-            <!-- </template> -->
-
-            <!-- <template is="dom-if" if="[[!isEqual(user.uid,_user.uid)]]">
-                <sign-in></sign-in>
-            </template> -->
             
         </template>
         <template is="dom-if" if="[[!signedIn]]">
@@ -252,10 +246,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             var that = this;
             
             // public app id
-            // var appID = "AIzaSyAf_oJi6fgm6-ZrVPeOVdW2DDoeu3v5SxY";
+            var appID = "AIzaSyAf_oJi6fgm6-ZrVPeOVdW2DDoeu3v5SxY";
             
             // Test app id
-            var appID = "AIzaSyBJH4pbQEzEpxtEomcnYjlUfsiFC5nqHoQ";
+            // var appID = "AIzaSyBJH4pbQEzEpxtEomcnYjlUfsiFC5nqHoQ";
 
             // Corporate app id
             // var appID = "AIzaSyCnpQlwku48ga6bR7Y3Sl94H-fazbzCgus"
@@ -488,10 +482,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     localStorage.setItem("follow_id", ""+newData.follow_id);
 
                     // public appID
-                    // var appID = "AIzaSyAf_oJi6fgm6-ZrVPeOVdW2DDoeu3v5SxY";
+                    var appID = "AIzaSyAf_oJi6fgm6-ZrVPeOVdW2DDoeu3v5SxY";
 
                     // Test app id
-                    var appID = "AIzaSyBJH4pbQEzEpxtEomcnYjlUfsiFC5nqHoQ";
+                    // var appID = "AIzaSyBJH4pbQEzEpxtEomcnYjlUfsiFC5nqHoQ";
 
                     // Corporate app id
                     // var appID = "AIzaSyCnpQlwku48ga6bR7Y3Sl94H-fazbzCgus"
