@@ -101,7 +101,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <div id="dashboard" class="w3-row-padding w3-white"><h2 class="w3-left">Analytics Dashboard</h2> <paper-spinner class="w3-right" active="{{isloading}}" style="height: 50px; width: 50px; margin:auto"></paper-spinner></div>
 
     <div id="searchbar" class="w3-row-padding w3-margin-bottom">
-        <template is="dom-if" if="[[user.reportadmin]]">
+        <template is="dom-if" if="[[user.companyanalytics]]">
             <div class="w3-row w3-left w3-mobile" hidden="{{iscompaniesloaded}}">
                 <paper-dropdown-menu autofocus id="dropdown_companies" label="Select Company" value="{{selectedCompany}}" style="width: -webkit-fit-content;" tabindex="0" class="w3-left w3-mobile" vertical-align="top" horizontal-align="left" vertical-offset="60">
                     <paper-listbox id="companyList" slot="dropdown-content" attr-for-selected="value" selected="{{selectedCompany}}" no-animations="true" style="min-width: 340px;">
@@ -136,22 +136,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </template>
         </div>
     </div>
-    
-    <!-- <div id="overallbar" class="w3-row-padding w3-white">
-        <div class="w3-row-padding">
-            <h3>Overall Traffic</h3>
-        </div>
-        <div class="w3-row-padding">
-            <google-chart
-                class="w3-left"
-                id="overall-chart"
-                type="md-line"
-                options='{"title": "Overall Traffic"}'
-                cols='[{"label": "Month", "type": "string"},{"label": "Traffic", "type": "number"}]'>
-            </google-chart>
-        </div>
-        
-    </div> -->
+
     <div id="postsbar" class="w3-row-padding w3-animate-zoom">
         <div class="w3-row-padding">
             <h3>Posts</h3>
@@ -447,17 +432,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           return res;
       }
       _companySelect(e){
-        this.isloading = true;
-        this._currentComments = 0;
-        this._currentActiveUsers = 0;
-        this._currentLikes = 0;
-        this._currentTasks = 0;
-        this._currentPosts = 0;
-        this._currentArticles = 0;
-        this._currentVideos = 0;
-        this._currentThoughts = 0;
-        this._currentPodcasts = 0;
-        this._currentViews = 0;
 
           if(e.currentTarget.data){
             this.selectedMonth = "All";
@@ -465,7 +439,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.currPeriod = ""+this._currentYear;
             this.useractive = "year-active-users";
 
-            this._companyid = e.currentTarget.data;
+            if(this._companyid != e.currentTarget.data){
+                this.isloading = true;
+                this._currentComments = 0;
+                this._currentActiveUsers = 0;
+                this._currentLikes = 0;
+                this._currentTasks = 0;
+                this._currentPosts = 0;
+                this._currentArticles = 0;
+                this._currentVideos = 0;
+                this._currentThoughts = 0;
+                this._currentPodcasts = 0;
+                this._currentViews = 0;
+
+                this._companyid = e.currentTarget.data
+            }
             
           }
       }
@@ -492,7 +480,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 this.currPeriod = ""+this._currentYear+"-"+e.currentTarget.getAttribute('data');
                 this.useractive = "month-active-users";
             }
-            // console.log("month value: ",e.currentTarget.getAttribute('data'))
         }
       }
 
@@ -544,8 +531,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var usersdata = this.activeUsersData;
         var bodyData = [];
 
-        // console.log(bodyData.length)
-
         for (var i = 0; i < usersdata.length; i++) {
             var dataRow = [];
             var dataRow2 = [
@@ -568,28 +553,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
         
         return bodyData;
-
-        // console.log(bodyData.length)
-
-        // var dd = {
-        //     content: [
-        //         {
-        //             table: {
-        //                 headerRows: 1,
-        //                 widths: [ '*'],
-        //                 body: bodyData
-        //             },
-		// 	        layout: {
-        //                 fillColor: function (i, node) {
-        //                     return (i % 2 === 0) ? '#E8E8E8' : null;
-        //                 }
-        //             }
-        //         }
-        //     ]
-        // }
-
-        // pdfMake.createPdf(dd).open();
-
     }
       _createPDF(){
         var that = this;
@@ -603,7 +566,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             reportPeriod = this.selectedMonth+" 2018";
         }
 
-        if(this.user.reportadmin == true){
+        if(this.user.companyanalytics == true){
             if(this.selectedCompany == undefined){
                 reportCompany = this.user.companyName;
             }else{
@@ -769,48 +732,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }else if(newData[x]['$key'] == 'views'){
                     this._currentViews = newData[x]['$val'];
                 }
-                // else if(newData[x]['$key'] == 'transactions'){
-                //     var trans = newData[x];
-
-                //     for(var y in trans){                        
-                //         if(y != "$key"){
-                //             var pushData = [];
-                //             pushData.push(""+y);
-                //             pushData.push(trans[y]);
-                //             finalData.push(pushData);                         
-                //         }
-                //     }
-
-                //     // object which holds the order value of the month
-                //     var monthNames = {
-                //         "Jan": 1,
-                //         "Feb": 2,
-                //         "Mar": 3,
-                //         "Apr": 4,
-                //         "May": 5,
-                //         "Jun": 6,
-                //         "Jul": 7,
-                //         "Aug": 8,
-                //         "Sep": 9,
-                //         "Oct": 10,
-                //         "Nov": 11,
-                //         "Dec": 12
-                //     };
-
-                //     // sort the data array
-                //     finalData.sort(function(a, b) {
-                //     // sort based on the value in the monthNames object
-                //     return monthNames[a[0]] - monthNames[b[0]];
-                //     });
-
-                //     if(chart != null){
-                //         chart.rows = finalData;
-                //     }
-                    
-                // }
+                
             }
 
-            if(this.user.reportadmin){
+            if(this.user.companyanalytics){
                 var qry_companies = Polymer.dom(that.root).querySelector("#qry_companies")
                 qry_companies.path="companies";
             }
@@ -824,9 +749,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           
       }
       _noOfUsersDataReceived(newData, oldData){
-          console.log("users loaded")
           var that = this;
-        //   var chart = Polymer.dom(that.root).querySelector("#overall-chart");
 
         if(newData.length > 0){
             for(var x in newData){

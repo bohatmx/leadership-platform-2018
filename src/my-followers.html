@@ -195,13 +195,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         _toArray(obj) {
             if(obj != undefined){
+
                 return Object.keys(obj).map(function(key) {
                     var retObj = {};
                     retObj = obj[key];
-                    retObj.key = key;
+
+                    if(retObj !== true)
+                        retObj.key = key;
+
                     return retObj;
-                    // return obj[key];
-            });
+                });
             }
         }
 

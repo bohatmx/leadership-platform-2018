@@ -270,16 +270,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       setInputFocus: function(){
         this.$.email_input.focus();
       },
-      corporateLinks(){
-
-      },
       checkUserDomain(usr){
-        // var corporates = [
+        var url = window.location.origin
+        
+        var corporates = ["edcon.co.za","edcon@","oneconnect.co.za","oneconnect@"]
 
-        // ]
-        // var str = "colman@edcon.co.za";
-        // var patt = new RegExp("edcon.co.za");
-        // var res = patt.test(str);
+        for(var x = 0; x < corporates.length; x++){
+          var y = corporates[x];
+          var patt = new RegExp(y);
+          
+          if(patt.test(usr)){
+            var corporateDomains = {
+              "oneconnect.co.za": "https://oneconnect.thinklead.co.za/",
+              "oneconnect@": "https://oneconnect.thinklead.co.za/",
+              "edcon.co.za":"https://edcon.thinklead.co.za/",
+              "edcon@":"https://edcon.thinklead.co.za/"
+            }
+
+            var companyurl = corporateDomains[y];
+            if(url !== companyurl){
+              window.location.replace(companyurl);
+            }
+          }
+        }
+                
       },
       signInGoogle: function(){
         let isError = false;
@@ -399,6 +413,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.showSnackBar("Password is required!");
           return;
         }else{
+          // this.checkUserDomain(email);
+
           sessionStorage.setItem("loginError", "");
           sessionStorage.setItem("isError", false);
 
@@ -428,12 +444,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   email: email,
                   dateRegistered: Date.now(),
                   clickType:"lastlogin"
-                }
-
-                console.log("user: ",isUser)
-
-                if(isUser.uid == "cEgC7UgFzJSuQ9lUpQtwvex0VDU2"){
-                  console.log("Is OneConnect User");
                 }
 
                 database.ref('user-lastlogin').push(userLoginData);
@@ -589,6 +599,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.showSnackBar("Password is required!");
           return;
         }else{
+          // For live servers
+          this.checkUserDomain(email);
+          
           firebase.auth().createUserWithEmailAndPassword(email, password).then(function(user){
             var uid = user.uid;
             // get date and time
