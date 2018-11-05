@@ -136,7 +136,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </template>
         </div>
     </div>
-
+    
     <div id="postsbar" class="w3-row-padding w3-animate-zoom">
         <div class="w3-row-padding">
             <h3>Posts</h3>
@@ -372,6 +372,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Number,
             value:0
           },
+          _currentNoOfUsersMonthly:{
+            type: Number,
+            value:0
+          },
+          _currentNoOfUsersOverall:{
+            type: Number,
+            value:0
+          },
           _currentLikes:{
             type: Number,
             value:0
@@ -390,6 +398,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           overallData: {
               type: Object,
+              notify:true,
               observer: "_overallDataReceived"
           },
           noOfUsersData: {
@@ -413,6 +422,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         };
       }
+    
       _getNos(nos){
           var res = "_"
           if(nos == undefined){
@@ -433,12 +443,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       _companySelect(e){
 
-          if(e.currentTarget.data){
+        if(e.currentTarget.data){
             this.selectedMonth = "All";
             this.activeUsersPeriod = ""+this._currentYear;
             this.currPeriod = ""+this._currentYear;
             this.useractive = "year-active-users";
-
+            
             if(this._companyid != e.currentTarget.data){
                 this.isloading = true;
                 this._currentComments = 0;
@@ -454,8 +464,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                 this._companyid = e.currentTarget.data
             }
-            
-          }
+
+        }
       }
       _monthSelect(e){
         this.isloading = true;
@@ -607,7 +617,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         }
                     },
                 },
-                // {text: 'User Engagement', style: 'header'},
                 {text: 'Impressions', style: 'subheader'},
                 {
                     style:'tableZebra',
@@ -693,7 +702,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _overallDataReceived(newData, oldData){
           var that = this;
           var finalData = [];
-        //   var chart = Polymer.dom(that.root).querySelector("#overall-chart");
 
         if(newData.length > 0){
             this._currentComments = 0;
@@ -706,6 +714,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this._currentThoughts = 0;
             this._currentPodcasts = 0;
             this._currentViews = 0;
+            this._currentNoOfUsers = this._currentNoOfUsersOverall;
 
             for(var x in newData){
                 if(newData[x]['$key'] == 'thoughts'){
@@ -731,6 +740,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     this._currentTasks = newData[x]['$val'];
                 }else if(newData[x]['$key'] == 'views'){
                     this._currentViews = newData[x]['$val'];
+                }else if(newData[x]['$key'] == 'noofusers'){
+                    if((this.selectedMonth != "All") && (this.selectedMonth != undefined) ){
+                        this._currentNoOfUsers = newData[x]['$val']
+                    }else{
+                        this._currentNoOfUsers = this._currentNoOfUsersOverall;
+                    }
                 }
                 
             }
@@ -750,11 +765,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       _noOfUsersDataReceived(newData, oldData){
           var that = this;
+        //   var chart = Polymer.dom(that.root).querySelector("#overall-chart");
 
         if(newData.length > 0){
             for(var x in newData){
                 if(newData[x]['$key'] == 'noofusers'){
-                    this._currentNoOfUsers = newData[x]['$val']
+                    // this._currentNoOfUsers = newData[x]['$val']
+                    if((this.selectedMonth == "All") || (this.selectedMonth == undefined) ){
+                        this._currentNoOfUsers = newData[x]['$val']
+                        this._currentNoOfUsersOverall = newData[x]['$val']
+                    }
                 }
             }
         }else{

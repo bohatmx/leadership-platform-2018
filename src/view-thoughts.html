@@ -21,170 +21,75 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 
 <!-- iron elements  -->
-<link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
 <link rel="import" href="../bower_components/paper-styles/shadow.html">
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
-<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
-<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
-
-<!-- paper rating -->
-<link rel="import" href="../bower_components/l2t-paper-rating/l2t-paper-rating.html">
-
-<!-- Firebase Auth -->
-<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
-
-<!-- Firebase Query -->
-<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
-<link rel="import" href="../bower_components/polymerfire/firebase-database-behavior.html">
-
-<!-- <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html"> -->
 
 <link rel="import" href="app-icons.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="thought-card-attachments.html">
 <link rel="import" href="comments-box.html">
-<link rel="import" href="follow-button.html">
 <link rel="import" href="preview-profile.html">
 
 <dom-module id="view-thoughts">
 	<template>
-		<template is="dom-if" if="[[_companyid]]">
-			<template is="dom-if" if="[[isEqual(thoughtype, 'companythoughts')]]">
-				<firebase-query
-					id="qry_viewthought"
-					path="/dailyThoughts"
-					order-by-child="publish_status"
-					equal-to="[[_companyid]]_approved"
-					limit-to-last="{{minData}}"
-					data="{{thoughtsData}}">
-				</firebase-query>
+		<!-- <template is="dom-if" if="[[_companyid]]"> -->
+			<firebase-query disabled="true" id="qry_viewthought" path="{{qrypath}}" order-by-child="{{orderchild}}" equal-to="{{equalto}}" limit-to-last="{{minData}}" data="{{thoughtsData}}">
+			</firebase-query>
+		<!-- </template> -->
+		<style include="w3-styles"></style>
+		<style include="shared-styles">
+			:host {
+				/* Label and underline color when the input is focused */
+				--paper-input-container-focus-color: #fff;
 
-				<!-- <firebase-query
-					path="/dailyThoughts"
-					order-by-child="publish_status"
-					equal-to="[[_companyid]]_approved"
-					limit-to-last="{{minData}}"
-					data="{{thoughtsData1}}">
-				</firebase-query> -->
-			</template>
+				/* Label and underline color when the input is invalid */
+				--paper-input-container-invalid-color: red;
 
-			<template is="dom-if" if="[[isEqual(thoughtype, 'dailythoughts')]]">
-				<firebase-query
-					id="qry_viewthought2"
-					path="/dailyThoughts"
-					order-by-child="publish_status"
-					equal-to="daily_approved"
-					limit-to-last="{{minData}}"
-					data="{{thoughtsData}}">
-				</firebase-query>
-
-				<!-- <firebase-query
-					path="/dailyThoughts"
-					order-by-child="publish_status"
-					equal-to="daily_approved"
-					limit-to-last="{{minData}}"
-					data="{{thoughtsData1}}">
-				</firebase-query> -->
-			</template>
-
-			<template is="dom-if" if="[[isEqual(thoughtype, 'mythoughts')]]">
-				<firebase-query
-					id="qry_viewthought3"
-					path="/dailyThoughts"
-					order-by-child="journalUserID"
-					equal-to="[[user.userID]]"
-					limit-to-last="{{minData}}"
-					data="{{thoughtsData}}">
-				</firebase-query>
-
-				<!-- <firebase-query
-					path="/dailyThoughts"
-					order-by-child="journalUserID"
-					equal-to="[[user.userID]]"
-					limit-to-last="{{minData}}"
-					data="{{thoughtsData1}}">
-				</firebase-query> -->
-			</template>
-
-			<template is="dom-if" if="[[isEqual(thoughtype, 'topleaderthoughts')]]">
-				<firebase-query
-					id="qry_viewthought4"
-					path="/dailyThoughts"
-					order-by-child="publish_status"
-					equal-to="hc_approved"
-					limit-to-last="{{minData}}"
-					data="{{thoughtsData}}">
-				</firebase-query>
-
-				<!-- <firebase-query
-					path="/dailyThoughts"
-					order-by-child="publish_status"
-					equal-to="hc_approved"
-					limit-to-last="{{minData}}"
-					data="{{thoughtsData1}}">
-				</firebase-query> -->
-			</template>
-
-			<template is="dom-if" if="[[isEqual(thoughtype, 'filteredthoughts')]]">
-				<firebase-query
-					id="qry_filteredthoughts"
-					path="/dailyThoughts"
-					order-by-child="dailyThoughtID"
-					equal-to="[[filterid]]"
-					data="{{thoughtsData}}">
-				</firebase-query>
-			</template>
-		</template>
-			<style include="w3-styles"></style>
-			<style include="shared-styles">
-
-				:host {
-					/* Label and underline color when the input is focused */
-					--paper-input-container-focus-color: #fff;
-
-					/* Label and underline color when the input is invalid */
-					--paper-input-container-invalid-color: red;
-
-					/* Input foreground color */
-					--paper-input-container-label:{
-						font-size: 12px;
-						margin-bottom: 4px;
-						color: #757575;
-					};
-					--paper-input-container-input-focus:{
-						font-size: 14px;
-						margin-bottom: 4px;
-						color: var(--app-primary-text);
-					};
-				}
-				.header-det{
-					flex-grow: 9;
-					display: flex;
-				}
-				.thought-rate-title{
-					text-align: center;
-					font-family: sans-serif;
-					white-space: wrap;
-					margin: 12px 0;
-				}
-				@media screen and (max-width: 900px) {
-					.main-card{
-						margin: 0px;
-					}
+				/* Input foreground color */
+				--paper-input-container-label: {
+					font-size: 12px;
+					margin-bottom: 4px;
+					color: #757575;
 				}
 
-				.previewFooter{
-					display: flex;
-					position: absolute;
-					width: 100%;
-					max-width: 600px;
-					margin-bottom: 6px;
-					bottom: 10px;
-					left:10px;
-					font-size: 10pt!important;
+				--paper-input-container-input-focus: {
+					font-size: 14px;
+					margin-bottom: 4px;
+					color: var(--app-primary-text);
 				}
-			</style>
+			}
+
+			.header-det {
+				flex-grow: 9;
+				display: flex;
+			}
+
+			.thought-rate-title {
+				text-align: center;
+				font-family: sans-serif;
+				white-space: wrap;
+				margin: 12px 0;
+			}
+
+			@media screen and (max-width: 900px) {
+				.main-card {
+					margin: 0px;
+				}
+			}
+
+			.previewFooter {
+				display: flex;
+				position: absolute;
+				width: 100%;
+				max-width: 600px;
+				margin-bottom: 6px;
+				bottom: 10px;
+				left: 10px;
+				font-size: 10pt !important;
+			}
+		</style>
 		<div id="media"></div>
+
 		<!-- <div class="container search-bar" hidden="[[isEqual(thoughtype, 'filteredthoughts')]]">
 			<paper-search-bar hide-filter-button="true" placeholder="[[placeholder]]"></paper-search-bar>
 		</div> -->
@@ -194,7 +99,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				<div class="w3-container">
 					<span id="spanCloseItemModal" on-click="_closeItemsModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white">&times;</span>
 					<div class="w3-large" style="padding:20px 15px">
-						<b class="w3-text-blue"><h3>[[itemName]]</h3></b>
+						<b class="w3-text-blue">
+							<h3>[[itemName]]</h3>
+						</b>
 					</div>
 					<div id="item-holder" class="w3-row w3-padding w3-border w3-round-small w3-margin-bottom">
 					</div>
@@ -205,7 +112,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 		<div id="preview-profile" class="ldp-modal w3-animate-zoom">
 			<div class="ldp-modal-content w3-round max-modal-width">
 				<div>
-					<span id="close-followers" data="preview-profile" on-click="_closeProfileModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white" style="z-index: 999;">&times;</span>
+					<span id="close-followers" data="preview-profile" on-click="_closeProfileModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white"
+					 style="z-index: 999;">&times;</span>
 					<div class="w3-row">
 						<preview-profile _userid="{{_userid}}" userobj="{{userobj}}"></preview-profile>
 					</div>
@@ -216,28 +124,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 		<section class="thought-card" id="thoughts-Holder">
 			<div class="main-card" style="width:100%;">
 				<div class="spinner">
-					<paper-spinner  active="{{isloading}}"></paper-spinner>
-					<div style="width: 100%; padding-top: 10px;" class="w3-row w3-center" id="spinnerMessage">{{loadingmessage}}</div>
+
+					<paper-spinner active="{{isloading}}"></paper-spinner>
+					<div style="width: 100%; padding-top: 10px;" class="w3-row w3-center" id="spinnerMessage">
+
+					<template is="dom-if" if="[[isEqual(thoughtype, 'filteredthoughts')]]">
+						<img hidden="{{!noIdea}}" src="https://png.icons8.com/material/200/666666/no-idea.png">
+					</template>
+						<h4>{{loadingmessage}}</h4> 
+					</div>
 				</div>
-				<template id="thoughtsList" is="dom-repeat" items="[[thoughtsData]]" as="item" sort="_sort" observe="dateScheduled">
+				<template id="thoughtsList" is="dom-repeat" items="[[thoughtsData]]" as="item" sort="_sort" observe="dateScheduled" initial-count="3" target-framerate="3">
 					<div class="modal-div w3-animate-zoom">
 						<div class="card-container fadeInUp">
 							<span class="w3-button w3-display-topright w3-red w3-medium w3-hide closer-for-modal" style="z-index:999999;">&times;</span>
 							<div class="container card-header">
 								<div class="header-det w3-row">
-									<div class="card-avatar" style$="[[_profilePhoto(item.photoURL)]] cursor: pointer;" data$="[[_setProfileInfo(item.journalUserName, item.journalUserID, item.companyName, item.companyID, item.photoURL)]]" on-tap="_previewProfile" postitem="[[item.dailyThoughtID]]"></div>
+									<div class="card-avatar" style$="[[_profilePhoto(item.photoURL)]] cursor: pointer;" data$="[[_setProfileInfo(item.journalUserName, item.journalUserID, item.companyName, item.companyID, item.photoURL)]]"
+									 on-tap="_previewProfile" postitem="[[item.dailyThoughtID]]"></div>
 									<div class="container card-company-container">
 										<div class="row card-postedby w3-medium">
 											<div>[[item.journalUserName]]</div>
-											<paper-button on-tap="followUser" data="[[item.dailyThoughtID]]" 
-												class$="followBTN [[isFollowingStyle(item.journalUserID)]]">[[isFollowing(item.journalUserID)]]</paper-button>
+											<paper-button on-tap="followUser" data="[[item.dailyThoughtID]]" class$="followBTN [[isFollowingStyle(item.journalUserID)]]">[[isFollowing(item.journalUserID)]]</paper-button>
 										</div>
 										<div class="row card-company">[[item.companyName]]</div>
 									</div>
 									<div class="thought-date">
 										[[_formate_date(item.dateScheduled)]]
 									</div>
-									
+
 								</div>
 								<template is="dom-if" if="[[isEqual(thoughtype, 'mythoughts')]]">
 									<div class$="[[jsFormatStatus(item.status)]]">[[jsUcfirst(item.status)]]</div>
@@ -245,7 +160,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 										<iron-icon data="delSettings[[item.dailyThoughtID]]" on-tap="_openButtonModal" icon="myicons:settings" style="padding:8px!important;"></iron-icon>
 										<div id="delSettings[[item.dailyThoughtID]]" class="w3-dropdown-content w3-bar-block w3-card-4" style="z-index:99999999;right:0;">
 											<ul class="w3-ul w3-hoverable" style="cursor:pointer;" on-tap="_closeButtonModal" data="delSettings[[item.dailyThoughtID]]">
-												<li indexed="add-thoughts" caption="Edit Thoughts" on-tap="_loadElement1" id="edit[[item.dateRegistered]]" data="[[item.dailyThoughtID]]" class="w3-text-dark-grey">
+												<li indexed="add-thoughts" caption="Edit Thoughts" on-tap="_loadElement1" id="edit[[item.dateRegistered]]"
+												 data="[[item.dailyThoughtID]]" class="w3-text-dark-grey">
 													<paper-icon-button icon="create"></paper-icon-button>
 													&nbsp;Edit
 												</li>
@@ -258,49 +174,57 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 									</div>
 								</template>
 							</div>
-						
+
 							<div class="container">
 								<div class="row">
 									<div class="thought-img" style$="[[_photo(item.photos, item.textColor)]]">
-										<div class="thought-mask"></div>
+										<div id="mask[[item.dailyThoughtID]]" on-tap="_openItemModal" class="thought-mask" data="[[item.dailyThoughtID]]"></div>
 										<div class="w3-row">
-											<div class="thought-title">
+											<div id="title[[item.dailyThoughtID]]" on-tap="_openItemModal" data="[[item.dailyThoughtID]]" class="thought-title">
 												[[item.title]]
 											</div>
-											<div class="thought-author">
+											<div id="subtitle[[item.dailyThoughtID]]" data="[[item.dailyThoughtID]]" on-tap="_openItemModal" class="thought-author">
 												[[item.subtitle]]
 											</div>
 										</div>
 										<div class="previewFooter">
-											<iron-image src="[[item.logo]]" style="width:36px; height:36px; padding:2px" preload sizing="contain"></iron-image>
+											<iron-image src="[[item.logo]]" style="width:36px; height:36px; padding:2px" preload sizing="cover"></iron-image>
 											<div class="previewText">
 												<div id="thoughtSlogan">[[item.slogan]]</div>
-												<div id="thoughtWebsite"><a id="thoughtWebsite[[item.dateRegistered]]" href$="[[_getWebsite(item.website)]]" target="_blank" data="[[item.dailyThoughtID]]" on-tap="_openWebsite">[[item.website]]</a></div>
+												<div id="thoughtWebsite"><a id="thoughtWebsite[[item.dateRegistered]]" href$="[[_getWebsite(item.website)]]"
+													 target="_blank" data="[[item.dailyThoughtID]]" on-tap="_openWebsite">[[item.website]]</a></div>
 											</div>
 										</div>
 									</div>
 								</div>
 							</div>
-			
-							<thought-card-attachments user="[[user]]" itemid="[[item.dailyThoughtID]]" item="[[item]]" thetype="dailyThoughts" thoughtype="[[thoughtype]]"></thought-card-attachments>
-							<comments-box user="[[user]]" firebaseref="dailyThoughts" opened="[[_openedcomments]]" item="[[item]]" thetype="Thought" entityid="[[item.dailyThoughtID]]"></comments-box>
+
+							<thought-card-attachments user="[[user]]" itemid="[[item.dailyThoughtID]]" item="[[item]]" thetype="dailyThoughts"
+							 thoughtype="[[thoughtype]]"></thought-card-attachments>
+							<comments-box user="[[user]]" firebaseref="dailyThoughts" opened="[[_openedcomments]]" item="[[item]]" thetype="Thought"
+							 entityid="[[item.dailyThoughtID]]"></comments-box>
 						</div>
 					</div>
 				</template>
 
 				<div class="w3-row w3-center" style="width: 100%" hidden="[[isEqual(thoughtype, 'filteredthoughts')]]">
-					<div class="w3-row w3-text-green" style="width: 100%"><paper-button hidden="{{loadmore}}" on-tap="_loadMorePosts">Read More Posts</paper-button></div>
-					<div class="w3-row" style="width: 100%"><paper-spinner  active="{{isloadingmore}}"></paper-spinner></div>
+					<div class="w3-row w3-text-green" style="width: 100%">
+						<paper-button hidden="{{loadmore}}" on-tap="_loadMorePosts">Read More Posts</paper-button>
+					</div>
+					<div class="w3-row" style="width: 100%">
+						<paper-spinner active="{{isloadingmore}}"></paper-spinner>
+					</div>
 				</div>
-				
+
 			</div>
 		</section>
 		<div class="container">
 			<paper-dialog id="deleteDialog">
-				<paper-icon-button icon="myicons:cancel" class="red"></paper-icon-button><h3 id="discardTitle">Discard Thought?</h3>
+				<paper-icon-button icon="myicons:cancel" class="red"></paper-icon-button>
+				<h3 id="discardTitle">Discard Thought?</h3>
 				<hr>
-					<p id="thoughtTitle" class="thought-rate-title"></p>
-					<p id="thoughtAuthor" class="thought-rate-title paper-font-caption"></p>
+				<p id="thoughtTitle" class="thought-rate-title"></p>
+				<p id="thoughtAuthor" class="thought-rate-title paper-font-caption"></p>
 				<hr>
 				<div class="buttons">
 					<paper-button dialog-dismiss>CANCEL</paper-button>
@@ -315,14 +239,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 		var _ua = window.navigator.userAgent;
 		var scrollTopPosition
 		iOS = /iPad|iPhone|iPod/.test(_ua),
-		iOS11 = /OS 11_0|OS 11_1|OS 11_2|OS 11_3/.test(_ua);
+			iOS11 = /OS 11_0|OS 11_1|OS 11_2|OS 11_3/.test(_ua);
 
 		class ViewThoughts extends Polymer.Element {
-			static get is() { return 'view-thoughts'; }
-			ready(){
+			static get is() {
+				return 'view-thoughts';
+			}
+			ready() {
 				super.ready();
-				
+
 				var that = this;
+
+				Polymer.RenderStatus.afterNextRender(this, () => {
+					setTimeout(function(){
+						if(that.thoughtype == "companythoughts"){
+							that.equalto=that._companyid+"_approved";
+							that.orderchild="publish_status";
+						}else if(that.thoughtype == "dailythoughts"){
+							that.equalto="daily_approved";
+							that.orderchild="publish_status";
+						}else if(that.thoughtype == "mythoughts"){
+							that.equalto=that.user.userID+"";
+							that.orderchild="journalUserID";
+						}else if(that.thoughtype == "topleaderthoughts"){
+							that.equalto="hc_approved";
+							that.orderchild="publish_status";
+						}
+
+						that.$.qry_viewthought.disabled=false;
+						that.qrypath="/dailyThoughts";
+					}, 200);
+					
+				});
 
 				// setTimeout(function(){
 				// 	that.minData += 6;
@@ -348,7 +296,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						type: Number,
 						value: 6
 					},
-					scrollPos:{
+					scrollPos: {
 						type: Number,
 						value: 0
 					},
@@ -358,15 +306,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					},
 					filterid: {
 						type: String,
-						notify: true
+						notify: true,
+						observer: "_filterIDChanged"
 					},
 					thoughtsData: {
 						type: Object,
 						observer: '_onthoughtsDataReceived'
-					},
-					thoughtsData1: {
-						type: Object,
-						observer: '_onthoughtsData1Received'
 					},
 					company: {
 						type: Object
@@ -376,14 +321,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						value: true,
 						notify: true
 					},
-					loadingmessage:{
+					loadingmessage: {
 						type: String,
 						value: 'Loading...'
 					},
-					_openedcomments: {type: Boolean, value: false, notify:true},
+					noIdea: { // For showing the Image placeholder 
+						type: Boolean,
+						value: false
+					},
+					_openedcomments: {
+						type: Boolean,
+						value: false,
+						notify: true
+					},
 					_nextComRatePage: String,
-					_companyid: String,
-					thoughtype: String,
+					_companyid: {
+						type: String,
+						notify: true,
+						observer: "_companyIdReceived"
+					},
+					thoughtype: {
+						type: String,
+						notify: true,
+						observer: "_thoughtypeReceived"
+					},
 					placeholder: String,
 					_selected: String,
 					_selectedComRate: String,
@@ -427,8 +388,48 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					}
 				};
 			}
-			connectedCallback() { 
-				super.connectedCallback();
+
+			_companyIdReceived(){
+				if(this.thoughtype == "companythoughts"){
+					this.equalto=this._companyid+"_approved";
+					this.orderchild="publish_status";
+				}
+			}
+			_filterIDChanged(){
+				var that = this;
+				if(that.thoughtype == "filteredthoughts"){
+					that.equalto=that.filterid+"";
+					that.orderchild="dailyThoughtID";
+					that.$.qry_viewthought.disabled=false;
+					that.qrypath="/dailyThoughts";
+				}
+			}
+
+			_thoughtypeReceived(){
+				var that = this;
+			}
+
+			_openItemModal(e){
+				var thoughtCard = Polymer.dom(this.root).querySelector("#"+e.currentTarget.id);
+
+				var modalContent = $(thoughtCard).parents('.card-container');
+				var modal = $(modalContent).parents('.modal-div');
+
+				if($(modal).find('.closer-for-modal').hasClass('w3-hide')){
+					$(modal).find('.closer-for-modal').removeClass('w3-hide');
+					modal.addClass('ldp-modal');
+					$(modalContent).addClass('ldp-modal-content');
+					$(modalContent).css('max-width', '600px');
+					modal.css('display', 'block');
+				}
+
+				var obj = {
+					itemID: e.currentTarget.data,
+					title: e.currentTarget.id,
+					ref: e.currentTarget.data
+				}
+
+				this._captureClicks(e.currentTarget.data, "clickedPost", obj);
 			}
 
 			_loadMorePosts(){
@@ -437,21 +438,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				this.minData += 6;
 			}
 
-			updateFollowBTN(journalUserID, following){
+			updateFollowBTN(journalUserID, following) {
 				var that = this;
 				var thoughtCard = Polymer.dom(that.root).querySelector("#thoughts-Holder");
 
-				$(thoughtCard).find('.modal-div').each(function(i, e){
+				$(thoughtCard).find('.modal-div').each(function (i, e) {
 					var followBTN = $(e).find('.followBTN')[0];
 					var itemID = $(followBTN).prop('data');
 					let filteredArray = that.findObjectByKey(that.thoughtsData, "dailyThoughtID", itemID);
 					let thoughtUserID = filteredArray.journalUserID;
 
-					if(thoughtUserID === journalUserID){
-						if(following == "Follow"){
+					if (thoughtUserID === journalUserID) {
+						if (following == "Follow") {
 							$(followBTN).addClass('following');
 							followBTN.innerHTML = "Following";
-						}else{
+						} else {
 							that.isFollowingStyle(journalUserID);
 							$(followBTN).removeClass('following');
 							followBTN.innerHTML = "Follow";
@@ -460,47 +461,47 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				});
 			}
 
-			_setNextComRatePage(id, typ){
-				return typ === 'default' ? 'page-comment'+id : id;
+			_setNextComRatePage(id, typ) {
+				return typ === 'default' ? 'page-comment' + id : id;
 			}
 
-			_countItems(itms){
+			_countItems(itms) {
 				var keys = itms == undefined ? [] : Object.keys(itms);
 				var val = keys.length == 0 ? true : false;
 				return val;
 			}
 
-			isFollowing(journalUserID){
-				if(this.user.following != undefined){
-					if(this.user.following){
-					let following =  this.user.following;
-					let isfollowing = following[journalUserID];
+			isFollowing(journalUserID) {
+				if (this.user.following != undefined) {
+					if (this.user.following) {
+						let following = this.user.following;
+						let isfollowing = following[journalUserID];
 
-					return isfollowing ? 'Following' : 'Follow';
-					}else return "Follow";
-				}else return "Follow";
-				
+						return isfollowing ? 'Following' : 'Follow';
+					} else return "Follow";
+				} else return "Follow";
+
 			}
 
-			isFollowingStyle(journalUserID){
+			isFollowingStyle(journalUserID) {
 				let userID = this.user.userID;
 
-				if(userID === journalUserID){
+				if (userID === journalUserID) {
 					return "w3-hide";
-				}
-				else{
-					if(this.user.following){
-						let following =  this.user.following;
+				} else {
+					if (this.user.following) {
+						let following = this.user.following;
 						let isfollowing = following[journalUserID];
 
 						return isfollowing ? 'following' : '';
+					} else {
+						return "";
 					}
-					else {return "";}
 
 				}
-				
+
 			}
-			_openWebsite(e){
+			_openWebsite(e) {
 				var obj = {
 					itemID: e.currentTarget.data,
 					title: e.currentTarget.id,
@@ -509,7 +510,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				this._captureClicks(e.currentTarget.data, "clickedWebsiteLink", obj);
 			}
-			_captureClicks(journalID, res, obj){
+			_captureClicks(journalID, res, obj) {
 				var database = firebase.database();
 				var userID = this.user.userID;
 				var userName = this.user.firstName + " " + this.user.lastName;
@@ -519,13 +520,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				var dateRegistered = Date.now();
 				var postType = "thoughts";
 
-				if(this.user.photoURL != undefined || this.user.photoURL != ""){
+				if (this.user.photoURL != undefined || this.user.photoURL != "") {
 					myPhoto = this.user.photoURL;
-				}else{
+				} else {
 					myPhoto = "";
 				}
 
-				if(myPhoto == undefined){
+				if (myPhoto == undefined) {
 					myPhoto = "";
 				}
 
@@ -538,14 +539,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				var journalCompanyName = filteredArray.companyName;
 				var journalDateRegistered = filteredArray.dateRegistered;
 				var journalPhotoURL;
-				
-				if(filteredArray.photoURL != undefined || filteredArray.photoURL != ""){
+
+				if (filteredArray.photoURL != undefined || filteredArray.photoURL != "") {
 					journalPhotoURL = filteredArray.photoURL;
-				}else{
+				} else {
 					journalPhotoURL = "";
 				}
 
-				if(journalPhotoURL == undefined){
+				if (journalPhotoURL == undefined) {
 					journalPhotoURL = "";
 				}
 
@@ -564,14 +565,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					journalCompanyName: journalCompanyName,
 					journalDateRegistered: journalDateRegistered,
 					journalPhotoURL: journalPhotoURL,
-					clickType:"posts",
-					clickArea:res,
-					clickItem:obj
+					clickType: "posts",
+					clickArea: res,
+					clickItem: obj
 				}
 
 				database.ref('user-clicks').push(data);
 			}
-			followUser(e){
+			followUser(e) {
 				let database = firebase.database();
 				let itemID = e.target.data;
 
@@ -587,61 +588,61 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				var followDate = Date.now();
 				// let journalUserName = e.target.parentNode.firstChild.nextSibling.innerText;
 
-				if(this.user.photoURL != undefined || this.user.photoURL != ""){
+				if (this.user.photoURL != undefined || this.user.photoURL != "") {
 					myPhoto = this.user.photoURL;
-				}else{
+				} else {
 					myPhoto = "";
 				}
 
-				if(myPhoto == undefined){
+				if (myPhoto == undefined) {
 					myPhoto = "";
 				}
 
-				if(following == "Follow"){
+				if (following == "Follow") {
 					$(e.target).addClass('following');
 
 					e.target.innerHTML = "Following";
 					that.updateFollowBTN(journalUserID, following);
 
 					var photoURL = "";
-					if(filteredArray.photoURL != undefined || filteredArray.photoURL != ""){
+					if (filteredArray.photoURL != undefined || filteredArray.photoURL != "") {
 						photoURL = filteredArray.photoURL;
-					}else{
+					} else {
 						photoURL = "";
 					}
 
-					if(photoURL == undefined){
+					if (photoURL == undefined) {
 						photoURL = "";
 					}
 
 					var theirdata = {
-						"firstName":filteredArray.journalUserName,
-						"lastName":"",
-						"companyName":filteredArray.companyName,
-						"dateRegistered":followDate,
-						"photoURL":photoURL,
-						"userID":journalUserID
+						"firstName": filteredArray.journalUserName,
+						"lastName": "",
+						"companyName": filteredArray.companyName,
+						"dateRegistered": followDate,
+						"photoURL": photoURL,
+						"userID": journalUserID
 					}
 
 					var mydata = {
-						"firstName":that.user.firstName,
-						"lastName":that.user.lastName,
-						"companyName":that.user.companyName,
+						"firstName": that.user.firstName,
+						"lastName": that.user.lastName,
+						"companyName": that.user.companyName,
 						"dateRegistered": followDate,
-						"photoURL":myPhoto,
+						"photoURL": myPhoto,
 						"userID": userID
 					}
 
 					var updates = {}
-					updates["users/"+userID+"/following/"+journalUserID]=theirdata;
-					updates["users/"+journalUserID+"/follower/"+userID]=mydata;
-					updates["followers/"+journalUserID+"/"+userID]=mydata;
+					updates["users/" + userID + "/following/" + journalUserID] = theirdata;
+					updates["users/" + journalUserID + "/follower/" + userID] = mydata;
+					updates["followers/" + journalUserID + "/" + userID] = mydata;
 
-					return database.ref().update(updates).then(() =>{
+					return database.ref().update(updates).then(() => {
 						return console.log("Following");
 					});
 
-				}else{
+				} else {
 					that.isFollowingStyle(journalUserID);
 
 					$(e.target).removeClass('following');
@@ -649,49 +650,51 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					that.updateFollowBTN(journalUserID, following);
 
 					var updates = {}
-					updates["users/"+userID+"/following/"+journalUserID]=null;
-					updates["users/"+journalUserID+"/follower/"+userID]=null;
-					updates["followers/"+journalUserID+"/"+userID]=null;
+					updates["users/" + userID + "/following/" + journalUserID] = null;
+					updates["users/" + journalUserID + "/follower/" + userID] = null;
+					updates["followers/" + journalUserID + "/" + userID] = null;
 
-					return database.ref().update(updates).then(() =>{
+					return database.ref().update(updates).then(() => {
 						return console.log("Unfollowed");
 					});
-					
+
 				}
 
 			}
 
-			_openButtonModal(e){
+			_openButtonModal(e) {
 				var modal_name = e.currentTarget.data;
-				var x = Polymer.dom(this.root).querySelector('#'+modal_name);
+				var x = Polymer.dom(this.root).querySelector('#' + modal_name);
 				if (x.className.indexOf("w3-show") == -1) {
 					x.className += " w3-show";
-				} else { 
+				} else {
 					x.className = x.className.replace(" w3-show", "");
 				}
 			}
 
-			_closeButtonModal(e){
+			_closeButtonModal(e) {
 				var modal_name = e.currentTarget.data;
-				var modal = Polymer.dom(this.root).querySelector('#'+modal_name);
-				if(modal_name === 'add-items')this._removeLoadElement();
+				var modal = Polymer.dom(this.root).querySelector('#' + modal_name);
+				if (modal_name === 'add-items') this._removeLoadElement();
 				$(modal).removeClass('w3-show');
 			}
 
-			_formate_date(dt){
+			_formate_date(dt) {
 				var date = new Date(dt);
-				var day = date.getDate() < 10 ? '0'+date.getDate() : date.getDate();
-				var hours = date.getHours() < 10 ? '0'+date.getHours() : date.getHours();
-				var minutes = date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes();
+				var day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate();
+				var hours = date.getHours() < 10 ? '0' + date.getHours() : date.getHours();
+				var minutes = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes();
 				var locale = 'en-us';
-				var month = date.toLocaleString(locale, { month: "long" });
+				var month = date.toLocaleString(locale, {
+					month: "long"
+				});
 				var year = date.getFullYear();
 				var am_pm = date.getHours() >= 12 ? "PM" : "AM"
 
-				return day+' '+month+' '+year+' '+hours+':'+minutes+" "+am_pm;
+				return day + ' ' + month + ' ' + year + ' ' + hours + ':' + minutes + " " + am_pm;
 			}
-			_setProfileInfo(journalUserName, journalUserID, companyName, companyID, photoURL){
-				if(photoURL == "" || photoURL == undefined) photoURL = "../images/default-user.png";
+			_setProfileInfo(journalUserName, journalUserID, companyName, companyID, photoURL) {
+				if (photoURL == "" || photoURL == undefined) photoURL = "../images/default-user.png";
 				var a = {
 					journalUserName: journalUserName,
 					journalUserID: journalUserID,
@@ -701,7 +704,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				}
 				return a;
 			}
-			_previewProfile(e){
+			_previewProfile(e) {
 				var data = e.currentTarget.getAttribute('data');
 				this.userobj = JSON.parse(data);
 				this._userid = this.userobj.journalUserID;
@@ -709,146 +712,142 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				this._captureClicks(e.currentTarget.postitem, "viewedUserProfile", this.userobj);
 			}
-			_openProfileModal(){
+			_openProfileModal() {
 				var modal = Polymer.dom(this.root).querySelector('#preview-profile');
 				modal.style.display = 'block';
 			}
-			_closeProfileModal(){
+			_closeProfileModal() {
 				var modal = Polymer.dom(this.root).querySelector('#preview-profile');
 				modal.style.display = 'none';
 			}
-			
-			_sort(a, b) {  
+
+			_sort(a, b) {
 				if (a.dateScheduled > b.dateScheduled) return -1;
 				if (a.dateScheduled < b.dateScheduled) return 1;
 				return 0;
 			}
-			_onthoughtsData1Received(newData, oldData){
-				var objLen = this._objLen(newData);
-				
-				if(objLen > 2){
-					this.thoughtsData = newData;
-					// this.thoughtsData = Object.assign(this.thoughtsData, newData);
-					this.$.thoughtsList.render();
-				}
-				
-			}
-			_onthoughtsDataReceived(newData, oldData){
+			_onthoughtsDataReceived(newData, oldData) {
 				var that = this;
-				
-				this.thoughtsData.forEach((val, ind)=>{
-					that._nextComRatePage = 'page-comment'+val.dailyThoughtID;
+				this.thoughtsData.forEach((val, ind) => {
+					that._nextComRatePage = 'page-comment' + val.dailyThoughtID;
 				})
 
-				if(newData.length > 0){
+				if (newData.length > 0) {
 					this.isloading = false;
 					this.loadingmessage = "";
 					this.loadmore = false;
 					this.isloadingmore = false;
-
-					setTimeout(function(){
+					this.noIdea = false;
+					setTimeout(function () {
 						window.scrollTo({
 							top: that.scrollPos,
 							behavior: "instant"
 						});
 					}, 1000);
-				} 
+				}
 
-				setTimeout(function(){
+				setTimeout(function () {
 					that.isloading = false;
-
-					if(newData.length == 0) that.loadingmessage = "";
-					else that.loadingmessage = "";
-
-				},30000)
 				
+					if (that.thoughtsData.length == 0 && that.thoughtype=== 'filteredthoughts') {
+						that.loadingmessage = "Thought was removed by Author"; 
+						that.noIdea = true;
+					}
+					else { 
+						that.loadingmessage = "";
+						that.noIdea = false;
+
+					}
+
+				}, 10000)
+
 			}
-			_sortComments(obj){
-				
-				if(obj != undefined){
+			_sortComments(obj) {
+
+				if (obj != undefined) {
 					// var modObj = obj;
 					// modObj.sort();
-					return Object.keys(obj).map(function(key) {
+					return Object.keys(obj).map(function (key) {
 						return obj[key];
 					});
 				}
 			}
-			toggleComRate(e){
+			toggleComRate(e) {
 				var selectedElem = e.currentTarget.id;
-				let dailyThought_ID = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).data;
+				let dailyThought_ID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
 
 				// var pages = Polymer.dom(this.root).querySelector('#page'+dailyThought_ID);
 
 				this._setNextComRatePage(dailyThought_ID, false)
 			}
-			toggle(e){
-				var a = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).data;
+			toggle(e) {
+				var a = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
 
 				var selectedElem = e.currentTarget.id;
 
-				this.opened = Polymer.dom(this.root).querySelector('#collapse'+a).opened;
-						
+				this.opened = Polymer.dom(this.root).querySelector('#collapse' + a).opened;
+
 				var res = selectedElem.substring(0, 3);
-				
-				if(res == 'blu'){
-					this._selected = 'page-1-'+a;
-				}else if(res == 'gre'){
-					this._selected = 'page-2-'+a;
-				}else if(res == 'cam'){
-					this._selected = 'page-3-'+a;
-				}else if(res == 'red'){
-					this._selected = 'page-4-'+a;
+
+				if (res == 'blu') {
+					this._selected = 'page-1-' + a;
+				} else if (res == 'gre') {
+					this._selected = 'page-2-' + a;
+				} else if (res == 'cam') {
+					this._selected = 'page-3-' + a;
+				} else if (res == 'red') {
+					this._selected = 'page-4-' + a;
 				}
 
-				if((this.lastSelected == this._selected) && (this.opened)){
-					Polymer.dom(this.root).querySelector('#collapse'+a).toggle();
+				if ((this.lastSelected == this._selected) && (this.opened)) {
+					Polymer.dom(this.root).querySelector('#collapse' + a).toggle();
 				}
 
-				if((this.lastSelected == this._selected) && (!this.opened)){
-					Polymer.dom(this.root).querySelector('#collapse'+a).toggle();
+				if ((this.lastSelected == this._selected) && (!this.opened)) {
+					Polymer.dom(this.root).querySelector('#collapse' + a).toggle();
 				}
 
-				if((this.lastSelected != this._selected) && (!this.opened)){
-					Polymer.dom(this.root).querySelector('#collapse'+a).toggle();
+				if ((this.lastSelected != this._selected) && (!this.opened)) {
+					Polymer.dom(this.root).querySelector('#collapse' + a).toggle();
 				}
 
 				this.lastSelected = this._selected;
 
 			}
-			_editThought(e){
+			_editThought(e) {
 				// Edit Thought
 				this.addedit = 1;
-				let editThoughtID = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).data;
+				let editThoughtID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
 
 				let filteredArray = this.findObjectByKey(this.thoughtsData, "dailyThoughtID", editThoughtID);
 
 				let editThoughtStr = JSON.stringify(filteredArray);
-				
+
 				sessionStorage.setItem("addedit", this.addedit);
 				sessionStorage.setItem("editThoughtID", editThoughtID);
 				sessionStorage.setItem("editThoughtStr", editThoughtStr);
 
 			}
 
-			_loadElement1(e){
-				var elem = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id);
+			_loadElement1(e) {
+				var elem = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id);
 				var caption = elem.getAttribute('caption');
 				var name = elem.getAttribute('indexed');
 				this.itemName = caption;
 
 				this.addedit = 1;
-				let editThoughtID =elem.data;
+				let editThoughtID = elem.data;
 
 				let filteredArray = this.findObjectByKey(this.thoughtsData, "dailyThoughtID", editThoughtID);
 
 				let editThoughtStr = JSON.stringify(filteredArray);
-				
+
 				sessionStorage.setItem("addedit", this.addedit);
 				sessionStorage.setItem("editThoughtID", editThoughtID);
 				sessionStorage.setItem("editThoughtStr", editThoughtStr);
 
 				this._openItemsModal();
-				this._myLoadElement(name, name+".html");
+				this._myLoadElement(name, name + ".html");
 			}
 			_myLoadElement(elementName, htmlImport) {
 				// Let's remove last loaded element if exists
@@ -873,22 +872,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 					myElement.addedit = 1;
 
-					
+
 				});
 			}
 
-			_openItemsModal(){
+			_openItemsModal() {
 				// ios 11 bug caret position
-				if ( iOS && iOS11 ) {
+				if (iOS && iOS11) {
 					this.addIOSBugfix();
 				}
 				var modal = Polymer.dom(this.root).querySelector('#add-items');
 				modal.style.display = 'block';
 			}
 
-			_closeItemsModal(){
+			_closeItemsModal() {
 				// ios 11 bug caret position
-				if ( iOS && iOS11 ) {
+				if (iOS && iOS11) {
 					this.removeIOSBugfix();
 				}
 				var modal = Polymer.dom(this.root).querySelector('#add-items');
@@ -896,7 +895,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				modal.style.display = 'none';
 			}
 
-			_removeElement () {
+			_removeElement() {
 				var container = Polymer.dom(this.root).querySelector('#item-holder');
 				// element.removeChild(element.firstChild);
 
@@ -906,48 +905,48 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				}
 			}
 
-			_getVideoName(storageName){
+			_getVideoName(storageName) {
 				let strName = '';
-				strName = storageName.slice(storageName.lastIndexOf('/')+1);
+				strName = storageName.slice(storageName.lastIndexOf('/') + 1);
 				strName = strName.replace(new RegExp('_', 'g'), ' ');
 				return strName;
 			}
-			_videoClick(e){      
-				var videoClicked = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).data;
+			_videoClick(e) {
+				var videoClicked = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
 
 				var src = this.getMediaURL(videoClicked);
 
 				this.loadsrc = src;
 				this._loadElement();
 			}
-			_getPodcastName(storageName){
+			_getPodcastName(storageName) {
 				let strName = '';
-				strName = storageName.slice(storageName.lastIndexOf('/')+1);
+				strName = storageName.slice(storageName.lastIndexOf('/') + 1);
 				strName = strName.replace(new RegExp('_', 'g'), ' ');
 				return strName;
 			}
-			_saveRateValue(e){
-				let dailyThought_ID = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).data;
-				let rating = Polymer.dom(this.root).querySelector('#rateThought'+dailyThought_ID).rating;
+			_saveRateValue(e) {
+				let dailyThought_ID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
+				let rating = Polymer.dom(this.root).querySelector('#rateThought' + dailyThought_ID).rating;
 				// let rating = this.$.rateThought.rating;
 				// let comment = this.$.rateComment.value;
 				let comment = "";
 
 				var journalUserID = this.user.userID;
-				var journalUserName = this.user.firstName+" "+this.user.lastName;
+				var journalUserName = this.user.firstName + " " + this.user.lastName;
 
 				var companyID = this.user.companyID;
 				var companyName = this.user.companyName;
 
 				var photoURL = "";
 
-				if(this.user.photoURL != undefined || this.user.photoURL != ""){
+				if (this.user.photoURL != undefined || this.user.photoURL != "") {
 					photoURL = this.user.photoURL;
-				}else{
+				} else {
 					photoURL = "";
 				}
 
-				if(photoURL == undefined){
+				if (photoURL == undefined) {
 					photoURL = "";
 				}
 
@@ -961,7 +960,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				var newRateKey = database.ref().child('ratings').push().key;
 
-				if(comment == undefined){
+				if (comment == undefined) {
 					comment = "";
 				}
 
@@ -988,74 +987,79 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				database.ref().update(updates);
 
 				// Write the new rating on thoughts data
-				var newTypeRateKey = database.ref().child('/dailyThoughts/' + dailyThought_ID +'/ratings').push().key;
+				var newTypeRateKey = database.ref().child('/dailyThoughts/' + dailyThought_ID + '/ratings').push().key;
 				var rateUpdates = {};
-				rateUpdates['/dailyThoughts/' + dailyThought_ID +'/ratings/'+newTypeRateKey] = data;
+				rateUpdates['/dailyThoughts/' + dailyThought_ID + '/ratings/' + newTypeRateKey] = data;
 				database.ref().update(rateUpdates);
 
-				Polymer.dom(this.root).querySelector('#rateThought'+dailyThought_ID).rating = 2;
+				Polymer.dom(this.root).querySelector('#rateThought' + dailyThought_ID).rating = 2;
 				// this.$.rateComment.value = "";
 
 				this.showSnackBar("Rating posted successfully!");
 			}
 			_toArray(obj) {
-				if(obj != undefined){
-					return Object.keys(obj).map(function(key) {
+				if (obj != undefined) {
+					return Object.keys(obj).map(function (key) {
 						var retObj = {};
 						retObj = obj[key];
 						// assign object id to lpUID
 						// retObj['lpUID'] = key;
 						return retObj;
 						// return obj[key];
-				});
+					});
 				}
 			}
 			_objLen(obj) {
 				let len = 0;
-				if(obj != undefined){
+				if (obj != undefined) {
 					len = Object.keys(obj).length;
 				}
 				return len;
 			}
-			_photo(photos, textColor){
-				if(textColor == undefined){
+			_photo(photos, textColor) {
+				if (textColor == undefined) {
 					var color = '#ffffff';
-				}else{
+				} else {
 					var color = textColor;
 				}
-				let photo_url = "background-image: url('../data/land.jpg'); color: "+color+";";
+				let photo_url = "background-image: url('../data/land.jpg'); color: " + color + ";";
 
 				for (var item in photos) { 
-					photo_url = "background-image: url('"+photos[item].url+"'); color: "+color+";";
+					if(photos[item].thumbNailUrl){
+						photo_url = "background-image: url('"+photos[item].thumbNailUrl+"'); color: "+color+";";
+					}else{
+						photo_url = "background-image: url('"+photos[item].url+"'); color: "+color+";";
+					}
+					
 				}
 
 				return photo_url;
 			}
-			_profilePhoto(photo){
+			_profilePhoto(photo) {
 				let photo_url = "background-image: url('../images/default-user.png');";
 
-				if(photo == undefined){
+				if (photo == undefined) {
 					photo_url = "background-image: url('../images/default-user.png');";
-				}else if(photo == ""){
+				} else if (photo == "") {
 					photo_url = "background-image: url('../images/default-user.png');";
-				}else{
-					photo_url = "background-image: url('"+photo+"');";
+				} else {
+					photo_url = "background-image: url('" + photo + "');";
 				}
 
 				return photo_url;
 			}
 			formatDate(date) {
 				var d = new Date(date),
-				month = '' + (d.getMonth() + 1),
-				day = '' + d.getDate(),
-				year = d.getFullYear(),
-				hours = '' + d.getHours(),
-				minutes = '' + d.getMinutes(),
-				seconds = '' + d.getSeconds(),
-				milliseconds = '' + d.getMilliseconds();
+					month = '' + (d.getMonth() + 1),
+					day = '' + d.getDate(),
+					year = d.getFullYear(),
+					hours = '' + d.getHours(),
+					minutes = '' + d.getMinutes(),
+					seconds = '' + d.getSeconds(),
+					milliseconds = '' + d.getMilliseconds();
 
 				var today = new Date(),
-				thisYear = today.getFullYear();
+					thisYear = today.getFullYear();
 
 				// get week day name Sunday - Saturday
 				var dayName = this.getDayMonthStr(d.getDay(), "day", true);
@@ -1073,24 +1077,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				// format thoughts date
 				// Monday, 04 December 2017 14:21:56
-				var thoughtDate = dayName+", "+day+" "+monthName+" "+year+" "+hours+":"+minutes+":"+seconds;
+				var thoughtDate = dayName + ", " + day + " " + monthName + " " + year + " " + hours + ":" + minutes + ":" +
+					seconds;
 
 				return thoughtDate;
 				// return [year, month, day].join('-');
 			}
 			formatRateTime(date) {
 				var d = new Date(date),
-				month = '' + (d.getMonth() + 1),
-				day = '' + d.getDate(),
-				year = d.getFullYear(),
-				hours = d.getHours() > 12 ? d.getHours() - 12 : d.getHours(),
-				am_pm = d.getHours() >= 12 ? "PM" : "AM",
-				minutes = '' + d.getMinutes(),
-				seconds = '' + d.getSeconds(),
-				milliseconds = '' + d.getMilliseconds();
+					month = '' + (d.getMonth() + 1),
+					day = '' + d.getDate(),
+					year = d.getFullYear(),
+					hours = d.getHours() > 12 ? d.getHours() - 12 : d.getHours(),
+					am_pm = d.getHours() >= 12 ? "PM" : "AM",
+					minutes = '' + d.getMinutes(),
+					seconds = '' + d.getSeconds(),
+					milliseconds = '' + d.getMilliseconds();
 
 				var today = new Date(),
-				thisYear = today.getFullYear();
+					thisYear = today.getFullYear();
 
 				// get week day name Sunday - Saturday
 				var dayName = this.getDayMonthStr(d.getDay(), "day", true);
@@ -1109,7 +1114,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				// format thoughts date
 				// 04 Dec 02:21:PM
-				var thoughtDate = day+" "+monthName+" "+hours+":"+minutes+":"+am_pm;
+				var thoughtDate = day + " " + monthName + " " + hours + ":" + minutes + ":" + am_pm;
 
 				return thoughtDate;
 				// return [year, month, day].join('-');
@@ -1154,104 +1159,104 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					intervalType += 's';
 				}
 
-				return interval + ' ' + intervalType+' ago';
+				return interval + ' ' + intervalType + ' ago';
 			};
 
-			
-			isElementInViewport (el) { 
-				if (typeof jQuery === "function" && el instanceof jQuery) { 
-					el = el[0]; 
-				} 
-				var rect = el.getBoundingClientRect(); 
-				return ( rect.top >= 0 && 
-					rect.left >= 0 && 
-					rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&  
-					rect.right <= (window.innerWidth || document.documentElement.clientWidth)  
-				); 
+
+			isElementInViewport(el) {
+				if (typeof jQuery === "function" && el instanceof jQuery) {
+					el = el[0];
+				}
+				var rect = el.getBoundingClientRect();
+				return (rect.top >= 0 &&
+					rect.left >= 0 &&
+					rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+					rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+				);
 			}
 
-			getDayMonthStr(val, dateParam, long){
+			getDayMonthStr(val, dateParam, long) {
 				// days
-				var days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-				var daysShort = ["Sun","Mon","Tue","Wed","Thur","Fri","Sat"];
+				var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+				var daysShort = ["Sun", "Mon", "Tue", "Wed", "Thur", "Fri", "Sat"];
 
 				// Months
-				var monthNames = ["January", "February", "March", "April", "May", "June","July", "August", "September","October", "November", "December"];
-				var monthNamesShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun","Jul", "Aug", "Sep","Oct", "Nov", "Dec"];
+				var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September",
+					"October", "November", "December"
+				];
+				var monthNamesShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-				if(dateParam == "day" && long == true){
+				if (dateParam == "day" && long == true) {
 					// return day in long format
 					return days[val];
-				}
-				else if(dateParam == "day" && long == false){
+				} else if (dateParam == "day" && long == false) {
 					// return days in short
 					return daysShort[val];
 				}
-				if(dateParam == "month" && long == true){
+				if (dateParam == "month" && long == true) {
 					// return month in long format
 					return monthNames[val];
-				}
-				else if(dateParam == "month" && long == false){
+				} else if (dateParam == "month" && long == false) {
 					// return month in short
 					return monthNamesShort[val];
 				}
-				
+
 			}
-			_openPLDP(e){
-				var thoughtID = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).data;
+			_openPLDP(e) {
+				var thoughtID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
 				sessionStorage.setItem("PLDP_ThoughtAdd", thoughtID);
 				this.$.pldpDialog.open();
 			}
-			getMediaURL(url){
+			getMediaURL(url) {
 				var res = "";
 				var checkHTTP;
 
-				if(url.includes("youtu")){
+				if (url.includes("youtu")) {
 					var youtubeID = this.getYoutubeID(url);
-					res = "https://www.youtube.com/embed/"+youtubeID;
-				}else{
+					res = "https://www.youtube.com/embed/" + youtubeID;
+				} else {
 					checkHTTP = url.indexOf("http:");
-					if(checkHTTP == -1) res = url;
+					if (checkHTTP == -1) res = url;
 					else res = url.replace("http:", "https:");
 				}
-				
+
 				return res;
 			}
 			getYoutubeID(youtubeURL) {
-					var str = youtubeURL;
-					var n = str.indexOf("=");
-					var x = str.indexOf("&");
-					var res = "";
-			
-					if(n == -1){
-						n = str.indexOf("youtu.be");
-						if(x == -1) res = str.substring(n+9);
-						else res = str.substring(n+9, x);
-					}else{
-						if(x == -1) res = str.substring(n+1);
-						else res = str.substring(n+1, x);
-					}
-					
-					return res;
+				var str = youtubeURL;
+				var n = str.indexOf("=");
+				var x = str.indexOf("&");
+				var res = "";
+
+				if (n == -1) {
+					n = str.indexOf("youtu.be");
+					if (x == -1) res = str.substring(n + 9);
+					else res = str.substring(n + 9, x);
+				} else {
+					if (x == -1) res = str.substring(n + 1);
+					else res = str.substring(n + 1, x);
+				}
+
+				return res;
 			}
 			getYoutubeThumbnail(youtubeURL) {
 				var res = this.getYoutubeID(youtubeURL);
-				return "https://img.youtube.com/vi/"+res+"/0.jpg";
+				return "https://img.youtube.com/vi/" + res + "/0.jpg";
 			}
 			findObjectByKey(array, key, value) {
-					for (var i = 0; i < array.length; i++) {
-							if (array[i][key] === value) {
-									return array[i];
-							}
+				for (var i = 0; i < array.length; i++) {
+					if (array[i][key] === value) {
+						return array[i];
 					}
-					return null;
+				}
+				return null;
 			}
-			closePLDPDialog(){
+			closePLDPDialog() {
 				this._addToPLDP();
 				sessionStorage.removeItem("PLDP_ThoughtAdd");
 				this.$.pldpDialog.close();
 			}
-			_addToPLDP(){
+			_addToPLDP() {
 				let PLDP_ThoughtAdd = sessionStorage.getItem("PLDP_ThoughtAdd");
 
 				let filteredArray = this.findObjectByKey(this.thoughtsData, "dailyThoughtID", PLDP_ThoughtAdd);
@@ -1261,7 +1266,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				// add PLDP user to the thought object
 				filteredArray.PLDPUserID = this.user.userID;
-				filteredArray.PLDPUserName = this.user.firstName+" "+this.user.lastName;
+				filteredArray.PLDPUserName = this.user.firstName + " " + this.user.lastName;
 
 				// instantiate db
 				let database = firebase.database();
@@ -1272,17 +1277,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				// delete the thought if already exists
 				let ref = database.ref('myPLDP/dailyThoughts');
 				ref.orderByChild('dailyThoughtID').equalTo(PLDP_ThoughtAdd)
-					.once('value').then(function(snapshot) {
-						snapshot.forEach(function(childSnapshot) {
-						if(newThought === childSnapshot.key){
-							console.log("Got the new ID");
-						}else{
-							// remove each old child
-							ref.child(childSnapshot.key).remove();
-						}
+					.once('value').then(function (snapshot) {
+						snapshot.forEach(function (childSnapshot) {
+							if (newThought === childSnapshot.key) {
+								console.log("Got the new ID");
+							} else {
+								// remove each old child
+								ref.child(childSnapshot.key).remove();
+							}
+						});
 					});
-				});
-				
+
 				let updates = {};
 				updates['/myPLDP/dailyThoughts/' + newThought] = filteredArray;
 				database.ref().update(updates);
@@ -1290,10 +1295,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			isEqual(a, b) {
 				return a === b;
 			}
-			_deleteThoughtImg(e){
-				var thoughtPhotoID = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).data;
-				var deldailyThoughtID = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).dataval;
-						
+			_deleteThoughtImg(e) {
+				var thoughtPhotoID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
+				var deldailyThoughtID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).dataval;
+
 				sessionStorage.setItem("thoughtPhotoID", thoughtPhotoID);
 				sessionStorage.setItem("deldailyThoughtID", deldailyThoughtID);
 				sessionStorage.setItem("deleteType", "photo");
@@ -1304,10 +1309,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				this.$.deleteDialog.open();
 			}
-			_deleteThoughtURL(e){
-				var thoughtURLID = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).data;
-				var deldailyThoughtID = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).dataval;
-						
+			_deleteThoughtURL(e) {
+				var thoughtURLID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
+				var deldailyThoughtID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).dataval;
+
 				sessionStorage.setItem("thoughtURLID", thoughtURLID);
 				sessionStorage.setItem("deldailyThoughtID", deldailyThoughtID);
 				sessionStorage.setItem("deleteType", "url");
@@ -1318,11 +1323,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				this.$.deleteDialog.open();
 			}
-			_deleteThoughtPodcast(e){
-				var thoughtPodcastID = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).data;
-				var deldailyThoughtID = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).dataval;
-				var podcastID = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).datapod;
-						
+			_deleteThoughtPodcast(e) {
+				var thoughtPodcastID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
+				var deldailyThoughtID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).dataval;
+				var podcastID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).datapod;
+
 				sessionStorage.setItem("thoughtPodcastID", thoughtPodcastID);
 				sessionStorage.setItem("podcastID", podcastID);
 				sessionStorage.setItem("deldailyThoughtID", deldailyThoughtID);
@@ -1334,11 +1339,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				this.$.deleteDialog.open();
 			}
-			_deleteThoughtVideo(e){
-				var thoughtVideoID = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).data;
-				var deldailyThoughtID = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).dataval;
-				var videoID = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).datavid;
-						
+			_deleteThoughtVideo(e) {
+				var thoughtVideoID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
+				var deldailyThoughtID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).dataval;
+				var videoID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).datavid;
+
 				sessionStorage.setItem("thoughtVideoID", thoughtVideoID);
 				sessionStorage.setItem("videoID", videoID);
 				sessionStorage.setItem("deldailyThoughtID", deldailyThoughtID);
@@ -1350,90 +1355,86 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				this.$.deleteDialog.open();
 			}
-			_deleteThought(e){
-				var dailyThoughtID = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).data;
-						
+			_deleteThought(e) {
+				var dailyThoughtID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
+
 				sessionStorage.setItem("deldailyThoughtID", dailyThoughtID);
 				sessionStorage.setItem("deleteType", "thought");
 
 				var filteredArray = this.findObjectByKey(this.thoughtsData, "dailyThoughtID", dailyThoughtID);
 
-				this.$.thoughtTitle.innerHTML = '"'+filteredArray.title+'"';
+				this.$.thoughtTitle.innerHTML = '"' + filteredArray.title + '"';
 				this.$.thoughtAuthor.innerHTML = filteredArray.subtitle;
 
 				this.$.deleteDialog.open();
 			}
-			deleteThought(){
+			deleteThought() {
 				var deleteType = sessionStorage.getItem("deleteType");
 				var dailyThoughtID = sessionStorage.getItem("deldailyThoughtID");
 
 				// delete Thought
-				if(deleteType == "thought"){
+				if (deleteType == "thought") {
 					// Get a reference to the database service
 					var database = firebase.database();
 
 					// delete thoughts
-					database.ref('dailyThoughts/'+ dailyThoughtID).remove();
+					database.ref('dailyThoughts/' + dailyThoughtID).remove();
 
 					this.showSnackBar("Thought deleted successfully!");
 
 					sessionStorage.removeItem("deldailyThoughtID");
-				}
-				else if(deleteType == "photo"){
+				} else if (deleteType == "photo") {
 					var thoughtPhotoID = sessionStorage.getItem("thoughtPhotoID");
 					// Get a reference to the database service
 					var database = firebase.database();
 
 					// delete thoughts
-					database.ref('dailyThoughts/'+dailyThoughtID+'/photos/'+ thoughtPhotoID).remove();
+					database.ref('dailyThoughts/' + dailyThoughtID + '/photos/' + thoughtPhotoID).remove();
 
 					this.showSnackBar("Photo deleted successfully!");
 
 					sessionStorage.removeItem("thoughtPhotoID");
 					sessionStorage.removeItem("deldailyThoughtID");
-				}
-				else if(deleteType == "url"){
+				} else if (deleteType == "url") {
 					var thoughtURLID = sessionStorage.getItem("thoughtURLID");
 					// Get a reference to the database service
 					var database = firebase.database();
 
 					// delete url
-					database.ref('dailyThoughts/'+dailyThoughtID+'/urls/'+ thoughtURLID).remove();
+					database.ref('dailyThoughts/' + dailyThoughtID + '/urls/' + thoughtURLID).remove();
 
 					this.showSnackBar("Article deleted successfully!");
 
 					sessionStorage.removeItem("thoughtURLID");
 					sessionStorage.removeItem("deldailyThoughtID");
-				}
-				else if(deleteType == "podcast"){
+				} else if (deleteType == "podcast") {
 					var thoughtPodcastID = sessionStorage.getItem("thoughtPodcastID");
 					var podcastID = sessionStorage.getItem("podcastID");
 					// Get a reference to the database service
 					var database = firebase.database();
 
 					// delete podcast from thought
-					database.ref('dailyThoughts/'+dailyThoughtID+'/podcasts/'+ thoughtPodcastID).remove();
+					database.ref('dailyThoughts/' + dailyThoughtID + '/podcasts/' + thoughtPodcastID).remove();
 
 					// delete podcast
-					database.ref('podcasts/'+ podcastID).remove();
+					database.ref('podcasts/' + podcastID).remove();
 
 					this.showSnackBar("Podcast deleted successfully!");
 
 					sessionStorage.removeItem("thoughtPodcastID");
 					sessionStorage.removeItem("podcastID");
 					sessionStorage.removeItem("deldailyThoughtID");
-				}
-				else if(deleteType == "video"){
+				} else if (deleteType == "video") {
 					var thoughtVideoID = sessionStorage.getItem("thoughtVideoID");
 					var videoID = sessionStorage.getItem("videoID");
 					// Get a reference to the database service
 					var database = firebase.database();
 
 					// delete podcast from thought
-					database.ref('dailyThoughts/'+dailyThoughtID+'/videos/'+ thoughtVideoID).remove();
+					database.ref('dailyThoughts/' + dailyThoughtID + '/videos/' + thoughtVideoID).remove();
 
 					// delete podcast
-					database.ref('videos/'+ videoID).remove();
+					database.ref('videos/' + videoID).remove();
 
 					this.showSnackBar("Video deleted successfully!");
 
@@ -1441,18 +1442,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					sessionStorage.removeItem("videoID");
 					sessionStorage.removeItem("deldailyThoughtID");
 				}
-				
+
 				sessionStorage.removeItem("deleteType");
 				this.$.deleteDialog.close();
 			}
-			showSnackBar(msg){
+			showSnackBar(msg) {
 				var x = this.$.snackbar;
 
 				x.innerHTML = msg;
 				x.className = "show";
-				setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+				setTimeout(function () {
+					x.className = x.className.replace("show", "");
+				}, 3000);
 			}
-			addIOSBugfix(){
+			addIOSBugfix() {
 				// Get scroll position before moving top
 				scrollTopPosition = $(document).scrollTop();
 				// Add CSS to body "position: fixed"
@@ -1460,19 +1463,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				// $("body").css('position: fixed!important; width: 100%!important;');
 			}
 
-			removeIOSBugfix(){
+			removeIOSBugfix() {
 				// Remove CSS to body "position: fixed"
 				$("body").removeClass("iosBugFixCaret");
 
 				//Go back to initial position in document
 				$(document).scrollTop(scrollTopPosition);
 			}
-			_getWebsite(url){
+			_getWebsite(url) {
 				var res = "";
-				if(url != undefined || url != ""){
-					if(url == undefined){
-					}else{
-						if(url.indexOf('http') == -1) {
+				if (url != undefined || url != "") {
+					if (url == undefined) {} else {
+						if (url.indexOf('http') == -1) {
 							var addHead = "http://";
 							res = addHead + url;
 						} else {
@@ -1480,25 +1482,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						}
 
 					}
-					
+
 				}
 				return res;
 			}
-			jsUcfirst(string) 
-			{
+			jsUcfirst(string) {
 				var edt_str = string;
 
-				if(string === "approved") edt_str = "published";
-				else if(string === "unpublished") edt_str = "scheduled";
+				if (string === "approved") edt_str = "published";
+				else if (string === "unpublished") edt_str = "scheduled";
 
 				return edt_str.charAt(0).toUpperCase() + edt_str.slice(1);
 			}
-			jsFormatStatus(string) 
-			{
-				if(string === "approved") return "w3-row w3-small w3-right w3-text-green";
-				else if(string === "declined") return "w3-row w3-small w3-right w3-text-red";
-				else if(string === "unpublished") return "w3-row w3-small w3-right w3-text-blue";
-				else if(string === "pending") return "w3-row w3-small w3-right w3-text-orange";	
+			jsFormatStatus(string) {
+				if (string === "approved") return "w3-row w3-small w3-right w3-text-green";
+				else if (string === "declined") return "w3-row w3-small w3-right w3-text-red";
+				else if (string === "unpublished") return "w3-row w3-small w3-right w3-text-blue";
+				else if (string === "pending") return "w3-row w3-small w3-right w3-text-orange";
 			}
 		}
 

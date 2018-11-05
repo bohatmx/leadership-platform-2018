@@ -167,7 +167,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 		</div>
 		<div class="spinner" style="position: fixed;">
 			<paper-spinner  active="{{isloading}}"></paper-spinner>
-			<div style="width: 100%; padding-top: 10px;" class="w3-row w3-center" id="spinnerMessage">{{loadingmessage}}</div>
+			<!-- <template is="dom-if" if="[[isEqual(thoughtype, 'filteredthoughts')]]">
+					<img hidden="{{!noIdea}}" src="https://png.icons8.com/material/200/666666/no-idea.png">
+
+				</template>
+					<h4 style="width: 100%; padding-top: 10px;" class="w3-row w3-center" id="spinnerMessage">{{loadingmessage}}</h4> -->
+					
+			<div style="width: 100%; padding-top: 10px;" class="w3-row w3-center" id="spinnerMessage">
+				<!-- <template is="dom-if" if="{{ !isloading }}"> -->
+					<img hidden="{{!noIdea}}"src="https://png.icons8.com/material/200/666666/no-idea.png">
+				<!-- </template> -->
+					<h4> {{loadingmessage}}</h4> 
+				
+				</div>
+		
 		</div>	
 		
 		<div id="preview-profile" class="ldp-modal w3-animate-zoom">
@@ -314,13 +327,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						type: String,
 						value: 'Loading...'
 					},
+					noIdea: {
+						type: Boolean,
+						value: false
+					},
 					videosData: {
 						type: Object,
 						observer: '_onvideosDataDataReceived'
-					},
-					videosData1: {
-						type: Object,
-						observer: '_onvideosData1DataReceived'
 					},
 					loadmore: {
 						type: Boolean,
@@ -483,15 +496,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				this.minData += 6;
 			}
 
-			_onvideosData1DataReceived(newData, oldData){
-				var objLen = this._objLen(newData);
-				if(objLen > 6){
-					this.videosData = newData;
-					// this.videosData = Object.assign(this.videosData, newData);
-					this.$.videosList.render();
-				}
-			}
-
 			_onvideosDataDataReceived(newData, oldData){
 				var that = this;
 				if(newData.length > 0){
@@ -499,6 +503,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					this.loadingmessage = "";
 					this.loadmore = false;
 					this.isloadingmore = false;
+					this.noIdea = false;
 					setTimeout(function(){
 						window.scrollTo({
 							top: that.scrollPos,
@@ -509,11 +514,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				setTimeout(function(){
 					that.isloading = false;
+					
+					if(that.videosData.length == 0) {
+						that.noIdea = true;
+						that.loadingmessage = "Video was removed by Author";
+					}
+					else {
+						that.noIdea = false;
+					 that.loadingmessage = "";
+					}
 
-					if(newData.length == 0) that.loadingmessage = "";
-					else that.loadingmessage = "";
-
-				},20000)
+				},10000)
 			}
 			_objLen(obj) {
 				let len = 0;

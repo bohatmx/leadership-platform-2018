@@ -1646,13 +1646,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         // Validate thought
         if ((title == undefined) || (title.trim() == "")){
-          this.showSnackBar("Please enter the thought!");
-          return;
+          title = "";
+          // this.showSnackBar("Please enter the thought!");
+          // return;
         }
 
         // Validate thought author
         if ((subtitle == undefined) || (subtitle.trim() == "")){
-          this.showSnackBar("Please enter the thought author!");
+          subtitle = "";
+          // this.showSnackBar("Please enter the thought author!");
+          // return;
+        }
+
+        // If title, subtitle and photo is blank ... raise error
+        if((title == "") && (subtitle == "") && (photo == undefined)){
+          this.showSnackBar("Please enter a Thought or an Image template!");
           return;
         }
 

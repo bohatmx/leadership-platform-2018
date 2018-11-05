@@ -72,14 +72,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="lazy-import" href="filtered-articles.html">
 <link rel="lazy-import" href="filtered-podcasts.html">
 <link rel="lazy-import" href="filtered-videos.html">
-<link rel="import" href="sidebar-menus.html">
+<link rel="lazy-import" href="sidebar-menus.html">
 <link rel="lazy-import" href="terms-conditions.html">
 <link rel="lazy-import" href="company-analytics.html">
 
 <link rel="import" href="app-icons.html" async>
 <link rel="import" href="w3-styles.html" async>
 <link rel="import" href="shared-styles.html" async>
-<link rel="import" href="my-notifications.html" async>
+<link rel="lazy-import" href="my-notifications.html" async>
 
 <dom-module id="my-app">
 	<template>
@@ -694,25 +694,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 			ready(){
 				super.ready();
-				
-				var a = Polymer.dom(this.root).querySelectorAll('.drawer-list');
-				var that = this;
-				
-				var closer = Polymer.dom(this.root).querySelector('#close-side-bar');
-				$(a).on('click', 'a.w3-row', function(){
-					parent.location.hash = '#';
-					if($(closer).is(':visible')){
-						that._sideBarClose();
-					}
-				})
 
-				this._setCompanyTypeSidebar();
-				this._setAccountDefaults();
+				Polymer.RenderStatus.afterNextRender(this, () => {
+					var a = Polymer.dom(this.root).querySelectorAll('.drawer-list');
+					var that = this;
+					
+					var closer = Polymer.dom(this.root).querySelector('#close-side-bar');
+					setTimeout(function(){
+						$(a).on('click', 'a.w3-row', function(){
+							parent.location.hash = '#';
+							if($(closer).is(':visible')){
+								that._sideBarClose();
+							}
+						})
+					}, 500);
 
-				// const app = firebase.app("[DEFAULT]");
-				// var database = firebase.database(app);
-				// console.log("App2: ", app2);
-				// console.log("Firebase: ", firebase.database(app2).app);
+					this._setCompanyTypeSidebar();
+					this._setAccountDefaults();
+
+					this.loadPage('sidebar-menus');
+					this.loadPage('my-notifications');
+				});
+				
 			}
 
 			static get properties() {

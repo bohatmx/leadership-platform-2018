@@ -11,32 +11,37 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 
 <!-- Sign In and Main Content -->
-<link rel="import" href="my-app.html">
+<link rel="lazy-import" href="my-app.html">
 <link rel="lazy-import" href="sign-in.html">
 
 <dom-module id="ldp-app">
   <template>
     <!-- Public App -->
-    <firebase-app
+    <!-- <firebase-app
         auth-domain="leadershipplatform-158316.firebaseapp.com"
         database-url="https://leadershipplatform-158316.firebaseio.com"
         api-key="AIzaSyAf_oJi6fgm6-ZrVPeOVdW2DDoeu3v5SxY"
         storage-bucket="leadershipplatform-158316.appspot.com"
-        messaging-sender-id="438289288307"> 
+        messaging-sender-id="438289288307">  -->
     
     <!-- Test App -->    
-    <!-- <firebase-app
+    <firebase-app
         auth-domain="glp-test.firebaseapp.com"
         database-url="https://glp-test.firebaseio.com"
         api-key="AIzaSyBJH4pbQEzEpxtEomcnYjlUfsiFC5nqHoQ"
         storage-bucket="glp-test.appspot.com"
         messaging-sender-id="805735980290">
-    </firebase-app> -->
+    </firebase-app>
 
     <style>
       :host {display: block;background-color: #f6f6f6;}
+      paper-dialog{max-width:500px!important;}
 
         /* ============ Snack Bar ======================== */
         #snackbar {
@@ -118,16 +123,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </template>
         
     <div id="snackbar">
-        <!-- <div id="snacklogo" class="snacklogo">
-        </div> -->
         <div class="snackmsg">
             <div id="snacktitle" class="snacktitle"></div>
             <div id="snackbody" class="snackbody"></div>
         </div>
     </div>
 
+    <paper-toast id="updateToast" duration="0" text="A new update is available! ">
+        <paper-button onclick="window.location.reload(true)">
+            Refresh
+        </paper-button>
+        <paper-button on-tap="hideToast">
+            Cancel
+        </paper-button>
+    </paper-toast>
+
+    <paper-dialog id="verifyDialog">
+        <h2>Email Verification Required</h2>
+    <paper-dialog-scrollable>
+        A verification message has been sent to your account: {{emailtoverify}}. Once you verify your email you'll be able to access Global Leadership Platform.
+    </paper-dialog-scrollable>
+    <div class="buttons">
+        <paper-button dialog-dismiss>CLOSE</paper-button>
+        <!-- <paper-button dialog-confirm autofocus on-tap="_resendEmail">RESEND</paper-button> -->
+    </div>
+    </paper-dialog>
+
     <firebase-auth id="auth" user="{{user}}" provider="google" status-known="{{statusKnown}}" on-error="handleError" signed-in="{{userSignedIn}}">
     </firebase-auth>
+
   </template>
   
   <script>
@@ -235,120 +259,119 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
         ready: function(){
             var that = this;
-            
-            // public app id
-            var appID = "AIzaSyAf_oJi6fgm6-ZrVPeOVdW2DDoeu3v5SxY";
-            
-            // Test app id
-            // var appID = "AIzaSyBJH4pbQEzEpxtEomcnYjlUfsiFC5nqHoQ";
-            
-            var logged = localStorage.getItem("firebase:authUser:"+appID+":[DEFAULT]");
 
-            // set messaging
-            const messaging = firebase.messaging();
-            
-            if(logged) {
-                this.signedIn = true;
-                // Get a reference to the database service
-                var database = firebase.database();
+            Polymer.RenderStatus.afterNextRender(this, () => {
+                // this.removeAttribute('unresolved');
+                if(!this.user){
+                    this.loadPage('sign-in');
+                }
+                this.loadPage('my-app');
+                /* Other lazy code here */
 
-                // Request for Permission
-                this.requestPermission();
+                // public app id
+                var appID = "AIzaSyAf_oJi6fgm6-ZrVPeOVdW2DDoeu3v5SxY";
+                
+                // Test app id
+                // var appID = "AIzaSyBJH4pbQEzEpxtEomcnYjlUfsiFC5nqHoQ";
+                
+                var logged = localStorage.getItem("firebase:authUser:"+appID+":[DEFAULT]");
 
-                // [START refresh_token]
-                // Callback fired if Instance ID token is updated.
-                messaging.onTokenRefresh(function() {
-                    messaging.getToken()
-                    .then(function(refreshedToken) {
-                        return messaging.getToken();
-                    })
-                    .then(function(currentToken) {
-                        if (currentToken) {
-                            if((/android|windows|windowsphone/i).test(_platform)){
-                                setTokenSentToServer(false);
-                                setTokenToLocalStorage(currentToken);
-                                sendTokenToServer();
+                // set messaging
+                const messaging = firebase.messaging();
+                
+                if(logged) {
+                    this.signedIn = true;
+                    // Get a reference to the database service
+                    var database = firebase.database();
+
+                    // Request for Permission
+                    this.requestPermission();
+
+                    // [START refresh_token]
+                    // Callback fired if Instance ID token is updated.
+                    messaging.onTokenRefresh(function() {
+                        messaging.getToken()
+                        .then(function(refreshedToken) {
+                            return messaging.getToken();
+                        })
+                        .then(function(currentToken) {
+                            if (currentToken) {
+                                if((/android|windows|windowsphone/i).test(_platform)){
+                                    setTokenSentToServer(false);
+                                    setTokenToLocalStorage(currentToken);
+                                    sendTokenToServer();
+                                }
+                                
+                            }
+                        })
+                        .catch(function(err) {
+                            console.log('Unable to retrieve refreshed token ', err);
+                        });
+
+                        // [END request_permission]
+                        function setTokenToLocalStorage(currentToken) {
+                            var previousToken = window.localStorage.getItem('currentToken');
+
+                            if(previousToken == undefined || previousToken == "undefined" || previousToken == null || previousToken == "null") previousToken = "";
+
+                            if (currentToken) {
+                                var data = {
+                                    "uid": that.user.uid,
+                                    "previousToken": previousToken,
+                                    "currentToken":currentToken
+                                }
+                                
+                                database.ref('/data-modelling/userWriteable/tokenRefresh/'+that.user.uid).set(data);
                             }
                             
+                            window.localStorage.setItem('currentToken', currentToken);
                         }
-                    })
-                    .catch(function(err) {
-                        console.log('Unable to retrieve refreshed token ', err);
-                    });
+                        function sendTokenToServer() {
+                            if (!isTokenSentToServer()) {
 
-                    // [END request_permission]
-                    function setTokenToLocalStorage(currentToken) {
-                        var previousToken = window.localStorage.getItem('currentToken');
-
-                        if(previousToken == undefined || previousToken == "undefined" || previousToken == null || previousToken == "null") previousToken = "";
-
-                        if (currentToken) {
-                            var data = {
-                                "uid": that.user.uid,
-                                "previousToken": previousToken,
-                                "currentToken":currentToken
-                            }
-                            
-                            database.ref('/data-modelling/userWriteable/tokenRefresh/'+that.user.uid).set(data);
+                            } 
+                        }
+                        function isTokenSentToServer() {
+                            return window.localStorage.getItem('sentToServer') == 1;
+                        }
+                        function setTokenSentToServer(sent) {
+                            window.localStorage.setItem('sentToServer', sent ? 1 : 0);
                         }
                         
-                        window.localStorage.setItem('currentToken', currentToken);
-                    }
-                    function sendTokenToServer() {
-                        if (!isTokenSentToServer()) {
+                    });
+                    // [END refresh_token]
+                }
+                else this.signedIn = false;
 
-                            // Update user fcmToken
-                            // var updates = {};
-                            // updates['/users/' + this._user.userID+'/fcmToken'] = localStorage.getItem('currentToken');
-                            // setTokenSentToServer(true);
-                        } 
-                    }
-                    function isTokenSentToServer() {
-                        return window.localStorage.getItem('sentToServer') == 1;
-                    }
-                    function setTokenSentToServer(sent) {
-                        window.localStorage.setItem('sentToServer', sent ? 1 : 0);
-                    }
+                // setTimeout(function(){if(that.signedIn === false) that.loadPage('sign-in') }, 1000);
+
+                var msg = messaging.onMessage(function(payload) {
                     
+                    showSnackBar(payload.notification);
                 });
-                // [END refresh_token]
-            }
-            else this.signedIn = false;
 
-            setTimeout(function(){if(that.signedIn === false) that.loadPage('sign-in') }, 1000);
+                var x = Polymer.dom(this.root).querySelector('#snackbar');
+                var snacktitle = Polymer.dom(this.root).querySelector('#snacktitle');
+                var snackbody = Polymer.dom(this.root).querySelector('#snackbody');
 
-            // [START receive_message]
-            // Handle incoming messages. Called when:
-            // - a message is received while the app has focus
-            // - the user clicks on an app notification created by a sevice worker
-            //   `messaging.setBackgroundMessageHandler` handler.
-            var msg = messaging.onMessage(function(payload) {
-                
-                showSnackBar(payload.notification);
-                
-                // [START_EXCLUDE]
-                // Update the UI to include the received message.
+                function showSnackBar(msg){
+                    // var x = this.$.snackbar;
 
-                // this.appendMessage(payload);
-                // [END_EXCLUDE]
+                    snacktitle.innerHTML = msg.title;
+                    snackbody.innerHTML = msg.body;
+                    x.className = "show";
+                    setTimeout(function(){ x.className = x.className.replace("show", ""); }, 10000);
+                }
+                // [END receive_message]
+
             });
 
-            var x = Polymer.dom(this.root).querySelector('#snackbar');
-            var snacktitle = Polymer.dom(this.root).querySelector('#snacktitle');
-            var snackbody = Polymer.dom(this.root).querySelector('#snackbody');
-
-            function showSnackBar(msg){
-                // var x = this.$.snackbar;
-
-                snacktitle.innerHTML = msg.title;
-                snackbody.innerHTML = msg.body;
-                x.className = "show";
-                setTimeout(function(){ x.className = x.className.replace("show", ""); }, 10000);
-            }
-            // [END receive_message]
-
-            
         },
+        update: function (worker) {
+            console.log("update found");
+            this.$.updateToast.show();
+        },
+        hideToast: function(){this.$.updateToast.toggle()},
         requestPermission: function() {
             // set messaging
             const messaging = firebase.messaging();
@@ -394,7 +417,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         setTokenSentToServer: function(sent) {
             window.localStorage.setItem('sentToServer', sent ? 1 : 0);
         },
+        _resendEmail(){
+            var that = this;
+            var actionCodeSettings = {
+                url: window.location.origin
+            };
+            this.user.sendEmailVerification(actionCodeSettings).then(function() {
+                // Email sent.
+                that.$.verifyDialog.open();
+                firebase.auth().signOut();
+            }).catch(function(error) {
+                // An error happened.
+            });
+        },
         userLoggedIn: function(){
+            if(this.user){
+                if(!this.user.emailVerified){
+                    this.emailtoverify = this.user.email;
+                    this._resendEmail();
+                    return;
+                }
+            }
             if(this.userSignedIn === true) {
                 this.signedIn = true;
                 var database = firebase.database();

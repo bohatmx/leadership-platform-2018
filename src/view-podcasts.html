@@ -278,7 +278,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 		<section class="thought-card" id="thoughts-Holder">
 			<div class="spinner" style="position: fixed;">
 				<paper-spinner  active="{{isloading}}"></paper-spinner>
-				<div style="width: 100%; padding-top: 10px;" class="w3-row w3-center" id="spinnerMessage">{{loadingmessage}}</div>
+				<div style="width: 100%; padding-top: 10px;" class="w3-row w3-center" id="spinnerMessage">
+				
+					<template is="dom-if" if="{{ !isloading }}">
+						<img hidden="{{!noIdea}}"src="https://png.icons8.com/material/200/666666/no-idea.png">
+					   </template>
+						<h4> {{loadingmessage}}</h4> 
+				</div>
 			</div>
 			<div class="main-card" style="width:100%;">
 				<template id="podcastsList" is="dom-repeat" items="[[podcastsData]]" as="item" sort="_sort" observe="dateScheduled">
@@ -381,6 +387,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					loadingmessage:{
 						type: String,
 						value: 'Loading...'
+					},
+					noIdea:{
+						type: Boolean,
+						value: false
 					},
 					commentsData: {
 						type: Object,
@@ -641,15 +651,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				this.isloadingmore = true;
 				this.minData += 6;
 			}
-
-			_onpodcastsData1Received(newData, oldData){
-				var objLen = this._objLen(newData);
-				if(objLen > 6){
-					this.podcastsData = newData;
-					// this.podcastsData = Object.assign(this.podcastsData, newData);
-					this.$.podcastsList.render();
-				}
-			}
 			_onpodcastsDataReceived(newData, oldData){
 				var that = this;
 
@@ -658,6 +659,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					this.loadingmessage = "";
 					this.loadmore = false;
 					this.isloadingmore = false;
+					this.noIdea = false;
+
 					setTimeout(function(){
 						window.scrollTo({
 							top: that.scrollPos,
@@ -669,10 +672,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				setTimeout(function(){
 					that.isloading = false;
 
-					if(newData.length == 0) that.loadingmessage = "";
-					else that.loadingmessage = "";
+					if(that.podcastsData.length == 0) { 
+						that.noIdea = true;
+						that.loadingmessage = "Podcast was removed by Author";
+					} else {
+						that.noIdea = true;
+						that.loadingmessage = "";
 
-				},20000)
+					}
+
+				},10000)
 			}
 			_setProfileInfo(journalUserName, journalUserID, companyName, companyID, photoURL){
 				if(photoURL == "" || photoURL == undefined) photoURL = "../images/default-user.png";

@@ -17,6 +17,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/paper-search/paper-search-bar.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 
@@ -34,21 +35,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="company-staff">
-    <template>
-      <template is="dom-if" if="[[_companyid]]">
-        <firebase-query
-          id="users"
-          path="/users"
-          order-by-child="companyID"
-          equal-to="[[_companyid]]"
-          data="{{usersData}}">
-        </firebase-query>
-        <!-- order-by-child="companyID"
+  <template>
+    <template is="dom-if" if="[[_companyid]]">
+      <firebase-query id="users" path="/users" order-by-child="companyID" equal-to="[[_companyid]]" limit-to-first="{{minData}}"
+        data="{{usersData}}">
+      </firebase-query>
+      <!-- order-by-child="companyID"
           equal-to="[[_companyid]]" -->
-      </template>
+    </template>
 
-  <style include="w3-styles">
-    .w3-modal{
+    <style include="w3-styles">
+      .w3-modal{
       padding-top: 200px!important;
     }
     .w3-modal-content{
@@ -59,8 +56,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
   </style>
 
-  <style include="shared-styles">
-    :host{
+    <style include="shared-styles">
+      :host{
       --paper-icon-button-hover: {
         color: red;
       }
@@ -214,126 +211,157 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
   </style>
 
-  
 
-   <!-- The Modal -->
-  <div id="myModal" class="w3-modal">
-    <!-- Modal content -->
-    <div class="w3-modal-content w3-animate-right w3-card-2">
-      <div class="modal-header w3-theme-l1">
-        <span id="closeModal" class="w3-button w3-display-topright w3-red w3-text-white">&times;</span>
-        <h2 class="w3-text-blue" ><iron-icon icon="app:group-add"></iron-icon>&nbsp;Upload Users</h2>
-      </div>
-      <div class="modal-body">
-      </div>
-      <div class="thought-prevImg" id="thoughtImg">
-        <form id="selectFileForm">
-          <label id="pickFileLabel" class="paper-font-body2" style="cursor: pointer; margin-top: 10px;" for="file-uploader">
-            <paper-button class="custom indigo" id="pickFile"><iron-icon icon="app:attach-file"></iron-icon>&nbsp;Select File (.xlsx, .xls)</paper-button>
-          </label>
-          <br>
-          <p id="filename"></p>
-          <input id="file-uploader" type="file" on-change="checkfile"/> 
-          <div class="upload-buttons">
-            <div id="hideRemoveFile" hidden>
-              <paper-button class="custom" style="color:#eaeaea; background:#810029; margin-right: 6px;" raised on-tap="uploadNewUsers">Upload File</paper-button>
-              <paper-button class="custom" style="color:#810029; background:#eaeaea;" raised on-tap="removeFile">Remove File</paper-button>
+
+    <!-- The Modal -->
+    <div id="myModal" class="w3-modal">
+      <!-- Modal content -->
+      <div class="w3-modal-content w3-animate-right w3-card-2">
+        <div class="modal-header w3-theme-l1">
+          <span id="closeModal" class="w3-button w3-display-topright w3-red w3-text-white">&times;</span>
+          <h2 class="w3-text-blue">
+            <iron-icon icon="app:group-add"></iron-icon>&nbsp;Upload Users
+          </h2>
+        </div>
+        <div class="modal-body">
+        </div>
+        <div class="thought-prevImg" id="thoughtImg">
+          <form id="selectFileForm">
+            <label id="pickFileLabel" class="paper-font-body2" style="cursor: pointer; margin-top: 10px;" for="file-uploader">
+              <paper-button class="custom indigo" id="pickFile">
+                <iron-icon icon="app:attach-file"></iron-icon>&nbsp;Select File (.xlsx, .xls)
+              </paper-button>
+            </label>
+            <br>
+            <p id="filename"></p>
+            <input id="file-uploader" type="file" on-change="checkfile" />
+            <div class="upload-buttons">
+              <div id="hideRemoveFile" hidden>
+                <paper-button class="custom" style="color:#eaeaea; background:#810029; margin-right: 6px;" raised
+                  on-tap="uploadNewUsers">Upload File</paper-button>
+                <paper-button class="custom" style="color:#810029; background:#eaeaea;" raised on-tap="removeFile">Remove
+                  File</paper-button>
+              </div>
             </div>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer w3-theme-l1">
+          </form>
+        </div>
+        <div class="modal-footer w3-theme-l1">
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- The Modal -->
-<div id="singleUser" class="w3-modal">
-  <div class="w3-modal-content w3-animate-right w3-card-4">
-    <header class="w3-container w3-theme-l1"> 
-      <span id="closeSingleUser" class="w3-button w3-display-topright w3-red w3-text-white">&times;</span>
-      <h2 class="w3-text-blue"><iron-icon icon="app:person-add"></iron-icon>&nbsp;New User</h2>
-    </header>
-    <div class="w3-container">
-      <paper-dropdown-menu autofocus id="dropdown_menu" label="User Category" value="{{selectedCategory}}" style="width: -webkit-fill-available;" tabindex="0">
-        <paper-listbox id="categoryList" slot="dropdown-content" attr-for-selected="value" selected="{{selectedCategory}}" no-animations="true" style="min-width: 340px;">
-          <paper-item value="Standard User">Standard User</paper-item>
-          <paper-item value="Master Contributor (Gold)">Master Contributor (Gold)</paper-item>
-          <paper-item value="Global Contributor (Top Leader)">Global Contributor (Top Leader)</paper-item>
-          <paper-item value="Platinum Admin">Platinum Admin</paper-item>
-        </paper-listbox>
-      </paper-dropdown-menu>
-      <paper-input id="firstName" name="firstName" always-float-label label="Firstname" type="text" required tabindex="1" ></paper-input>
-      <paper-input id="lastName" name="lastName" always-float-label label="Lastname" type="text" required tabindex="2" ></paper-input>
-      <paper-input id="email" name="email" always-float-label label="Email" type="email" required tabindex="3" ></paper-input>
+    <!-- The Modal -->
+    <div id="singleUser" class="w3-modal">
+      <div class="w3-modal-content w3-animate-right w3-card-4">
+        <header class="w3-container w3-theme-l1">
+          <span id="closeSingleUser" class="w3-button w3-display-topright w3-red w3-text-white">&times;</span>
+          <h2 class="w3-text-blue">
+            <iron-icon icon="app:person-add"></iron-icon>&nbsp;New User
+          </h2>
+        </header>
+        <div class="w3-container">
+          <paper-dropdown-menu autofocus id="dropdown_menu" label="User Category" value="{{selectedCategory}}" style="width: -webkit-fill-available;"
+            tabindex="0">
+            <paper-listbox id="categoryList" slot="dropdown-content" attr-for-selected="value" selected="{{selectedCategory}}"
+              no-animations="true" style="min-width: 340px;">
+              <paper-item value="Standard User">Standard User</paper-item>
+              <paper-item value="Master Contributor (Gold)">Master Contributor (Gold)</paper-item>
+              <paper-item value="Global Contributor (Top Leader)">Global Contributor (Top Leader)</paper-item>
+              <paper-item value="Platinum Admin">Platinum Admin</paper-item>
+            </paper-listbox>
+          </paper-dropdown-menu>
+          <paper-input id="firstName" name="firstName" always-float-label label="Firstname" type="text" required
+            tabindex="1"></paper-input>
+          <paper-input id="lastName" name="lastName" always-float-label label="Lastname" type="text" required tabindex="2"></paper-input>
+          <paper-input id="email" name="email" always-float-label label="Email" type="email" required tabindex="3"></paper-input>
+        </div>
+        <footer class="w3-container w3-light-grey w3-padding">
+          <paper-button raised class="w3-blue" on-tap="createNewUser">
+            <iron-icon icon="app:send"></iron-icon>&nbsp;SUBMIT
+          </paper-button>
+        </footer>
+      </div>
     </div>
-    <footer class="w3-container w3-light-grey w3-padding">
-        <paper-button raised class="w3-blue" on-tap="createNewUser">
-          <iron-icon icon="app:send"></iron-icon>&nbsp;SUBMIT
-        </paper-button>
-    </footer>
-  </div>
-</div>
-        
+
     <!-- <div class="container search-bar">
       <paper-search-bar hide-filter-button="true" placeholder="Search for Staff Members"></paper-search-bar>
     </div>  -->
     <div class="add-users-bar w3-card-1">
-      <paper-button raised class="custom indigo w3-small" on-tap="newUserDialog"><iron-icon icon="app:person-add"></iron-icon>&nbsp; Add User</paper-button>
-      <paper-button raised class="custom indigo w3-small" on-tap="uploadUsersDialog"><iron-icon icon="app:group-add"></iron-icon>&nbsp; Upload Users (xls)</paper-button>
-    </div> 
+      <paper-button raised class="custom indigo w3-small" on-tap="newUserDialog">
+        <iron-icon icon="app:person-add"></iron-icon>&nbsp; Add User
+      </paper-button>
+      <paper-button raised class="custom indigo w3-small" on-tap="uploadUsersDialog">
+        <iron-icon icon="app:group-add"></iron-icon>&nbsp; Upload Users (xls)
+      </paper-button>
+    </div>
     <div class="content fadeInUp">
       <ul class="w3-ul w3-card-2 w3-hoverable">
-        <template is="dom-repeat" items="[[usersData]]" as="item">
+        <template is="dom-repeat" items="[[usersData]]" as="item" initial-count="10" target-framerate="10">
           <li class="w3-bar" style="padding: 8px 0;">
             <img class="w3-third w3-padding-small w3-circle" style="width:36px; height: 36px;" src="[[_profilePhoto(item.photoURL)]]">
             <div class="w3-rest w3-bar-item">
               <span class="w3-medium w3-text-blue">[[item.firstName]] [[item.lastName]]</span><span class$="[[_isDisabled(item.disabled)]] w3-tag w3-tiny w3-round">[[_isDisabledText(item.disabled)]]</span><br>
               <span>[[item.email]]</span>
             </div>
-            
-            <paper-icon-button isdisabled="[[item.disabled]]" username="[[item.firstName]] [[item.lastName]]" data="[[item.userID]]" icon$="[[_statusIcon(item.disabled)]]" class="custom indigo w3-right" on-tap="disableAccount"></paper-icon-button>
+            <!--  This is the Trash icon -->
+            <paper-icon-button isdisabled="[[item.disabled]]" username="[[item.firstName]] [[item.lastName]]" data="[[item.userID]]"
+              icon="myicons:delete" class="custom indigo w3-right" on-tap="deleteAccount"></paper-icon-button>
+              
+            <paper-icon-button isdisabled="[[item.disabled]]" username="[[item.firstName]] [[item.lastName]]" data="[[item.userID]]"
+              icon$="[[_statusIcon(item.disabled)]]" class="custom indigo w3-right" on-tap="disableAccount"></paper-icon-button>
+
           </li>
         </template>
       </ul>
+    </div>
+    <div class="w3-row w3-center" style="width: 100%">
+      <div class="w3-row" style="width: 100%">
+        <paper-spinner active="{{isloadingmore}}"></paper-spinner>
+      </div>
+      <div class="w3-row w3-text-green" style="width: 100%">
+        <paper-button hidden="{{loadmore}}" on-tap="_loadMorePosts">Load More Users</paper-button>
+      </div>
+
     </div>
     <div id="snackbar"></div>
   </template>
 
   <script>
     var _ua = window.navigator.userAgent;
-		var scrollTopPosition
-		iOS = /iPad|iPhone|iPod/.test(_ua),
-    iOS11 = /OS 11_0|OS 11_1|OS 11_2|OS 11_3/.test(_ua);
-    
+    var scrollTopPosition
+    iOS = /iPad|iPhone|iPod/.test(_ua),
+      iOS11 = /OS 11_0|OS 11_1|OS 11_2|OS 11_3/.test(_ua);
+
     class CompanyStaff extends Polymer.Element {
-      static get is() { return 'company-staff'; }
-      ready(){
+      static get is() {
+        return 'company-staff';
+      }
+      ready() {
         super.ready();
 
         var modal = Polymer.dom(this.root).querySelector('#myModal');
         var modalsingleUser = Polymer.dom(this.root).querySelector('#singleUser');
         var span = Polymer.dom(this.root).querySelector('#closeModal');
         var spanSingleUSer = Polymer.dom(this.root).querySelector('#closeSingleUser');
-        var pickFileLabel = Polymer.dom(this.root).querySelector('#pickFileLabel'); 
+        var pickFileLabel = Polymer.dom(this.root).querySelector('#pickFileLabel');
         var hideRemoveFile = Polymer.dom(this.root).querySelector('#hideRemoveFile');
         var filename = Polymer.dom(this.root).querySelector('#filename');
         var selectFileForm = Polymer.dom(this.root).querySelector('#selectFileForm');
         var that = this;
 
-        span.addEventListener('click', function(e){
-            pickFileLabel.style = "display: block;";
-            filename.innerHTML = "";
-            hideRemoveFile.style = "display: none";
-            selectFileForm.reset();
-            modal.style.display = "none";
+        span.addEventListener('click', function (e) {
+          pickFileLabel.style = "display: block;";
+          filename.innerHTML = "";
+          hideRemoveFile.style = "display: none";
+          selectFileForm.reset();
+          modal.style.display = "none";
         });
-        
-        spanSingleUSer.addEventListener('click', function(e){
+
+        spanSingleUSer.addEventListener('click', function (e) {
           // ios 11 bug caret position
-				if ( iOS && iOS11 ) {
-					that.removeIOSBugfix();
-				}
+          if (iOS && iOS11) {
+            that.removeIOSBugfix();
+          }
           this.selectedCategory = "";
           modalsingleUser.style.display = "none";
         });
@@ -344,17 +372,48 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Object
           },
           _companyid: String,
+          minData: {
+            type: Number,
+            value: 50
+          },
           usersData: {
             type: Object,
             observer: '_onusersDataDataReceived'
           },
+          loadmore: {
+            type: Boolean,
+            value: true
+          },
+          isloadingmore: {
+            type: Boolean,
+            value: true
+          }
         };
       }
-      _onusersDataDataReceived(newData, oldData){
-        // console.log('Quotes: '+this.quotes);
-        // for (item in newData) { 
-        //     this._dailythoughts = newData[item];
-        // }
+      _loadMorePosts() {
+        this.scrollPos = window.scrollY;
+        this.isloadingmore = true;
+        this.minData += 50;
+      }
+      _onusersDataDataReceived(newData, oldData) {
+        var that = this;
+        if (newData.length > 0) {
+          this.loadmore = false;
+          this.isloadingmore = false;
+
+          setTimeout(function () {
+            window.scrollTo({
+              top: that.scrollPos,
+              behavior: "instant"
+            });
+          }, 1000);
+        }
+
+        setTimeout(function () {
+          that.loadmore = false;
+          that.isloadingmore = false;
+
+        }, 10000)
       }
       attached() {
         // Use the document element
@@ -363,7 +422,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       getClassForItem(item, selected) {
         return selected ? 'item expanded' : 'item';
       }
-      disableAccount(e){
+      disableAccount(e) {
         let userID = e.target.data;
         let userName = e.target.username;
         let active = e.target.isdisabled
@@ -373,33 +432,93 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         active ? disabled = false : true;
         disabled ? disabledText = 'Deactivate' : disabledText = 'Activate';
 
-        if (confirm(disabledText+' selected account: '+userName+'?')){
+        if (confirm(disabledText + ' selected account: ' + userName + '?')) {
           // Get a reference to the database service
           let database = firebase.database();
 
           // Update user data 
           let updates = {};
-          updates['/users/' + userID+'/disabled'] = disabled;
+          updates['/users/' + userID + '/disabled'] = disabled;
           database.ref().update(updates);
         }
       }
-      _isDisabled(disabled){
-        return disabled ? "w3-red" : "w3-green";
-      }
-      _isDisabledText(disabled){
-        return disabled ? "Disabled" : "Active";
-      }
-      _statusIcon(disabled){
-        return disabled ? "app:check" : "myicons:cancel"; 
+
+      findObjectByKey(array, key, value) {
+        for (var i = 0; i < array.length; i++) {
+          if (array[i][key] === value) {
+            return array[i];
+          }
+        }
+        return null;
       }
 
-      uploadUsersDialog(){
+
+      findAndDeleteDocument(documentPathUrl, objectId) {
+        // Get a reference to the database service
+        const database = firebase.database();
+
+        database.ref(`${documentPathUrl}/${objectId}`).remove();
+
+
+
+      }
+
+      // Delete User account from DB
+      async deleteAccount(e) {
+
+        try {
+          //Get user data from targeted event
+          const {
+            data,
+            username
+          } = e.target;
+
+          const userProfile = this.usersData.find((value) => value.userID === data ? value : null);
+
+          //TODO: User Paper Dialog to Confirmation with (Yes) / (No) buttons 
+          //Confirm user deletion action 
+
+          const answerEmail = prompt(
+            `Are your sure you want to remove ${userProfile.firstName} ${userProfile.lastName} \n ( Please type in the email of the User !) `
+          );
+
+
+          if (answerEmail === '' || answerEmail === null || answerEmail !== userProfile.email) {
+            this.showSnackBar('User not deleted: Incorrect email address provided.');
+            return;
+          }
+
+          // Remove user object from subscribed, users, user , if any 
+          this.findAndDeleteDocument('subscribed', userProfile.userID);
+          this.findAndDeleteDocument('users', userProfile.userID);
+          this.findAndDeleteDocument('user', userProfile.uid);
+
+          this.showSnackBar(`Deleted ${userProfile.firstName} ${userProfile.lastName} successfully!`);
+        } catch (error) {
+
+          console.log(error);
+
+        } // end try-catch block
+
+      } // end deleteAccount func
+
+      _isDisabled(disabled) {
+        return disabled ? "w3-red" : "w3-green";
+      }
+      _isDisabledText(disabled) {
+        return disabled ? "Disabled" : "Active";
+      }
+      _statusIcon(disabled) {
+        return disabled ? "app:check" : "myicons:cancel";
+      }
+   
+      uploadUsersDialog() {
         var modal = Polymer.dom(this.root).querySelector('#myModal');
         modal.style.display = "block";
       }
       checkfile(e) {
         var validExts = new Array(".xlsx", ".xls");
-        var fileName = e.target.files[0].name;        
+        var fileName = e.target.files[0].name;
 
         var fileExt = fileName.substring(fileName.lastIndexOf('.'));
 
@@ -408,44 +527,43 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.$.filename.innerHTML = fileName;
 
           this.showSnackBar("Invalid file selected, valid files are of " +
-                  validExts.toString() + " types.");
+            validExts.toString() + " types.");
           return false;
-        }
-        else {
+        } else {
           this.$.hideRemoveFile.style = "display: block";
           this.$.filename.innerHTML = fileName;
-          
+
           return true;
         }
       }
-      removeFile(){
-        var pickFileLabel = this.$.pickFileLabel; 
+      removeFile() {
+        var pickFileLabel = this.$.pickFileLabel;
         this.$.hideRemoveFile.style = "display: none";
         this.$.filename.innerHTML = "";
         pickFileLabel.style = "display: block;";
         var selectFileForm = Polymer.dom(this.root).querySelector('#selectFileForm');
         selectFileForm.reset();
       }
-      showSnackBar(msg){
+      showSnackBar(msg) {
         var x = this.$.snackbar;
         x.innerHTML = msg;
         x.className = "show";
-        setTimeout(function(){
+        setTimeout(function () {
           x.className = x.className.replace("show", "");
         }, 3000);
       }
       isEqual(a, b) {
         return a === b;
       }
-      newUserDialog(){
+      newUserDialog() {
         // ios 11 bug caret position
-				if ( iOS && iOS11 ) {
-					this.addIOSBugfix();
-				}
+        if (iOS && iOS11) {
+          this.addIOSBugfix();
+        }
         var modal = Polymer.dom(this.root).querySelector('#singleUser');
         modal.style.display = "block";
       }
-      createNewUser(){
+      createNewUser() {
         var span = Polymer.dom(this.root).querySelector('#closeSingleUser');
         var email = this.$.email.value;
         var firstName = this.$.firstName.value;
@@ -465,7 +583,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         let companyName = this.user.companyName;
 
         // Validate thought category
-        if ((this.selectedCategory == undefined) || (this.selectedCategory == -1)){
+        if ((this.selectedCategory == undefined) || (this.selectedCategory == -1)) {
           this.showSnackBar("Please select user category!");
           return;
         }
@@ -473,16 +591,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         let userDescription = "Standard User";
         let userType = 8;
 
-        if(this.selectedCategory == "Global Contributor (Top Leader)"){
+        if (this.selectedCategory == "Global Contributor (Top Leader)") {
           userDescription = this.selectedCategory;
           userType = 4;
-        }else if(this.selectedCategory == "Master Contributor (Gold)"){
+        } else if (this.selectedCategory == "Master Contributor (Gold)") {
           userDescription = this.selectedCategory;
           userType = 5;
-        }else if(this.selectedCategory == "Platinum Admin"){
+        } else if (this.selectedCategory == "Platinum Admin") {
           userDescription = this.selectedCategory;
           userType = 7;
-        }else if(this.selectedCategory == "Standard User"){
+        } else if (this.selectedCategory == "Standard User") {
           userDescription = this.selectedCategory;
           userType = 8;
         }
@@ -496,33 +614,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // Get a reference to the database service
         var database = firebase.database();
 
-        if(!email || !emailVal){
+        if (!email || !emailVal) {
           this.showSnackBar("Email is required!");
           return;
-        }else if(!firstName || !firstNameVal){
+        } else if (!firstName || !firstNameVal) {
           this.showSnackBar("Firstname is required!");
           return;
-        }else if(!lastName || !lastNameVal){
+        } else if (!lastName || !lastNameVal) {
           this.showSnackBar("Lastname is required!");
           return;
-        }else{
+        } else {
           var userID = database.ref().child('newUploadUsers').push().key;
           var defPassword = Math.random().toString(36).substring(2, 6) + Math.random().toString(36).substring(2, 6);
           defPassword = defPassword.toUpperCase();
 
           var data = {
-            "companyID" : companyID,
-            "companyName" : companyName,
-            "dateRegistered" : timeInMs,
-            "email" : email,
-            "firstName" : firstName,
-            "lastName" : lastName,
-            "password" : defPassword,
-            "stringDateRegistered" : datetime,
-            "userDescription" : userDescription,
-            "newUploadUserID" : userID,
-            "userType" : userType,
-            "companyID_userType" : companyID+"_"+userType
+            "companyID": companyID,
+            "companyName": companyName,
+            "dateRegistered": timeInMs,
+            "email": email,
+            "firstName": firstName,
+            "lastName": lastName,
+            "password": defPassword,
+            "stringDateRegistered": datetime,
+            "userDescription": userDescription,
+            "newUploadUserID": userID,
+            "userType": userType,
+            "companyID_userType": companyID + "_" + userType
           }
 
           // Write the new rating data
@@ -539,7 +657,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.showSnackBar("User created successfully!");
         }
       }
-      uploadNewUsers(){
+      uploadNewUsers() {
         var span = Polymer.dom(this.root).querySelector('#closeModal');
         var files = Polymer.dom(this.root).querySelector('#file-uploader').files;
         var i, f;
@@ -554,21 +672,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         // Get a reference to the database service
         var database = firebase.database();
-        
+
         for (i = 0, f = files[i]; i != files.length; ++i) {
           var reader = new FileReader();
           var name = f.name;
-          reader.onload = function(e) {
-            
+          reader.onload = function (e) {
+
             var data = e.target.result;
-            var workbook = XLSX.read(data, {type: 'binary'});
+            var workbook = XLSX.read(data, {
+              type: 'binary'
+            });
 
             function to_json(workbook) {
               var result = {};
-              workbook.SheetNames.forEach(function(sheetName) {
+              workbook.SheetNames.forEach(function (sheetName) {
                 var roa = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
-                if(roa.length > 0){
-                    result[sheetName] = roa;
+                if (roa.length > 0) {
+                  result[sheetName] = roa;
                 }
               });
               return result;
@@ -579,27 +699,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             // console.log('xls json: '+JSON.stringify(xls_json));
             Object.keys(xls_json).forEach(key => {
               users = xls_json[key];
-              users.forEach((userobj, index) =>{
-                console.log('Index:'+index + ' Name: '+userobj.Firstname);
-
+              users.forEach((userobj, index) => {
                 var email = userobj.Email;
-                if(email !== undefined && email.length > 5){
+                if (email !== undefined && email.length > 5) {
                   var userID = database.ref().child('newUploadUsers').push().key;
-                  var defPassword = Math.random().toString(36).substring(2, 6) + Math.random().toString(36).substring(2, 6);
+                  var defPassword = Math.random().toString(36).substring(2, 6) + Math.random().toString(
+                    36).substring(2, 6);
                   defPassword = defPassword.toUpperCase();
 
                   var data = {
-                    "companyID" : companyID,
-                    "companyName" : companyName,
-                    "dateRegistered" : timeInMs,
-                    "email" : userobj.Email,
-                    "firstName" : userobj.Firstname,
-                    "lastName" : userobj.Lastname,
-                    "password" : defPassword,
-                    "stringDateRegistered" : datetime,
-                    "userDescription" : "Standard",
-                    "newUploadUserID" : userID,
-                    "userType" : 8
+                    "companyID": companyID,
+                    "companyName": companyName,
+                    "dateRegistered": timeInMs,
+                    "email": userobj.Email,
+                    "firstName": userobj.Firstname,
+                    "lastName": userobj.Lastname,
+                    "password": defPassword,
+                    "stringDateRegistered": datetime,
+                    "userDescription": "Standard User",
+                    "newUploadUserID": userID,
+                    "userType": 8,
+                    "companyID_userType": companyID + "_8"
                   }
 
                   // Write the new rating data
@@ -610,7 +730,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
               });
             });
-            
+
             /* DO SOMETHING WITH workbook HERE */
           };
           reader.readAsBinaryString(f);
@@ -621,16 +741,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       formatDate(date) {
         var d = new Date(date),
-        month = '' + (d.getMonth() + 1),
-        day = '' + d.getDate(),
-        year = d.getFullYear(),
-        hours = '' + d.getHours(),
-        minutes = '' + d.getMinutes(),
-        seconds = '' + d.getSeconds(),
-        milliseconds = '' + d.getMilliseconds();
+          month = '' + (d.getMonth() + 1),
+          day = '' + d.getDate(),
+          year = d.getFullYear(),
+          hours = '' + d.getHours(),
+          minutes = '' + d.getMinutes(),
+          seconds = '' + d.getSeconds(),
+          milliseconds = '' + d.getMilliseconds();
 
         var today = new Date(),
-        thisYear = today.getFullYear();
+          thisYear = today.getFullYear();
 
         // get week day name Sunday - Saturday
         var dayName = this.getDayMonthStr(d.getDay(), "day", true);
@@ -648,67 +768,68 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         // format thoughts date
         // Monday, 04 December 2017 14:21:56
-        var thoughtDate = dayName+", "+day+" "+monthName+" "+year+" "+hours+":"+minutes+":"+seconds;
+        var thoughtDate = dayName + ", " + day + " " + monthName + " " + year + " " + hours + ":" + minutes + ":" +
+          seconds;
 
         return thoughtDate;
         // return [year, month, day].join('-');
       }
-      getDayMonthStr(val, dateParam, long){
+      getDayMonthStr(val, dateParam, long) {
         // days
-        var days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-        var daysShort = ["Sun","Mon","Tue","Wed","Thur","Fri","Sat"];
+        var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        var daysShort = ["Sun", "Mon", "Tue", "Wed", "Thur", "Fri", "Sat"];
 
         // Months
-        var monthNames = ["January", "February", "March", "April", "May", "June","July", "August", "September","October", "November", "December"];
-        var monthNamesShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun","Jul", "Aug", "Sep","Oct", "Nov", "Dec"];
+        var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September",
+          "October", "November", "December"
+        ];
+        var monthNamesShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-        if(dateParam == "day" && long == true){
+        if (dateParam == "day" && long == true) {
           // return day in long format
           return days[val];
-        }
-        else if(dateParam == "day" && long == false){
+        } else if (dateParam == "day" && long == false) {
           // return days in short
           return daysShort[val];
         }
-        if(dateParam == "month" && long == true){
+        if (dateParam == "month" && long == true) {
           // return month in long format
           return monthNames[val];
-        }
-        else if(dateParam == "month" && long == false){
+        } else if (dateParam == "month" && long == false) {
           // return month in short
           return monthNamesShort[val];
         }
-        
+
       }
-      _profilePhoto(photo){
+      _profilePhoto(photo) {
         let photo_url = "../images/default-user.png";
 
-        if(photo == undefined){
+        if (photo == undefined) {
           photo_url = "../images/default-user.png";
-        }else if(photo == ""){
+        } else if (photo == "") {
           photo_url = "../images/default-user.png";
-        }else{
-          photo_url = ""+photo;
+        } else {
+          photo_url = "" + photo;
         }
 
         return photo_url;
       }
-      addIOSBugfix(){
-				// Get scroll position before moving top
-				scrollTopPosition = $(document).scrollTop();
-				console.log('iOS device')
-				// Add CSS to body "position: fixed"
-				$("body").addClass("iosBugFixCaret");
-				// $("body").css('position: fixed!important; width: 100%!important;');
-			}
+      addIOSBugfix() {
+        // Get scroll position before moving top
+        scrollTopPosition = $(document).scrollTop();
+        console.log('iOS device')
+        // Add CSS to body "position: fixed"
+        $("body").addClass("iosBugFixCaret");
+        // $("body").css('position: fixed!important; width: 100%!important;');
+      }
 
-			removeIOSBugfix(){
-				// Remove CSS to body "position: fixed"
-				$("body").removeClass("iosBugFixCaret");
+      removeIOSBugfix() {
+        // Remove CSS to body "position: fixed"
+        $("body").removeClass("iosBugFixCaret");
 
-				//Go back to initial position in document
-				$(document).scrollTop(scrollTopPosition);
-			}
+        //Go back to initial position in document
+        $(document).scrollTop(scrollTopPosition);
+      }
     }
 
     window.customElements.define(CompanyStaff.is, CompanyStaff);

@@ -16,6 +16,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="follow-button.html">
 <!-- Firebase Auth -->
 <!-- <link rel="import" href="../bower_components/polymerfire/firebase-auth.html"> -->
 
@@ -56,6 +57,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             border-radius: 10px;
             -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
         }
+
+        follow-button{
+            width: -moz-fit-content;
+            width: fit-content;
+        }
         
     </style>
 
@@ -86,12 +92,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </div>
         <ul class="w3-ul w3-card-2 w3-hoverable w3-margin-bottom">
             <!-- <hr> -->
-            <template id="resultList" is="dom-repeat" items="[[mylist]]" as="item" filter="_filter" sort="_sort" observe="dateRegistered">
-                <li class="w3-bar" style="padding: 8px 0; cursor: pointer;" data="[[item]]" on-tap="_previewProfile">
-                <img class="w3-bar-item w3-circle" style="width:42px; height: 42px;" src="[[_profilePhoto(item.photoURL)]]">
-                    <div class="w3-bar-item">
-                        <span class="w3-medium w3-text-blue">[[item.firstName]] [[item.lastName]]</span><br>
-                        <span>[[item.companyName]]</span>
+            <template id="resultList" is="dom-repeat" items="[[mylist]]" as="item" filter="_filter" sort="_sort" observe="dateRegistered" initial-count="10" target-framerate="10">
+                <li class="w3-bar" style="width:auto;cursor: pointer;">
+                    <div class="w3-row" data="[[item]]" on-tap="_previewProfile">
+                        <img class="w3-left w3-circle" style="width:42px; height: 42px;" src="[[_profilePhoto(item.photoURL)]]">
+                        <div class="w3-rest w3-padding-small">
+                            <span class="w3-medium w3-text-blue">[[item.firstName]] [[item.lastName]]</span><br>
+                            <span>[[item.companyName]]</span>
+                        </div>
+                    </div>
+                    <div class="w3-row" style="padding-left: 50px;">
+                        <follow-button on-tap="followUser" data="[[item]]" user="[[user]]" _journaluserid="[[item.key]]" class$="followBTNOther [[_isFollowingStyle(item.key)]]" text="[[isFollowing(item.key)]]"></follow-button>
                     </div>
                 </li>
             </template>
@@ -140,6 +151,136 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             };
         }
 
+        findObjectByKey(array, key, value) {
+            for (var i = 0; i < array.length; i++) {
+                if (array[i][key] === value) {
+                        return array[i];
+                }
+            }
+            return null;
+        }
+        followUser(e){
+            // console.log("clicked ", );
+            let database = firebase.database();
+
+            var data = e.currentTarget.data;
+            var filteredArray = data;
+
+            let following = e.currentTarget.text;
+            let userID = this.user.userID;
+            var that = this;
+            var myPhoto = "";
+
+            let journalUserID = filteredArray.key;
+            let journalUserName = filteredArray.firstName+" "+filteredArray.lastName;
+            var followDate = Date.now();
+
+            if(this.user.photoURL != undefined || this.user.photoURL != ""){
+                myPhoto = this.user.photoURL;
+            }else{
+                myPhoto = "";
+            }
+
+            if(myPhoto == undefined){
+                myPhoto = "";
+            }
+
+            if(following == "Follow"){
+                var name = "following";
+                var arr = e.currentTarget.className.split(" ");
+                
+                if (arr.indexOf(name) == -1) {
+                    e.currentTarget.className += " " + name;
+                    e.currentTarget.text = "Following";
+                }
+
+                var photoURL = this._profilePhoto(filteredArray.photoURL);
+
+                var theirdata = {
+                    "firstName":filteredArray.firstName,
+                    "lastName":filteredArray.lastName,
+                    "companyName":filteredArray.companyName,
+                    "dateRegistered":followDate,
+                    "photoURL":photoURL,
+                    "userID":journalUserID
+                }
+
+                var mydata = {
+                    "firstName":that.user.firstName,
+                    "lastName":that.user.lastName,
+                    "companyName":that.user.companyName,
+                    "dateRegistered": followDate,
+                    "photoURL":myPhoto,
+                    "userID": userID
+                }
+
+                var updates = {}
+                updates["users/"+userID+"/following/"+journalUserID]=theirdata;
+                updates["users/"+journalUserID+"/follower/"+userID]=mydata;
+                updates["followers/"+journalUserID+"/"+userID]=mydata;
+
+                return database.ref().update(updates).then(() =>{
+                    that.refreshFilter();
+                    return console.log("Following");
+                });
+
+            }else{
+                e.currentTarget.className = e.currentTarget.className.replace(/\bfollowing\b/g, "");
+                e.currentTarget.text = "Follow";
+
+                var updates = {}
+                updates["users/"+userID+"/following/"+journalUserID]=null;
+                updates["users/"+journalUserID+"/follower/"+userID]=null;
+                updates["followers/"+journalUserID+"/"+userID]=null;
+
+                return database.ref().update(updates).then(() =>{
+                    that.refreshFilter();
+                    return console.log("Unfollowed");
+                });
+                
+            }
+
+        }
+        isFollowing(journalUserID){
+            if(this.user.following != undefined){
+                if(this.user.following){
+                    let following =  this.user.following;
+                    let isfollowing = following[journalUserID];
+                    
+                    if(isfollowing){
+                        return 'Following';
+                    }else{
+                        return 'Follow';
+                    }
+                
+                }else {
+                    return "Follow";
+                }
+            }else {
+                return "Follow";
+            }
+            
+        }
+
+        _isFollowingStyle(journalUserID){
+            let userID = this.user.userID;
+
+            if(userID === journalUserID){
+                return "w3-hide";
+            }
+            else{
+                if(this.user.following){
+                    let following =  this.user.following;
+                    let isfollowing = following[journalUserID];
+
+                    return isfollowing ? 'following' : '';
+                }
+                else {return "";}
+
+            }
+            
+        }
+
         _usersDataChange(newData, oldData) {
         }
         _sort(a, b) {  
@@ -169,16 +310,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             var followersTab = this.$.followersTab;
             var followingTab = this.$.followingTab;
 
+            
+
             if(this.follow == 'Followers'){
+                console.log("followers: ", this.follow);
                 selectedTab.style = "background-color: #ff5722!important;";
                 followersTab.style = "background-color: #ff5722!important;";
                 followingTab.style = "background-color: #616161!important;";
                 this.mylist = [];
 
                 if(this.user.follower != undefined){
+                    console.log("followers: not undefined refreshing filters");
                     this.mylist = this._toArray(this.user.follower);
                 }
             }else{
+                console.log("following: ", this.follow);
                 selectedTab.style = "background-color: #ff5722!important;";
                 followersTab.style = "background-color: #616161!important;";
                 followingTab.style = "background-color: #ff5722!important;";
@@ -186,6 +332,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 this.mylist = [];
                 
                 if(this.user.following != undefined){
+                    console.log("following: not undefined refreshing filters");
                     this.mylist = this._toArray(this.user.following);
                 }
             }
@@ -199,11 +346,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 return Object.keys(obj).map(function(key) {
                     var retObj = {};
                     retObj = obj[key];
-
+                    
                     if(retObj !== true)
                         retObj.key = key;
 
                     return retObj;
+                    // return obj[key];
                 });
             }
         }

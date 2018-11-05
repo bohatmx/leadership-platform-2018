@@ -14,21 +14,10 @@ module.exports = {
   staticFileGlobs: [
     'index.html',
     'manifest.json',
+    'images/**/*',
+    'data/**/*',
     'firebase-messaging-sw.js',
-    'bower_components/webcomponentsjs/custom-elements-es5-adapter.js',
-    'bower_components/webcomponentsjs/webcomponents-loader.js',
-    'images/manifest/icon-48x48.png',
-    'images/manifest/icon-57x57.png',
-    'images/manifest/icon-72x72.png',
-    'images/manifest/icon-96x96.png',
-    'images/manifest/icon-114x114.png',
-    'images/manifest/icon-144x144.png',
-    'images/manifest/icon-192x192.png',
-    'images/manifest/icon-512x512.png',
-    'images/glp-logo.png',
-    'images/google-plus.png',
-    'images/favicon.ico',
-    'data/jquery.min.js'
+    'bower_components/**/*',
   ],
   navigateFallback: 'index.html',
   navigateFallbackWhitelist: [/^(?!\/__)/],
@@ -41,6 +30,16 @@ module.exports = {
           name: 'webcomponentsjs-polyfills-cache',
         },
       },
+    },
+    {
+      urlPattern: /.*\.(png|jpg|gif|svg)/i,
+      handler: 'fastest',
+      options: {
+        cache: {
+          maxEntries: 200,
+          name: 'data-images-cache'
+        }
+      }
     },
   ],
 };
