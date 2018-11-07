@@ -413,7 +413,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.showSnackBar("Password is required!");
           return;
         }else{
-          // this.checkUserDomain(email);
+          this.checkUserDomain(email);
 
           sessionStorage.setItem("loginError", "");
           sessionStorage.setItem("isError", false);
@@ -600,7 +600,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           return;
         }else{
           // For live servers
-          // this.checkUserDomain(email);
+          this.checkUserDomain(email);
           
           firebase.auth().createUserWithEmailAndPassword(email, password).then(function(user){
             var uid = user.uid;

@@ -220,7 +220,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 updates["followers/"+journalUserID+"/"+userID]=mydata;
 
                 return database.ref().update(updates).then(() =>{
-                    that.refreshFilter();
+                    that._getUpdatedUserData();
+                    // that.refreshFilter();
                     return console.log("Following");
                 });
 
@@ -234,7 +235,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 updates["followers/"+journalUserID+"/"+userID]=null;
 
                 return database.ref().update(updates).then(() =>{
-                    that.refreshFilter();
+                    that._getUpdatedUserData();
                     return console.log("Unfollowed");
                 });
                 
@@ -260,6 +261,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 return "Follow";
             }
             
+        }
+
+        _getUpdatedUserData(){
+            var that = this;
+            let database = firebase.database();
+
+            var userRef = database.ref('users').orderByChild("uid").equalTo(this.user.uid);
+            userRef.on('value', function(snapshot, prevChildKey) {
+                
+                if(snapshot){
+                    snapshot.forEach(function(childSnapshot) {
+                        var childKey = childSnapshot.key;
+                        var childData = childSnapshot.val();
+                        that.user = childData;
+                        that.refreshFilter();
+                    });
+                }
+            });
         }
 
         _isFollowingStyle(journalUserID){
@@ -310,21 +329,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             var followersTab = this.$.followersTab;
             var followingTab = this.$.followingTab;
 
-            
-
             if(this.follow == 'Followers'){
-                console.log("followers: ", this.follow);
                 selectedTab.style = "background-color: #ff5722!important;";
                 followersTab.style = "background-color: #ff5722!important;";
                 followingTab.style = "background-color: #616161!important;";
                 this.mylist = [];
 
                 if(this.user.follower != undefined){
-                    console.log("followers: not undefined refreshing filters");
                     this.mylist = this._toArray(this.user.follower);
                 }
             }else{
-                console.log("following: ", this.follow);
                 selectedTab.style = "background-color: #ff5722!important;";
                 followersTab.style = "background-color: #616161!important;";
                 followingTab.style = "background-color: #ff5722!important;";
@@ -332,7 +346,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 this.mylist = [];
                 
                 if(this.user.following != undefined){
-                    console.log("following: not undefined refreshing filters");
                     this.mylist = this._toArray(this.user.following);
                 }
             }

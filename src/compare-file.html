@@ -8,175 +8,580 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
-<link rel="manifest" href="/manifest.json">
-
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
-
+<link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../bower_components/paper-ripple/paper-ripple.html">
+<link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
+<link rel="import" href="../bower_components/paper-radio-button/paper-radio-button.html">
 
-<link rel="import" href="../bower_components/paper-search/paper-search-bar.html">
-<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
-<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../bower_components/paper-fab-speed-dial/paper-fab-speed-dial.html">
+<link rel="import" href="../bower_components/paper-fab-speed-dial/paper-fab-speed-dial-action.html">
+<link rel="import" href="../bower_components/paper-badge/paper-badge.html">
 
-<!-- iron elements  -->
-<link rel="import" href="../bower_components/paper-styles/shadow.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/iron-iconset/iron-iconset.html">
 
-<link rel="import" href="thought-card-attachments.html">
-<link rel="import" href="comments-box.html">
-<link rel="import" href="app-icons.html">
-<link rel="import" href="shared-styles.html">
-<link rel="import" href="preview-profile.html">
+<link rel="lazy-import" href="daily-thoughts.html">
+<link rel="lazy-import" href="company-thoughts.html">
+<link rel="lazy-import" href="i-lead.html">
+<link rel="lazy-import" href="ldp-companies.html">
+<link rel="lazy-import" href="leadership-thoughts.html">
+<link rel="lazy-import" href="leadership-articles.html">
+<link rel="lazy-import" href="master-class.html">
+<link rel="lazy-import" href="topleader-thoughts.html">
+<link rel="lazy-import" href="leadership-podcasts.html">
+<link rel="lazy-import" href="leadership-videos.html">
+<link rel="lazy-import" href="leadership-ebooks.html">
+<link rel="lazy-import" href="company-profile.html">
+<link rel="lazy-import" href="company-staff.html">
+<link rel="lazy-import" href="thoughts-management.html">
+<link rel="lazy-import" href="read-articles.html">
+<link rel="lazy-import" href="add-thoughts.html">
+<link rel="lazy-import" href="add-article.html">
+<link rel="lazy-import" href="add-podcast.html">
+<link rel="lazy-import" href="add-video.html">
+<link rel="lazy-import" href="add-voicemail.html">
+<link rel="lazy-import" href="not-found.html">
+<link rel="lazy-import" href="sign-in.html">
+<link rel="lazy-import" href="my-pldp.html"> 
+<link rel="lazy-import" href="about-pldp.html"> 
+<link rel="lazy-import" href="user-profile.html">
+<link rel="lazy-import" href="my-followers.html">
+<link rel="lazy-import" href="filtered-thoughts.html">
+<link rel="lazy-import" href="filtered-articles.html">
+<link rel="lazy-import" href="filtered-podcasts.html">
+<link rel="lazy-import" href="filtered-videos.html">
+<link rel="lazy-import" href="sidebar-menus.html">
+<link rel="lazy-import" href="terms-conditions.html">
+<link rel="lazy-import" href="company-analytics.html">
+<link rel="lazy-import" href="welcome-page.html">
 
-<dom-module id="view-articles">
+<link rel="import" href="app-icons.html" async>
+<link rel="import" href="w3-styles.html" async>
+<link rel="import" href="shared-styles.html" async>
+<link rel="lazy-import" href="my-notifications.html" defer>
+
+<dom-module id="my-app">
 	<template>
-		<template is="dom-if" if="[[_companyid]]">
-			<template is="dom-if" if="[[isEqual(thoughtype, 'articles')]]">
-				<template is="dom-if" if="[[mypost]]">
-					<firebase-query
-						id="myarticles"
-						path="/news"
-						order-by-child="journalUserID"
-						equal-to="[[user.userID]]"
-						limit-to-last="{{minData}}"
-						data="{{articlesData}}">
-					</firebase-query>
-				</template>
+		<!-- <firebase-auth id="auth" user="{{user}}" provider="google" status-known="{{statusKnown}}" on-error="handleError">
+		</firebase-auth> -->
+		<style include="shared-styles"></style>
+		<style include="w3-styles">
+			:host {
+				--app-primary-color: #4285f4;
+				--app-theme-color: #fff;
+				/* --app-theme-color: #c3272e; */
+				--app-secondary-color: black;
+				--app-topbar-color: #fff;
+				/* --app-topbar-color: #c3272e; */
+				--app-topbar-text: #ffffff;
+				--app-menu-text: #fff;
+				display: block;
+			}
 
-				<template is="dom-if" if="[[!mypost]]">
-					<firebase-query
-						id="articles"
-						path="/news"
-						order-by-child="companyID_status"
-						equal-to="[[_companyid]]_approved"
-						limit-to-last="{{minData}}"
-						data="{{articlesData}}">
-					</firebase-query>
-	
-					<firebase-query
-						id="articlesG"
-						path="/news"
-						order-by-child="dailyThoughtType_status"
-						equal-to="2_approved"
-						limit-to-last="{{minData}}"
-						data="{{articlesData}}">
-					</firebase-query>
-				</template>
-			</template>
-			<template is="dom-if" if="[[isEqual(thoughtype, 'filteredarticles')]]">
-				<firebase-query
-					id="filteredarticles"
-					path="/news"
-					equal-to="[[filterid]]"
-					data="{{articlesData}}">
-				</firebase-query>
-			</template>
-		</template>
-			<style include="w3-styles"></style>
-			<style include="shared-styles">
-				:host {
-					/* Label and underline color when the input is focused */
-					--paper-input-container-focus-color: #fff;
-					/* Label and underline color when the input is invalid */
-					--paper-input-container-invalid-color: red;
-					/* Input foreground color */
-					--paper-input-container-label:{
-						font-size: 12px;
-						margin-bottom: 4px;
-						color: #757575;
-					};
-					--paper-input-container-input-focus:{
-						font-size: 14px;
-						margin-bottom: 4px;
-						color: var(--app-primary-text);
-					};
+			#main-header{
+				position: fixed;
+				left:280px; top:0px; right:0px;
+				z-index:10;
+				height:50px;
+				background-color: var(--app-theme-color);
+				color: #fff;
+				/* background-image: url(/images/header.png); */
+				background-position: right;
+				background-repeat: no-repeat;
+			}
+
+			#main-header .w3-padding-large{
+				padding: 13px 24px !important;
+			}
+
+			#sidebar{
+				position: fixed;
+				left:0px; top:0px; bottom:0px;
+				z-index:10;
+				width:280px;
+				background-color: #222d32;
+				overflow-y: auto;
+				overflow-x: hidden;
+			}
+
+			#sidebar-menu{
+				display: none;
+			} 
+
+			paper-fab-speed-dial{
+				bottom: 0px;
+				right: 12px;
+				position: fixed;
+			}
+
+			paper-fab-speed-dial-action{
+				cursor: pointer;
+			}
+
+			paper-fab-speed-dial-action .flex .label{
+				background-color: #0b908b;
+				color:#fff;
+				box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+			}
+
+			iron-selector a{
+				text-decoration: none;
+				display: block;
+				padding:7px 5px;
+				position: relative;
+			}
+
+			.a-border-top{
+				border-top: 1px solid rgba(255,255,255, 0.05);
+			}
+
+			iron-selector a .sb-link-icon, iron-selector a .sb-link-text{
+				color:#fff;
+			}
+
+			iron-selector a .sb-link-text{
+				padding: 10px 10px;
+				font-size: 10pt;
+			}
+
+			iron-selector a:hover{
+				background-color: rgba(255,255,255,0.05);
+			}
+
+			iron-selector a iron-icon{
+				color:#fff;
+			}
+
+			#main-content{
+				min-height:100vh;
+				margin-left:280px;
+				padding:15px;
+				margin-top: 50px;
+			}
+
+			.user-pic{
+				width:60px;
+				height:60px;
+				border:4px solid var(--app-theme-color);
+			}
+
+			.user-pic:hover{
+				cursor: pointer;
+				border:4px solid var(--app-theme-color);
+			}
+
+			paper-button.fancy:hover {
+				background: var(--app-theme-color);
+			}
+
+			.user-name{
+				padding-top:17px !important;
+				font-size:12px;
+			}
+
+			.user-email{
+				padding-top:3px;
+			}
+
+			.w3-padding-tiny{
+				padding:2px;
+			}
+
+			.w3-relative{
+				position: relative;
+			}
+
+			#user-identity{
+				position: relative;
+				z-index: 10;
+				margin-top: -28px;
+			}
+
+			#mobile-logo{
+				display: none;
+			}
+			.mobilelogo{
+				/* height: 50px; */
+				/* width: 192px; */
+				height: 74px;
+				background-position: center;
+				background-size: contain;
+				background-repeat: no-repeat;
+			}
+			.oneconnectlogo{
+				height: 45px;
+				background-position: center;
+				background-size: contain;
+				background-repeat: no-repeat;
+			}
+
+			@media (max-width: 780px){
+				#sidebar{
+					display:none;
+					position: fixed;
+					z-index: 999;
+					left:0px;
 				}
-				.rate-color-post {
-					--rating-icon-color: var(--app-primary-color);
-					--rating-ink-color: var(--app-primary-color);
+
+				#main-header{
+					left: 0px;
+					height: 81px;
+					background-color: var(--app-topbar-color);
+					color: var(--app-topbar-text);
 				}
-				.rate-color {
-					--rating-icon-color: #9e9e9e;
-					--rating-ink-color: #9e9e9e;
+
+				#main-content{
+					margin-left: 0px;
+					padding:10px;
+					margin-top: 81px !important;
 				}
-				.thought-card{
-					display: flex;
-					flex-direction: row;
+
+				#sidebar-menu{
+					display: unset;
 				}
-				.comments-box{
-					display: -webkit-flex;
-					display: flex;
-					padding: 10px 16px;
+
+				#mobile-logo{
+					display: block;
 				}
-				.comments-info{
-					display: -webkit-flex;
-					display: flex;
-					flex-direction: column;
-					max-width: 80%;
+
+				#close-side-bar{
+					display: block;
 				}
-				.comment-details{
-					display: -webkit-flex;
-					display: flex;
-					flex-direction: row;
-					margin-bottom: 6px;
+			}
+
+			.sub-price{
+				cursor: pointer;
+			}
+
+			.w3-bolded{
+				font-weight: 700;	
+			}
+
+			.w3-editable{
+				position: relative;
+			}
+
+			.w3-editable .editable{
+				opacity: 0.95;
+				position: absolute; 
+				cursor: pointer;
+				top: 12px;
+				text-align: center;
+				right: 0px;
+				background-color: var(--app-theme-color);
+				border-radius:50%;
+			}
+
+			.w3-editable:hover .editable{
+				opacity: 1;
+			}
+
+			.pricing-holder .w3-container-fluid .w3-row:nth-child(even){
+				background-color: rgba(0,0,0,0.06);
+			}
+
+			@media(min-width: 780px){
+				#sidebar{
+					display:block;
 				}
-				.comment-author{
-					margin-right: 16px;
-					color: var(--app-primary-color);
+
+				#close-side-bar{
+					display: none;
 				}
-				.pageComments{
-					padding: 0 8px;
-					background-color: #f7f7f7;
+			}
+			
+			@media(max-width: 359px){
+				.mobilelogo{
+					height: 74px;
+					background-position: center;
+					background-size: contain;
+					background-repeat: no-repeat;
 				}
-				.comment-date{
-					color: #9e9e9e !important;
+				.oneconnectlogo{
+					height: 45px;
+					background-position: center;
+					background-size: contain;
+					background-repeat: no-repeat;
 				}
-				.comment-msg{
-				 color: var(--app-primary-text);
+			}
+
+			@media(max-width: 320px){
+				.mobilelogo{
+					height: 70px;
+					background-position: center;
+					background-size: contain;
+					background-repeat: no-repeat;
 				}
-				.comment-input{
-					background-color: #ffffff;
-					padding: 0 16px;
-					border-radius: 2px;
+				.oneconnectlogo{
+					height: 45px;
+					background-position: center;
+					background-size: contain;
+					background-repeat: no-repeat;
 				}
-				.comment-area{
-					display: flex;
-					flex-direction: row;
-					padding-bottom: 10px;
-					padding-top: 10px;
+			}
+
+			@media(max-width: 300px){
+				.mobilelogo{
+					height: 64px;
+					background-position: center;
+					background-size: contain;
+					background-repeat: no-repeat;
 				}
-				.comment-input{
-					flex-grow: 8;
-					margin-left: -10px;
+				.oneconnectlogo{
+					height: 45px;
+					background-position: center;
+					background-size: contain;
+					background-repeat: no-repeat;
 				}
-				.comment-btn{
-					margin: 10px;
-					color: var(--app-primary-color);
-				}
-				@media screen and (max-width: 900px) {
-					.main-card{
-						margin: 0px;
-					}
-				}
-				.pldp-link{
-					text-decoration: none;
-					text-transform: uppercase;
-					text-align: -webkit-center;
-					display: flex;
-					align-items: center;
-					color: var(--paper-dialog-button-color, var(--primary-color));
-					-webkit-user-select: none;
-					user-select: none;
-					padding: 0 8px 0 2px;
-				}
-			</style>
-		<div id="media"></div>
-		<!-- <div class="container search-bar" hidden="[[isEqual(thoughtype, 'filteredarticles')]]">
-				<paper-search-bar hide-filter-button="true" placeholder="[[placeholder]]"></paper-search-bar>
-		</div> -->
-		
+			}
+			iron-image{
+				width: 100%;
+				height: 100px;
+			}
+			.ldp-logo{
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+				justify-content: center;
+			}
+
+		</style>
+
+		<app-location
+			route="{{route}}"
+			url-space-regex="^[[rootPath]]">
+		</app-location>
+
+		<app-route
+			route="{{route}}"
+			pattern="[[rootPath]]:page"
+			data="{{routeData}}"
+			tail="{{subroute}}">
+		</app-route>
+
+	<iron-pages selected="{{currentpage}}" attr-for-selected="pages-name">
+		<div pages-name="mainapp">
+			<div class="w3-row" fullbleed>
+					<div class="w3-animate-left w3-display-container" id="sidebar">
+						<span class="w3-display-topright w3-padding-small w3-text-grey" on-click="_sideBarClose" id="close-side-bar">
+							<paper-ripple></paper-ripple>
+							<iron-icon icon="smapp:arrow-back"></iron-icon>
+						</span>
+						<div class="w3-padding-small" style="height:160px; background-color:#fff;
+						flex-direction: column;justify-content: center;align-items: center;">
+						<a href=".">
+							<img src$="{{companyLogo}}" style="width: 100%" class="w3-padding-top w3-margin-top">
+						</a>
+						</div>
+						<div id="user-identity" class="w3-text-white">
+							<div class="w3-row w3-padding-top">
+								<div class="w3-left w3-padding-small w3-editable" on-tap="_openUserProfile">
+									<img src$="{{_photo(_user.photoURL)}}" class="user-pic w3-circle" />
+									<div class="editable">
+										<iron-icon icon="smapp:create"></iron-icon>
+									</div>
+								</div>
+								<div class="w3-margin-top w3-padding-small w3-rest">
+									<div class="user-name w3-medium" style="color: #fff;">{{fullName}}</div>
+								</div>
+							</div>
+							<div class="w3-row w3-padding w3-sb-title follow w3-hover-dark-grey" style="position:relative;">
+								<div id="openFollowers" class="w3-col s6 w3-center" on-tap="_openModal" data="my-followers" style="position:relative; cursor: pointer;">
+									<span class="w3-badge w3-small w3-light-grey">{{no_followers}}</span> Followers
+								</div>
+								<div id="openFollowing" class="w3-col s6 w3-center" on-tap="_openModal" data="my-followers" style="cursor: pointer;">
+									<span class="w3-badge w3-small w3-light-grey">{{no_following}}</span> Following
+								</div>
+								<paper-ripple></paper-ripple>
+							</div>
+						</div>
+						<sidebar-menus id="sidebarMenu" hidecompany="[[hidecompany]]" notcompanyadmin="[[notcompanyadmin]]" pendingstring="{{pending_string}}" leadershipapp="[[leadershipapp]]" publicapp="[[publicapp]]" salesapp="[[salesapp]]" hrapp="[[hrapp]]" on-tap="_sideBarClicked"></sidebar-menus>
+						<div class="w3-row w3-padding w3-small w3-sb-title w3-sb-title-text">MORE ON GLP</div>
+						<div class="w3-text-white">
+							<div class="w3-row w3-padding-small w3-left">
+								<paper-button class="fancy" style="width: 92%;font-size: 10px;" on-tap="_openWelcomePage">
+									<iron-icon icon="smapp:help-outline"></iron-icon>
+									GLP Tutorials</paper-button>
+							</div>
+						</div>
+						<div class="w3-text-white">
+							<div class="w3-row w3-padding-small w3-left">
+								<paper-button class="fancy" style="width: 92%;font-size: 10px;" on-tap="loadTerms">
+									<!-- <iron-icon icon="smapp:help-outline"></iron-icon> -->
+									Terms and Conditions</paper-button>
+							</div>
+						</div>
+						<div class="w3-text-white">
+							<div class="w3-row w3-padding-small">
+								<a on-tap="logout" href="[[rootPath]]" style="display: block; text-decoration: none; width:100%" class="w3-left a-border-top">
+									<paper-button class="w3-text-light-grey w3-hover-deep-orange w3-center" style="min-width:92% !important">
+										<iron-icon icon="smapp:input"></iron-icon>
+										Sign Out
+									</paper-button>
+								</a>
+							</div>
+						</div>
+						<!-- <br>
+						<div class="w3-row w3-text-white a-border-top" style="padding-bottom: 20px;">
+							<paper-button class="fancy w3-padding-small" style="width: 100%;font-size: 10px;" on-tap="loadTerms">Terms and Conditions</paper-button>
+						</div> -->
+					</div>
+					<div class="w3-rest" id="main-content" on-click="_closeSidebarFromBody">
+						<div class="w3-row" id="main-header">
+							<div data="send-feedback" class="w3-padding-small w3-right w3-relative" on-click="_openFeedbackModal">
+								<paper-ripple></paper-ripple>
+								<iron-icon icon="app:message"></iron-icon>
+								<span class="w3-hide-small">Feedback</span>
+							</div>
+							<div id="open-notifications" data="my-notifications" class="w3-padding-small w3-right w3-relative" on-click="_openModal">
+								<paper-ripple></paper-ripple>
+								<iron-icon on-click="_openModal" data="my-notifications" id="notificationIcon" icon="app:notifications"></iron-icon>
+								<div class="w3-new-badge nt"
+									style="left:22px!important; top:2px!important; z-index:222; position:absolute;background-color: #0085a5;">
+									{{unreadstring}}
+								</div>
+								<span class="w3-padding-small w3-hide-small">Notifications</span>
+							</div>
+							<div class="w3-padding-small w3-left w3-relative w3-relative" id="sidebar-menu" on-click="_sideBarOpen" style="z-index: 999;">
+								<paper-ripple></paper-ripple>
+								<iron-icon icon="app:menu"></iron-icon>
+							</div>
+							<div class="w3-padding-small w3-center" id="mobile-logo" style="background-color: #ffffff;">
+								<!-- OneConnect -->
+								<template is="dom-if" if="[[isEqual(_companyid, '-LDVbbRyIMhukVtTVQ0n')]]">
+									<a href="."><img class="oneconnectlogo" src$="{{companyLogo}}"></a>
+								</template>
+								<!-- Global Leadership Platform - Corporate -->
+								<template is="dom-if" if="[[isEqual(_companyid, '-KgsUcgfo7z1U9MXgd9i')]]">
+									<a href="."><div style="background-image: url('{{companyLogo}}');" class="mobilelogo"></div></a>
+								</template>
+								<!-- Global Leadership Platform - Public -->
+								<template is="dom-if" if="[[isEqual(_companyid, '-LEiZPT-C2PyLu_YLKNU')]]">
+									<a href="."><div style="background-image: url('{{companyLogo}}');" class="mobilelogo"></div></a>
+								</template>
+								<!-- Other Companies -->
+								<template is="dom-if" if="[[isEqual(_companyid, '12345')]]">
+									<a href="."><img class="oneconnectlogo" src$="{{companyLogo}}"></a>
+								</template>
+								
+							</div>
+						</div>
+						<iron-pages
+								selected="{{page}}"
+								attr-for-selected="name"
+								fallback-selection="not-found"
+								role="main">
+							<company-thoughts name="company-thoughts" _companyid="[[_companyid]]" user="[[_user]]"></company-thoughts>
+							<i-lead name="i-lead" _companyid="[[_publicid]]" user="[[_user]]"></i-lead>
+							<daily-thoughts name="daily-thoughts" _companyid="[[_companyid]]" user="[[_user]]"></daily-thoughts>
+							<leadership-thoughts company="[[company]]" name="leadership-thoughts" _companyid="[[_companyid]]" user="[[_user]]"></leadership-thoughts>
+							<leadership-articles name="leadership-articles" _companyid="[[_companyid]]" user="[[_user]]"></leadership-articles>
+							<ldp-companies name="ldp-companies" user="[[_user]]"></ldp-companies>
+							<topleader-thoughts name="topleader-thoughts" _companyid="[[_companyid]]" user="[[_user]]"></topleader-thoughts>
+							<leadership-podcasts name="leadership-podcasts" _companyid="[[_companyid]]" user="[[_user]]"></leadership-podcasts>
+							<leadership-videos name="leadership-videos" _companyid="[[_companyid]]" user="[[_user]]"></leadership-videos>
+							<leadership-ebooks name="leadership-ebooks" _companyid="[[_companyid]]" user="[[_user]]"></leadership-ebooks>
+							<company-profile name="company-profile" _companyid="[[_companyid]]" user="[[_user]]"></company-profile>
+							<company-staff name="company-staff" _companyid="[[_companyid]]" user="[[_user]]"></company-staff>
+							<thoughts-management name="thoughts-management" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]"></thoughts-management>
+							<my-pldp name="my-pldp" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]"></my-pldp>
+							<about-pldp name="about-pldp" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]"></about-pldp>
+							<add-thoughts name="add-thoughts" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]" addedit="[[addedit]]" company="[[company]]"></add-thoughts>
+							<add-article name="add-article" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]"></add-article>
+							<read-articles name="read-articles" _companyid="[[_companyid]]" user="[[_user]]" author="[[bookAuthor]]" title="[[bookTitle]]" body="[[bookBody]]" photo="[[bookPhoto]]"></read-articles>
+							<add-podcast name="add-podcast" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]"></add-podcast>
+							<add-video name="add-video" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]"></add-video>
+							<add-voicemail name="add-voicemail" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]"></add-voicemail>
+							<filtered-thoughts name="filtered-thoughts" _companyid="[[_companyid]]" user="[[_user]]"></filtered-thoughts>
+							<filtered-articles name="filtered-articles" _companyid="[[_companyid]]" user="[[_user]]"></filtered-articles>
+							<filtered-podcasts name="filtered-podcasts" _companyid="[[_companyid]]" user="[[_user]]"></filtered-podcasts>
+							<filtered-videos name="filtered-videos" _companyid="[[_companyid]]" user="[[_user]]"></filtered-videos>
+							<company-analytics name="company-analytics" logo="{{companyLogo}}" _companyid="[[_companyid]]" user="[[_user]]"></company-analytics>
+						</iron-pages>
+						
+					</div>
+			</div>
+		</div>
+		<div pages-name="terms">
+			<terms-conditions currentpage="{{currentpage}}"></terms-conditions>
+		</div>
+	</iron-pages>
+	<!-- hidden$="[[hidemenu]]" -->
+		<paper-fab-speed-dial id="paperSpeed" with-backdrop style="z-index: 200" hidden$="[[hidemenu]]">
+			<paper-fab-speed-dial-action id="fabthoughts" icon="app:message" on-tap="_loadElement1" indexed="add-thoughts" caption="Add Thought">Thought</paper-fab-speed-dial-action>
+			<paper-fab-speed-dial-action id="fabarticles" icon="app:remove-red-eye" on-tap="_loadElement1" indexed="add-article" caption="Add Article" hidden$="[[hidesubmenu]]">Article</paper-fab-speed-dial-action>
+			<paper-fab-speed-dial-action id="fabvoicemail" icon="app:record-voice-over" on-tap="_loadElement1" indexed="add-voicemail" caption="Add Voicemail" hidden$="[[hidesubmenu]]">Voicemail</paper-fab-speed-dial-action>
+			<paper-fab-speed-dial-action id="fabpodcast" icon="app:mic" on-tap="_loadElement1" indexed="add-podcast" caption="Add Podcast" hidden$="[[hidesubmenu]]">Podcast</paper-fab-speed-dial-action>
+			<paper-fab-speed-dial-action id="fabvideo" icon="app:videocam" on-tap="_loadElement1" indexed="add-video" caption="Add Video" hidden$="[[hidesubmenu]]">Video</paper-fab-speed-dial-action>
+		</paper-fab-speed-dial>
+		<div id="send-feedback" class="w3-modal w3-animate-zoom">
+			<div class="w3-modal-content w3-round max-modal-width" >
+				<div class="w3-container">
+					<span id="close-feedback" data="send-feedback" on-click="_closeModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white">&times;</span>
+					<div class="w3-large" style="padding:20px 15px">
+						<b class="w3-text-blue"><iron-icon icon="app:message"></iron-icon> Send us Feedback</b>
+					</div>
+					<div class="w3-row">
+						<div class="w3-row w3-padding"><label id="labelFeedback" class="w3-medium w3-text-grey">Feedback Category:</label></div>
+						<paper-radio-group id="feedbackCategory" name="feedbackCategory" selected="" allow-empty-selection>
+							<paper-radio-button id="Feedback" name="Feedback">Feedback</paper-radio-button>
+							<paper-radio-button id="Defect" name="Defect">Report Defect</paper-radio-button>
+						</paper-radio-group>
+					</div>
+					<div class="w3-row w3-padding">
+						<paper-input id="feedbackSubject" label="Subject" auto-validate></paper-input>
+					</div>
+					<div class="w3-row w3-padding">
+						<paper-textarea id="feedbackMessage" rows="2" multiple label="Feedback" auto-validate></paper-textarea>
+					</div>
+					<div class="w3-row w3-padding-large">
+						<div class="w3-twothird"><paper-button raised class="w3-blue" on-tap="sendFeedback">
+							<iron-icon icon="app:send"></iron-icon>&nbsp;Send Feedback</paper-button>
+						</div>
+						<div class="w3-third"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="my-notifications" class="ldp-modal w3-animate-zoom">
+			<div class="ldp-modal-content w3-round max-modal-width">
+				<div class="w3-container">
+					<span id="closeNotifications" data="my-notifications" on-click="_closeNotificationsModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white">&times;</span>
+					<div class="w3-large" style="padding:20px 15px">
+						<b class="w3-text-blue w3-center"><iron-icon icon="app:notifications"></iron-icon>&nbsp;Notifications</b>
+					</div>
+					<div class="w3-row">
+						<my-notifications unreadstring="{{unreadstring}}" userid="[[_userID]]" rootpath=[[rootPath]] listclicked="{{listclicked}}"></my-notifications>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="my-followers" class="ldp-modal w3-animate-zoom">
+			<div class="ldp-modal-content w3-round max-modal-width">
+				<div>
+					<span id="close-followers" data="my-followers" on-click="_closeModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white">&times;</span>
+					<div class="w3-row">
+						<my-followers follow="{{follow}}" user="[[_user]]"></my-followers>
+					</div>
+					
+				</div>
+			</div>
+		</div>
 		<div id="add-items" class="w3-modal w3-animate-zoom padding-modal-top">
 			<div class="w3-modal-content w3-round max-modal-width">
 				<div class="w3-container">
@@ -184,607 +589,930 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					<div class="w3-large" style="padding:20px 15px">
 						<b class="w3-text-blue"><h3>[[itemName]]</h3></b>
 					</div>
-					<div id="item-holder" class="w3-row w3-padding w3-border w3-round-small w3-margin-bottom">
-					</div>
+					<div id="item-holder" class="w3-row w3-padding w3-border w3-round-small w3-margin-bottom"></div>
 				</div>
 			</div>
 		</div>
-
-		<div id="preview-profile" class="ldp-modal w3-animate-zoom">
-			<div class="ldp-modal-content w3-round max-modal-width">
-				<div>
-					<span id="close-followers" data="preview-profile" on-click="_closeProfileModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white" style="z-index: 999;">&times;</span>
-					<div class="w3-row">
-						<preview-profile _userid="{{_userid}}" userobj="{{userobj}}"></preview-profile>
-					</div>
+		<div id="snackbar"></div>
+		<div class="ldp-modal" id="userProfile">
+			<div class="ldp-modal-content" style="max-width:700px">
+				<span id="spancloseUserProfile" on-click="_closeUserProfile" class="w3-button w3-display-topright w3-medium w3-red w3-text-white ldp-modal-close">&times;</span>
+				<user-profile name="user-profile" _companyid="[[_companyid]]" user="[[_user]]" photo="[[photo]]"></user-profile>
+			</div>
+		</div>
+		<div class="ldp-modal w3-animate-zoom" id="welcomePage">
+			<div class="ldp-modal-content w3-round-small max-modal-width">
+				<span id="spancloseWelcomePage" on-click="_closeWelcomePage" class="w3-button w3-display-topright w3-medium w3-red w3-text-white ldp-modal-close" style="z-index:99;">&times;</span>
+				<div class="w3-row w3-round-small">
+					<welcome-page></welcome-page>
 				</div>
 			</div>
 		</div>
-	
-		<section class="thought-card" id="thoughts-Holder">
-			<div class="spinner" style="position: fixed;">
-				<paper-spinner active="{{isloading}}"></paper-spinner>
-				<div style="width: 100%; padding-top: 10px;" class="w3-row w3-center" id="spinnerMessage">
-				   <template is="dom-if" if="{{ !isloading }}">
-					<img hidden="{{!noIdea}}"src="https://png.icons8.com/material/200/666666/no-idea.png">
-				   </template>
-					<h4> {{loadingmessage}}</h4> 
-				
-				</div>
-			</div>
-			
-			<div class="main-card" style="width:100%;">
-				<template id="articlesList" is="dom-repeat" items="[[articlesData]]" as="item" sort="_sort" observe="dateScheduled">
-					<div class="modal-div w3-animate-zoom">
-						<div class="card-container fadeInUp">
-								<span class="w3-button w3-red w3-display-topright w3-medium w3-hide closer-for-modal" style="z-index:9999999;right:0; width: 22px; height: 25px;">&times;</span>
-							<div class="container card-header w3-row">
-								<div class="card-avatar w3-left" style$="[[_profilePhoto(item.photoURL)]] cursor: pointer;" data$="[[_setProfileInfo(item.journalUserName, item.journalUserID, item.companyName, item.companyID, item.photoURL)]]" on-tap="_previewProfile"></div>
-								<div class="container card-company-container">
-									<div class="row card-postedby w3-medium">
-										<div>[[item.journalUserName]]</div>
-										<paper-button on-tap="followUser" data="[[item.newsID]]" 
-											class$="followBTN [[isFollowingStyle(item.journalUserID)]]">[[isFollowing(item.journalUserID)]]</paper-button>
-									</div>
-									<div class="row card-company">[[item.companyName]]</div>
-								</div>
-								<div class="thought-date">
-									[[_formate_date(item.dateScheduled)]]
-								</div>
-								
-								<template is="dom-if" if="[[isEqual(item.journalUserID, user.userID)]]">
-									<div class="w3-dropdown-hover w3-display-topright" style="cursor:pointer;">
-										<iron-icon data="delSettings" on-tap="_openButtonModal" icon="myicons:settings" style="padding:8px!important;"></iron-icon>
-										<div id="delSettings" class="w3-dropdown-content w3-bar-block w3-card-4" style="z-index:999;right:0;">
-											<ul class="w3-ul w3-hoverable" style="cursor:pointer;">
-												<li indexed="add-article" caption="Edit Article" on-tap="_loadElement1" id="edit[[item.dateRegistered]]" data="[[item.newsID]]" class="w3-text-dark-grey">
-													<paper-icon-button icon="create"></paper-icon-button>
-													&nbsp;Edit
-												</li>
-												<li class="w3-text-red" on-tap="_deleteArticle" id="del[[item.dateRegistered]]" data="[[item.newsID]]">
-													<paper-icon-button icon="delete"></paper-icon-button>
-													&nbsp;Delete
-												</li>
-											</ul>
-										</div>
-									</div>
-								</template>
-							</div>
-						
-							<div class="container">
-								<div class="row"><!-- No empty text node--><a href="[[articleLink(item.manualOrExternal, item.articleLink)]]" target="[[targetLink(item.manualOrExternal)]]" name="name" style="text-decoration: none;">
-									<div id="article[[item.dateRegistered]]" class="thought-img" style$="[[_photo(item.photos)]]" on-click="_openArticle" onmouseover="" data="[[_setArticleData(item.subtitle, item.title, item.body, item.photos)]]" itemid="[[item.newsID]]" >
-									<div class="w3-row" hidden$="[[_imageNotFound(item.photos)]]">
-										<div id="title[[item.dailyThoughtID]]" on-tap="_openItemModal" data="[[item.dailyThoughtID]]" class="thought-title">
-											[[item.title]]
-										</div>
-										<div id="subtitle[[item.dailyThoughtID]]" data="[[item.dailyThoughtID]]" on-tap="_openItemModal" class="thought-author">
-											[[item.subtitle]]
-										</div>
-									</div>
-									</div></a><!-- No empty text node-->
-								</div>
-							</div>
-							<!-- hidden$="[[!_imageNotFound(item.photos)]]" -->
-							<div class="horizontal justified w3-padding-small"><!-- No empty text node-->
-								<div class="w3-row"><a id="article1[[item.dateRegistered]]" href="[[articleLink(item.manualOrExternal, item.articleLink)]]" target="[[targetLink(item.manualOrExternal)]]" name="name" style="text-decoration: none;" class="article-title" on-click="_openArticle" data="[[_setArticleData(item.subtitle, item.title, item.body, item.photos)]]" itemid="[[item.newsID]]">[[item.title]]</a><!-- No empty text node--></div>
-								<div class="w3-row"><a id="article2[[item.dateRegistered]]" href="[[articleLink(item.manualOrExternal, item.articleLink)]]" target="[[targetLink(item.manualOrExternal)]]" name="name" style="text-decoration: none;" class="article-author" on-click="_openArticle" data="[[_setArticleData(item.subtitle, item.title, item.body, item.photos)]]" itemid="[[item.newsID]]">[[item.subtitle]]</a><!-- No empty text node--></div>
-							</div>
-							<thought-card-attachments itemid="[[item.newsID]]" item="[[item]]" user="[[user]]" thetype="news" thoughtype="[[thoughtype]]"></thought-card-attachments>
-							<comments-box user="[[user]]" firebaseref="news" item="[[item]]" thetype="Article" entityid="[[item.newsID]]"></comments-box>
+		<div class="ldp-modal w3-animate-zoom" id="firstPage">
+			<div class="ldp-modal-content w3-round-large" style="max-width:400px">
+				<div class="w3-row w3-padding">
+					<div class="w3-xlarge w3-border-bottom w3-padding">
+						<b class="w3-text-dark-grey">Welcome to GLP</b>
+					</div>
+					<div class="ldp-logo w3-margin-top">
+						<iron-image src="../images/glp-logo.png" preload sizing="contain"></iron-image>
+					</div>
+					<br>
+					<div class="modal-list w3-padding w3-margin-bottom">
+						<div class="w3-row w3-medium">
+							<span>Learn more about the platform, it’s purpose and how the various functions work...</span>
 						</div>
 					</div>
-				</template>
-
-				<div class="w3-row w3-center" style="width: 100%" hidden="[[isEqual(thoughtype, 'filteredarticles')]]">
-					<div class="w3-row w3-text-green" style="width: 100%"><paper-button hidden="{{loadmore}}" on-tap="_loadMorePosts">Read More Articles</paper-button></div>
-					<div class="w3-row" style="width: 100%">					
-						<paper-spinner active="{{isloadingmore}}"></paper-spinner>
+					<div class="modal-list w3-padding w3-light-grey w3-text-white">
+						<div class="w3-row w3-medium">
+							<paper-button class="w3-green" on-tap="_openWelcomePage">PROCEED</paper-button>
+							<paper-button class="w3-red" on-tap="_closeFirstPage">NOT NOW</paper-button>
+						</div>
 					</div>
 				</div>
-
-				<paper-dialog id="deleteDialog" hidden="[[isloading]]">
-					<paper-icon-button icon="myicons:cancel" class="red"></paper-icon-button><h3 id="discardTitle">Discard Article?</h3>
-					<hr>
-						<p id="thoughtTitle" class="thought-rate-title"></p>
-						<p id="thoughtAuthor" class="thought-rate-title paper-font-caption"></p>
-					<hr>
-					<div class="buttons">
-						<paper-button dialog-dismiss>CANCEL</paper-button>
-						<paper-button on-tap="deleteArticle">DISCARD</paper-button>
-					</div>
-				</paper-dialog>
+				
 			</div>
-		</section>
+		</div>
 
-		
-
-		<div id="snackbar"></div>
+		<template is="dom-if" if="[[_companyid]]">
+			<firebase-query
+				id="qrycompany"
+				path="/companies"
+				order-by-child="companyID"
+				equal-to="[[_companyid]]"
+				data="{{companyData}}">
+			</firebase-query>
+		</template>
 	</template>
 
 	<script>
-		class ViewArticles extends Polymer.Element {
-			static get is() { return 'view-articles'; }
+		var _platform, _guid;
+		var nav = window.navigator;
+		var _ua = window.navigator.userAgent;
+		var scrollTopPosition
+		iOS = /iPad|iPhone|iPod/.test(_ua),
+		iOS11 = /OS 11_0|OS 11_1|OS 11_2|OS 11_3/.test(_ua);
+
+		var guid = function() {
+			var screen = window.screen;
+			var guid = nav.mimeTypes.length;
+			guid += nav.userAgent.replace(/\D+/g, '');
+			guid += nav.plugins.length;
+			guid += screen.height || '';
+			guid += screen.width || '';
+			guid += screen.pixelDepth || '';
+
+			return guid;
+		};
+
+		var plat = function() {
+			var plat = 'undefined';
+
+			if((/iphone|ipod|ipad/i).test(_ua) && (nav.platform.match(/iPhone|iPod|iPad/i))) plat = 'iOS';
+			if((/macintosh/i).test(_ua) && (nav.platform.match(/MacIntel/i))) plat = 'MacOS';
+			if((/android/i).test(_ua) && (nav.platform.match(/Linux/i))) plat = 'Android';
+			if((/windows nt/i).test(_ua) && (nav.platform.match(/Win32/i))) plat = 'Windows';
+			if((/windows nt/i).test(_ua) && (nav.platform.match(/Win64/i))) plat = 'Windows';
+			if((/windows phone/i).test(_ua)) plat = 'WindowsPhone';
+
+			if(nav.platform.match(/Win32/i)) plat = 'Windows';
+			else if(nav.platform.match(/Win64/i)) plat = 'Windows';
+			else if(nav.platform.match(/MacIntel/i)) plat = 'MacOS';
+			else if(nav.platform.match(/iPhone|iPod|iPad/i)) plat = 'iOS';
+			else if(nav.platform.match(/blackberry/i)) plat = 'BlackBerry';
+
+			return plat;
+		};
+
+		_guid = guid();
+		_platform = plat();
+
+		class MyApp extends Polymer.Element {
+			static get is() { return 'my-app'; }
+
 			ready(){
 				super.ready();
-				var that = this;
-				// window.onscroll = function() {
-				// 	var pageHeight=document.documentElement.offsetHeight,
-				// 	windowHeight=window.innerHeight,
-				// 	scrollPosition=window.scrollY || window.pageYOffset || document.body.scrollTop + (document.documentElement && document.documentElement.scrollTop || 0);
-				// 	if (pageHeight <= windowHeight+scrollPosition) {
-				// 		that.minData += 6;
-				// 	}
-				// };
+
+				Polymer.RenderStatus.afterNextRender(this, () => {
+					var a = Polymer.dom(this.root).querySelectorAll('.drawer-list');
+					var that = this;
+					
+					var closer = Polymer.dom(this.root).querySelector('#close-side-bar');
+
+					setTimeout(function(){
+						$(a).on('click', 'a.w3-row', function(){
+							parent.location.hash = '#';
+							if($(closer).is(':visible')){
+								that._sideBarClose();
+							}
+						})
+					 }, 500);
+
+					//  set company id
+					 var _companyID = localStorage.getItem('_companyID')
+					 this._companyid = _companyID;
+
+					this._setCompanyTypeSidebar();
+					this._setAccountDefaults();
+
+					// this.loadPage('app-icons');
+					// this.loadPage('w3-styles');
+					this.loadPage('sidebar-menus');
+					// this.loadPage('my-notifications');
+				});
+				
 			}
+
 			static get properties() {
 				return {
-					user: {
-						type: Object
+					page: {
+						type: String,
+						reflectToAttribute: true,
+						observer: '_pageChanged',
+						notify: true
 					},
-					minData: {
+					unreadstring: {
+						type: String,
+						value: "0",
+						notify: true
+					},
+					pending_string: {
+						type: String,
+						value: "",
+						notify: true
+					},
+					no_followers:{
 						type: Number,
-						value: 6
+						value: 0,
+						notify: true
 					},
-					scrollPos:{
+					no_following:{
 						type: Number,
-						value: 0
+						value: 0,
+						notify: true
 					},
-					_userid: {
+					seen:{type: Boolean, value: false},
+					routeData: Object,
+					subroute: String,
+					// This shouldn't be neccessary, but the Analyzer isn't picking up
+					// Polymer.Element#rootPath
+					rootPath: {
 						type: String,
 						notify: true
 					},
-					filterid:{
-						type:String,
-						notify:true
+					_selected: {
+						type: Number,
+						value: 0,
+						notify: true
 					},
-					company:{
+					statusKnown: {
 						type: Object
 					},
-					articlesData: {
+					company: {
+						type: Object
+					},
+					_companyPhoto: {
+						type: Object
+					},
+					companyData: {
 						type: Object,
-						observer: '_onarticlesDataReceived'
+						observer: '_onCompanyDataReceived'
 					},
-					commentsData: {
+					companyPhotos:{
 						type: Object,
-						observer: '_oncommentsData'
+						observer: '_onCompanyPhotoChange'
 					},
-					_companyid: String,
-					thoughtype: String,
-					placeholder: String,
-					_selected: String,
-					_selectedComRate: String,
-					_selectedComRates: {
-						type: Number,
-						value: 0
-					},
-					isloading: {
+					hidemenu:{
 						type: Boolean,
 						value: true,
 						notify: true
 					},
-					loadingmessage:{
+					hidesubmenu:{
+						type: Boolean,
+						value: true,
+						notify: true
+					},
+					approvethoughts: Boolean,
+					hidecompany: Boolean,
+					mythoughts: Boolean,
+					notcompanyadmin:{
+						type: Boolean,
+						value: true,
+						notify: true
+					},
+					leadershipapp: {
+						type: Boolean,
+						value: false,
+						notify: true
+					},
+					publicapp: {
+						type: Boolean,
+						value: true,
+						notify: true
+					},
+					salesapp: {
+						type: Boolean,
+						value: false,
+						notify: true
+					},
+					hrapp: {
+						type: Boolean,
+						value: false,
+						notify: true
+					},
+					_user: {
+						type: Object,
+						notify: true,
+						observer: '_userDataChange'
+					},
+					follow: {
 						type: String,
-						value: 'Loading...'
+						notify: true
 					},
-					noIdea: { // For showing the Image placeholder 
-						type: Boolean,
-						value: false
+					_userID:{
+						type: String
 					},
-					opened: {
-						type: Boolean,
-						reflectToAttribute: true,
-						value: true
+					user: {
+						type: Object
 					},
-					lastSelected: {
+					photo: {
+						type: String
+					},
+					userLogo:{
 						type: String,
-						value: ''
+						value: "../images/default-user.png"
 					},
-					openedComRate: {
-						type: Boolean,
-						reflectToAttribute: true,
-						value: true
-					},
-					lastSelectedComRate: {
+					companyLogo: {type: String, value: ""},
+					companyBgColor: {type: String, value: "background-color:#c3272e"},
+					menuTextColor: {type: String, value: "color:#fff"},
+					_companyid: {
 						type: String,
-						value: ''
+						notify: true
 					},
-					loadmore: {
+					_publicid: {
+						type: String,
+						notify: true
+					},
+					listclicked: {
 						type: Boolean,
-						value: true
+						value: false,
+						notify: true,
+						observer: "_listclicked"
 					},
-					isloadingmore: {
-						type: Boolean,
-						value: false
-					},
-					mypost:{
-						type: Boolean,
-						value: false
-					},
+					bookAuthor: String,
+					bookTitle: String,
+					bookBody: String,
+					bookPhoto: String,
+					previousPage: String,
+					ID: String,
+					Title: String,
+					Subtitle: String,
+					aID: String,
+					rateType: String,
+					orderRateBy: String,
+					commentType: String,
+					orderCommentBy: String,
+					addedit: Number,
+					currentpage: {
+						type: String,
+						value: 'mainapp',
+						notify: true
+					}
 				};
 			}
-			connectedCallback() { 
-				super.connectedCallback();
-				
+
+			static get observers() {
+				return [
+					'_routePageChanged(routeData.page)',
+				];
 			}
-			isFollowing(journalUserID){
-				if(this.user.following != undefined){
-					if(this.user.following){
-					let following =  this.user.following;
-					let isfollowing = following[journalUserID];
-					return isfollowing ? 'Following' : 'Follow';
-					}else return "Follow";
-				}else return "Follow";
-				
-			}
-			isFollowingStyle(journalUserID){
-				let userID = this.user.userID;
-				if(userID === journalUserID){
-					return "w3-hide";
-				}
-				else{
-					if(this.user.following){
-						let following =  this.user.following;
-						let isfollowing = following[journalUserID];
-						return isfollowing ? 'following' : '';
+			_listclicked(){
+				var that = this;
+
+				if(this.listclicked === true){
+					setTimeout(myFunction, 500);
+					function myFunction(){
+						that._closeNotificationsModal();
 					}
-					else {return "";}
 				}
-				
 			}
-			followUser(e){
+
+			_openWelcomePage(){
+				let modal = Polymer.dom(this.root).querySelector('#welcomePage');
+				this.loadPage('welcome-page');
+				$(modal).css('display', 'block');
+				this._closeFirstPage();
+			}
+			_closeWelcomePage(){
+				let modal = Polymer.dom(this.root).querySelector('#welcomePage');
+				$(modal).css('display', 'none');
+			}
+			_openFirstPage(){
+				let modal = Polymer.dom(this.root).querySelector('#firstPage');
+				$(modal).css('display', 'block');
+			}
+			_closeFirstPage(){
+				let modal = Polymer.dom(this.root).querySelector('#firstPage');
+				$(modal).css('display', 'none');
+
+				if(this._user.userID){
+					var database = firebase.database();
+					database.ref('/users/' + this._user.userID).child('welcomePage').set(true);
+				}
+			}
+
+			_openUserProfile(){
+				// ios 11 bug caret position
+				if ( iOS && iOS11 ) {
+					this.addIOSBugfix();
+				}
+				let modal = Polymer.dom(this.root).querySelector('#userProfile');
+				this.loadPage('user-profile');
+				$(modal).css('display', 'block');
+			}
+
+			_closeUserProfile(){
+				// ios 11 bug caret position
+				if ( iOS && iOS11 ) {
+					this.removeIOSBugfix();
+				}
+				let modal = Polymer.dom(this.root).querySelector('#userProfile');
+				$(modal).css('display', 'none');
+			}
+
+			setDeviceType(device){
 				let database = firebase.database();
-				let itemID = e.target.data;
-				let filteredArray = this.findObjectByKey(this.articlesData, "newsID", itemID);
-				let following = e.target.innerHTML;
-				let userID = this.user.userID;
+				if(this._user.userID != undefined){
+					database.ref('/users/' + this._user.userID + '/deviceTypes').child(device).set(true);
+				}
+			}
+			setDeviceToken(){
+				let database = firebase.database();
+				var currentToken = localStorage.getItem('currentToken');
+
+				if(this._user != undefined || this._user != null){
+					if(currentToken != undefined || currentToken != null){
+						database.ref('/users/' + this._user.userID + '/deviceTokens').child(_guid).set(currentToken);
+					}
+				}
+			}
+			_objLen(obj) {
+				let len = 0;
+				if(obj != undefined){
+					len = Object.keys(obj).length;
+				}
+				return len;
+			}
+
+			_objLenNotifications(obj) {
+				var unread = 0;
+				if(obj != undefined){
+					unread = this._toArray(obj);
+				}
+			}
+
+			_toArray(obj) {
 				var that = this;
-				var myPhoto = "";
-				let journalUserID = filteredArray.journalUserID;
-				let journalUserName = filteredArray.journalUserName;
-				var followDate = Date.now();
-				if(this.user.photoURL != undefined || this.user.photoURL != ""){
-					myPhoto = this.user.photoURL;
-				}else{
-					myPhoto = "";
-				}
-				if(myPhoto == undefined){
-					myPhoto = "";
-				}
-				if(following == "Follow"){
-					$(e.target).addClass('following');
-					e.target.innerHTML = "Following";
-					that.updateFollowBTN(journalUserID, following);
-					var photoURL = "";
-					if(filteredArray.photoURL != undefined || filteredArray.photoURL != ""){
-						photoURL = filteredArray.photoURL;
-					}else{
-						photoURL = "";
-					}
-					if(photoURL == undefined){
-						photoURL = "";
-					}
-					var theirdata = {
-						"firstName":filteredArray.journalUserName,
-						"lastName":"",
-						"companyName":filteredArray.companyName,
-						"dateRegistered":followDate,
-						"photoURL":photoURL,
-						"userID":journalUserID
-					}
-					var mydata = {
-						"firstName":that.user.firstName,
-						"lastName":that.user.lastName,
-						"companyName":that.user.companyName,
-						"dateRegistered": followDate,
-						"photoURL":myPhoto,
-						"userID": userID
-					}
-					var updates = {}
-					updates["users/"+userID+"/following/"+journalUserID]=theirdata;
-					updates["users/"+journalUserID+"/follower/"+userID]=mydata;
-					updates["followers/"+journalUserID+"/"+userID]=mydata;
-					return database.ref().update(updates).then(() =>{
-						return console.log("Following");
-					});
-				}else{
-					that.isFollowingStyle(journalUserID);
-					$(e.target).removeClass('following');
-					e.target.innerHTML = "Follow";
-					that.updateFollowBTN(journalUserID, following);
-					var updates = {}
-					updates["users/"+userID+"/following/"+journalUserID]=null;
-					updates["users/"+journalUserID+"/follower/"+userID]=null;
-					updates["followers/"+journalUserID+"/"+userID]=null;
-					return database.ref().update(updates).then(() =>{
-						return console.log("Unfollowed");
-					});
-					
-				}
-			}
-			updateFollowBTN(journalUserID, following){
-				var that = this;
-				var thoughtCard = Polymer.dom(that.root).querySelector("#thoughts-Holder");
-				$(thoughtCard).find('.modal-div').each(function(i, e){
-					var followBTN = $(e).find('.followBTN')[0];
-					var itemID = $(followBTN).prop('data');
-					let filteredArray = that.findObjectByKey(that.articlesData, "newsID", itemID);
-					let thoughtUserID = filteredArray.journalUserID;
-					if(thoughtUserID === journalUserID){
-						if(following == "Follow"){
-							$(followBTN).addClass('following');
-							followBTN.innerHTML = "Following";
-						}else{
-							that.isFollowingStyle(journalUserID);
-							$(followBTN).removeClass('following');
-							followBTN.innerHTML = "Follow";
-						}
-					}
-				});
-			}
-			_loadMorePosts(){
-				this.scrollPos = window.scrollY;
-				this.isloadingmore = true;
-				this.minData += 6;
-			}
-			_onarticlesDataReceived(newData, oldData){
-				var that = this;
-				if(newData.length > 0){
-					this.isloading = false;
-					this.loadingmessage = "";
-					this.loadmore = false;
-					this.isloadingmore = false;
-					this.noIdea = false;
-
-					setTimeout(function () {
-						window.scrollTo({
-							top: that.scrollPos,
-							behavior: "instant"
-						});
-					}, 1000);
-				} 
-				setTimeout(function(){
-					that.isloading = false;
-
-					if (that.articlesData.length == 0) {
-						that.noIdea = true;
-						that.loadingmessage = "Article was removed by Author";
-					}
-					else {
-						that.noIdea= false;
-						that.loadingmessage = "";
-					}
-
-				}, 10000)
-
-			}
-			_sort(a, b) {  
-				if (a.dateScheduled > b.dateScheduled) return -1;
-				if (a.dateScheduled < b.dateScheduled) return 1;
-				return 0;
-			}
-			articleLink(manualOrExternal, articleLink){
-				if((manualOrExternal !== undefined) || (manualOrExternal !== "undefined")){
-				if (manualOrExternal == "externalLink") return articleLink;
-					return "read-articles";
-				}
-				
-				return "read-articles";
-			}
-			targetLink(manualOrExternal){
-				if (manualOrExternal == "externalLink") return "_blank";
-				return "_self";
-			}
-			_captureClicks(journalID, res, obj){
-				var database = firebase.database();
-				var userID = this.user.userID;
-				var userName = this.user.firstName + " " + this.user.lastName;
-				var myPhoto;
-				var myCompanyID = this.user.companyID;
-				var myCompanyName = this.user.companyName;
-				var dateRegistered = Date.now();
-				var postType = "articles";
-				if(this.user.photoURL != undefined || this.user.photoURL != ""){
-					myPhoto = this.user.photoURL;
-				}else{
-					myPhoto = "";
-				}
-				if(myPhoto == undefined){
-					myPhoto = "";
-				}
-				var filteredArray = this.findObjectByKey(this.articlesData, "newsID", journalID);
-				var journalID = journalID;
-				var journalUserID = filteredArray.journalUserID;
-				var journalUserName = filteredArray.journalUserName;
-				var journalCompanyID = filteredArray.companyID;
-				var journalCompanyName = filteredArray.companyName;
-				var journalDateRegistered = filteredArray.dateRegistered;
-				var journalPhotoURL;
-				
-				if(filteredArray.photoURL != undefined || filteredArray.photoURL != ""){
-					journalPhotoURL = filteredArray.photoURL;
-				}else{
-					journalPhotoURL = "";
-				}
-				if(journalPhotoURL == undefined){
-					journalPhotoURL = "";
-				}
-				var data = {
-					userID: userID,
-					userName: userName,
-					myPhoto: myPhoto,
-					myCompanyID: myCompanyID,
-					myCompanyName: myCompanyName,
-					dateRegistered: dateRegistered,
-					postType: postType,
-					journalID: journalID,
-					journalUserID: journalUserID,
-					journalUserName: journalUserName,
-					journalCompanyID: journalCompanyID,
-					journalCompanyName: journalCompanyName,
-					journalDateRegistered: journalDateRegistered,
-					journalPhotoURL: journalPhotoURL,
-					clickType:"posts",
-					clickArea:res,
-					clickItem:obj
-				}
-				database.ref('user-clicks').push(data);
-			}
-			_oncommentsData(){
-				this.commentsData.sort(function(a, b) {
-				var nameA = a.dateRegistered; // ignore upper and lowercase
-				var nameB = b.dateRegistered; // ignore upper and lowercase
-				if (nameA < nameB) {
-					return 1;
-				}
-				if (nameA > nameB) {
-					return -1;
-				}
-				return 0;
-				});
-					
-			}
-			_setArticleData(a, t, b, p){
-				var photo = this._photoURL(p);
-				var a = {
-							body: b,
-							photo: photo,
-							author: a,
-							title: t
-					}
-				return a;
-			}
-			_setData(title, subtitle, id){
-				// set thought data to be rated
-				let a = {
-							Title: title,
-							Subtitle: subtitle,
-							ID: id
-					}
-				return a;
-			}
-			_photoURL(photos) {
-				let photo_url = "../data/land.jpg";
-
-				for (var item in photos) {
-					photo_url = "" + photos[item].url + "";
-				}
-				return photo_url;
-			}
-			_formate_date(dt){
-				var date = new Date(dt);
-				var day = date.getDate() < 10 ? '0'+date.getDate() : date.getDate();
-				var hours = date.getHours() < 10 ? '0'+date.getHours() : date.getHours();
-				var minutes = date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes();
-				var locale = 'en-us';
-				var month = date.toLocaleString(locale, { month: "long" });
-				var year = date.getFullYear();
-				var am_pm = date.getHours() >= 12 ? "PM" : "AM"
-				return day+' '+month+' '+year+' '+hours+':'+minutes+" "+am_pm;
-			}
-			_openArticle(e){
-				var a = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
-				var itemid = Polymer.dom(this.root).querySelector('#'+e.target.id).itemid;
-				sessionStorage.setItem("bookAuthor",a.author);
-				sessionStorage.setItem("bookTitle",a.title);
-				sessionStorage.setItem("bookBody",a.body);
-				sessionStorage.setItem("bookPhoto",a.photo);
-				var obj = {
-					itemID: itemid,
-					title: a.title,
-					ref: a.author
-				}
-				this._captureClicks(itemid, "readArticle", obj);
-			}
-			_sortComments(obj){
+				var unread = 0;
 				if(obj != undefined){
 					return Object.keys(obj).map(function(key) {
-						return obj[key];
+						if(obj[key].seen == false) {
+							unread++;
+							if(unread > 20) that.unreadstring = "20+";
+							else that.unreadstring = ""+unread; 
+
+							return 1
+						};
 					});
 				}
-			}
-			isArray (value) {
-			return value && typeof value === 'object' && value.constructor === Array;
-			};
-			isObject (value) {
-			return value && typeof value === 'object' && value.constructor === Object;
-			};
-			toggleComRate(e){
-				var selectedElem = e.target.id;
-				let news_ID = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
-				var pages = Polymer.dom(this.root).querySelector('#page'+news_ID);
-				pages.selectNext();
-			}
-			toggle(e){
-				var a = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
-				var selectedElem = e.target.id;
-				this.opened = Polymer.dom(this.root).querySelector('#collapse'+a).opened;
-						
-				var res = selectedElem.substring(0, 3);
 				
-				if(res == 'blu'){
-					this._selected = 'page-1-'+a;
-				}else if(res == 'gre'){
-					this._selected = 'page-2-'+a;
-				}else if(res == 'cam'){
-					this._selected = 'page-3-'+a;
-				}else if(res == 'red'){
-					this._selected = 'page-4-'+a;
-				}
-				if((this.lastSelected == this._selected) && (this.opened)){
-					Polymer.dom(this.root).querySelector('#collapse'+a).toggle();
-				}
-				if((this.lastSelected == this._selected) && (!this.opened)){
-					Polymer.dom(this.root).querySelector('#collapse'+a).toggle();
-				}
-				if((this.lastSelected != this._selected) && (!this.opened)){
-					Polymer.dom(this.root).querySelector('#collapse'+a).toggle();
-				}
-				this.lastSelected = this._selected;
 			}
-			_getVideoName(storageName){
-				let strName = '';
-				strName = storageName.slice(storageName.lastIndexOf('/')+1);
-				strName = strName.replace(new RegExp('_', 'g'), ' ');
-				return strName;
+
+			userBrowser(){
+				var sBrowser, sUsrAg = window.navigator.userAgent;
+
+				//The order matters here, and this may report false positives for unlisted browsers.
+
+				if (sUsrAg.indexOf("Firefox") > -1) {
+					sBrowser = "Mozilla Firefox";
+					//"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0"
+				} else if (sUsrAg.indexOf("Opera") > -1) {
+					sBrowser = "Opera";
+				} else if (sUsrAg.indexOf("Trident") > -1) {
+					sBrowser = "Microsoft Internet Explorer";
+					//"Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; .NET4.0C; .NET4.0E; Zoom 3.6.0; wbx 1.0.0; rv:11.0) like Gecko"
+				} else if (sUsrAg.indexOf("Edge") > -1) {
+					sBrowser = "Microsoft Edge";
+					//"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299"
+				} else if (sUsrAg.indexOf("Chrome") > -1) {
+					sBrowser = "Google Chrome or Chromium";
+					//"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/66.0.3359.181 Chrome/66.0.3359.181 Safari/537.36"
+				} else if (sUsrAg.indexOf("Safari") > -1) {
+					sBrowser = "Apple Safari";
+					//"Mozilla/5.0 (iPhone; CPU iPhone OS 11_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.0 Mobile/15E148 Safari/604.1 980x1306"
+				} else {
+					sBrowser = "unknown";
+				}
+
+				return sBrowser;
 			}
-			_loadElement1(e){
-				var elem = Polymer.dom(this.root).querySelector('#'+e.target.id);
-				var caption = elem.getAttribute('caption');
-				var name = elem.getAttribute('indexed');
-				this.itemName = caption;
-				this.addedit = 1;
-				let editnewsID =elem.data;
-				let filteredArray = this.findObjectByKey(this.articlesData, "newsID", editnewsID);
-				let editArticleStr = JSON.stringify(filteredArray);
+
+			sendFeedback(){
+				var subject = this.$.feedbackSubject.value;
+				var message = this.$.feedbackMessage.value;
+				var feedbackCategory = this.$.feedbackCategory.selected;
+
+				var nav = window.navigator;
+				var userPlatform = "";
+				userPlatform += "Browser Name: " + this.userBrowser() + " ==> ";
+				userPlatform += "Browser Version: " + nav.appVersion + " ==> ";
+				userPlatform += "Browser Language: " + nav.language + " ==> ";
+				userPlatform += "Browser Online: " + nav.onLine + " ==> ";
+				userPlatform += "Platform: " + nav.platform;
+
+				var messageVal = this.$.feedbackMessage.validate();
+				var subjectVal = this.$.feedbackSubject.validate();
+
+				if(feedbackCategory == ""){
+					this.showSnackBar("Feedback Category required!");
+					return;
+				}else if(!subject || !subjectVal){
+					this.showSnackBar("Feedback Subject required!");
+					return;
+				}else if(!message || !messageVal){
+					this.showSnackBar("Feedback Message required!");
+					return;
+				}else{
+					// Get a reference to the database service
+					var database = firebase.database();
+
+					var timeInMs = Date.now();
+					// Get a key for a new thought.
+					var feedbackID = database.ref().child('feedback').push().key;
+
+					// fix data
+					var data = {
+						subject: subject,
+						message: message,
+						category: feedbackCategory,
+						companyID: this._user.companyID,
+						companyName: this._user.companyName,
+						journalUserID: this._user.userID,
+						journalUserName: this._user.firstName+" "+this._user.lastName,
+						journalUserEmail: this._user.email,
+						feedbackID: feedbackID,
+						dateRegistered: timeInMs,
+						userPlatform: userPlatform
+					}
+
+					// Write the new thought's data
+					var updates = {};
+					updates['/feedback/' + feedbackID] = data;
+					database.ref().update(updates);
+
+					this.$.feedbackSubject.value = "";
+					this.$.feedbackMessage.value = "";
+					this.$.feedbackCategory.selected = "";
+
+					this.showSnackBar("Feedback posted successfully!");
+
+					// close modal
+					var modal = Polymer.dom(this.root).querySelector('#send-feedback');
+					modal.style.display = 'none';
+				}
+			}
+
+			_openModal(e){
+				// ios 11 bug caret position
+				if(e.currentTarget.id == "openFollowing") this.follow = "Following";
+				else this.follow = "Followers";
+
+				if ( iOS && iOS11 ) {
+					this.addIOSBugfix();
+				}
+				var modal_name = e.currentTarget.getAttribute('data');
 				
-				sessionStorage.setItem("addedit", this.addedit);
-				sessionStorage.setItem("editnewsID", editnewsID);
-				sessionStorage.setItem("editArticleStr", editArticleStr);
-				this._openItemsModal();
-				
-				this._myLoadElement(name, name+".html");
+				if(modal_name == "my-notifications"){
+					console.log("opening notifications");
+					this._captureClicks("openedNotificationsPage");
+					this.listclicked = false;
+				}
+				var modal = Polymer.dom(this.root).querySelector('#'+modal_name);
+				this.loadPage(modal_name);
+				modal.style.display = 'block';
 			}
+
+			_openFeedbackModal(e){
+				// ios 11 bug caret position
+				if ( iOS && iOS11 ) {
+					this.addIOSBugfix();
+				}
+				var modal_name = e.currentTarget.getAttribute('data');
+				var modal = Polymer.dom(this.root).querySelector('#'+modal_name);
+				modal.style.display = 'block';
+				this._captureClicks("openedFeedbackPage");
+			}
+			_closeNotificationsModal(e){
+				var modal = Polymer.dom(this.root).querySelector('#my-notifications');
+				modal.style.display = 'none';
+				
+				let database = firebase.database();
+				let seen = false;
+				
+				database.ref('/users/'+this._userID+'/notifications').orderByChild("seen").equalTo(seen).once('value').then((data)=>{
+					var myNotifications = data.val();
+					if(myNotifications === null){
+						console.log("No notifications");
+					}else{
+						this._notificationSeen(myNotifications)
+					}
+					
+				}).catch(function(error) {
+					console.log("Error updating user notifications:", error);
+				});
+
+				database.ref('/users/'+this._userID+'/pldpnotifications').orderByChild("seen").equalTo(seen).once('value').then((data)=>{
+					var myNotifications = data.val();
+					if(myNotifications === null){
+						console.log("No notifications");
+					}else{
+						this._pldpnotificationSeen(myNotifications)
+					}
+					
+				}).catch(function(error) {
+					console.log("Error updating user notifications:", error);
+				});
+				
+			}
+			_closeModal(e){
+				// ios 11 bug caret position
+				if ( iOS && iOS11 ) {
+					this.removeIOSBugfix();
+				}
+
+				var modal_name = e.currentTarget.getAttribute('data');
+				console.log("modal name: ", modal_name);
+				var modal = Polymer.dom(this.root).querySelector('#'+modal_name);
+
+				if(modal_name === 'add-items'){
+					this._removeLoadElement();
+				}
+				
+				modal.style.display = 'none';
+			}
+			_notificationSeen(nots){
+				var myNotifications = {};
+				var _userID = this._userID;
+
+				$.each(nots, function(n, nt){
+					myNotifications['/users/'+_userID+'/notifications/'+n+'/seen'] = true
+				});
+
+				let database = firebase.database();
+				database.ref().update(myNotifications);
+			}
+
+			_pldpnotificationSeen(nots){
+				var myNotifications = {};
+				var _userID = this._userID;
+
+				$.each(nots, function(n, nt){
+					myNotifications['/users/'+_userID+'/pldpnotifications/'+n+'/seen'] = true
+				});
+
+				let database = firebase.database();
+				database.ref().update(myNotifications);
+			}
+
+			isEqual(a, b) {
+				//(a !=="-LDVbbRyIMhukVtTVQ0n")
+				if((b == "12345" && a !=="-KgsUcgfo7z1U9MXgd9i") && (b == "12345" && a !=="-LDVbbRyIMhukVtTVQ0n") && (b == "12345" && a !=="-LEiZPT-C2PyLu_YLKNU") ){
+					return true;
+				}else return a === b;
+			}
+
 			_openItemsModal(){
+				// ios 11 bug caret position
+				if ( iOS && iOS11 ) {
+					this.addIOSBugfix();
+				}
 				var modal = Polymer.dom(this.root).querySelector('#add-items');
 				modal.style.display = 'block';
 			}
+
 			_closeItemsModal(){
+				// ios 11 bug caret position
+				if ( iOS && iOS11 ) {
+					this.removeIOSBugfix();
+				}
 				var modal = Polymer.dom(this.root).querySelector('#add-items');
-				this._removeElement();
+				this._removeLoadElement();
 				modal.style.display = 'none';
 			}
+
+			_closeSidebarFromBody(){
+				var backBTN = Polymer.dom(this.root).querySelector('#close-side-bar');
+				var sidebar = Polymer.dom(this.root).querySelector('#sidebar');
+				if($(window).outerWidth() < 780){
+					this._sideBarClose();
+				}
+			}
+
+			_sideBarClicked(){
+				var that = this;
+				var closer = Polymer.dom(this.root).querySelector('#close-side-bar');
+				parent.location.hash = '#';
+				if($(closer).is(':visible')){
+					that._sideBarClose();
+				}
+			}
+
+			_sideBarClose(){
+				var sidebar = Polymer.dom(this.root).querySelector('#sidebar');
+				$(sidebar).animate({'left':'-280px'},200,function(){
+					$(sidebar).css('left', '0px');
+					$(sidebar).css('display', 'none');
+				});
+				
+				window.onresize = function(){
+					if($(window).outerWidth() > 780){
+						$(sidebar).css('display', 'block');
+					}
+				}
+			}
+
+			_sideBarOpen(e){
+				e.stopPropagation();
+				var sidebar = Polymer.dom(this.root).querySelector('#sidebar');
+				$(sidebar).css('display', 'block');
+				// sidebar.style.display = 'block';
+			}
+
+			_routePageChanged(page) {
+				// If no page was found in the route data, page will be an empty string.
+				// Default to 'view1' in that case.
+				var oldpage = this.page;
+				this.$.paperSpeed.style.visibility = 'visible';
+				window.scrollTo(0, 0);
+
+				if(page == 'leadership-platform' || page == 'components'){
+					// public app
+					if(this._companyid == "-LEiZPT-C2PyLu_YLKNU"){
+						this.page = 'i-lead';
+				 		this._selected = 22;
+					}else{
+						this.page = 'company-thoughts';
+				 		this._selected = 0;
+					}
+				 
+				}else{
+					// public app
+					if(this._companyid == "-LEiZPT-C2PyLu_YLKNU"){
+						this.page = page || 'i-lead';
+				 		this._selected = 22;
+					}else{
+						this.page = page || 'company-thoughts';
+				 		this._selected = 0;
+					}
+				}
+
+				 this._selected = page;
+				 var modselect = 0;
+
+				 var showmythoughts = localStorage.getItem("myThoughts");
+
+				 // control the selected tab
+				 if(showmythoughts == "false")
+					modselect = 1;
+
+				 if(page == 'company-thoughts')
+					this._selected = 0;
+				 else if(page == 'daily-thoughts')
+					this._selected = 1;
+				 else if(page == 'leadership-thoughts')
+					this._selected = 2;
+				 else if(page == 'leadership-articles')
+					this._selected = 3 - modselect;
+				 else if(page == 'master-class')
+					this._selected = 4 - modselect;
+				 else if(page == 'topleader-thoughts')
+					this._selected = 5 - modselect;
+				 else if(page == 'leadership-podcasts')
+					this._selected = 6 - modselect;
+				 else if(page == 'leadership-videos')
+					this._selected = 7 - modselect;
+				 else if(page == 'leadership-ebooks')
+					this._selected = 8 - modselect;
+				 else if(page == 'my-pldp'){
+					this.$.paperSpeed.style.visibility = 'hidden';
+					if(oldpage == 'my-pldp') oldpage = 'company-thoughts';
+					if(oldpage != undefined)
+					  this.previousPage = oldpage;
+					else
+					  this.previousPage = "company-thoughts";
+
+					this._selected = 9 - modselect;
+				 }
+				 else if(page == 'company-profile')
+					this._selected = 10 - modselect;
+				 else if(page == 'company-staff')
+					this._selected = 11 - modselect;
+				 else if(page == 'thoughts-management'){
+					
+					if(oldpage == 'thoughts-management') oldpage = 'company-thoughts';
+					if(oldpage != undefined)
+					  this.previousPage = oldpage;
+					else
+					  this.previousPage = "company-thoughts";
+				 }
+				 else if(page == 'read-articles'){
+					this.$.paperSpeed.style.visibility = 'hidden';
+					this.bookAuthor = sessionStorage.getItem("bookAuthor");
+					this.bookTitle = sessionStorage.getItem("bookTitle");
+					this.bookBody = sessionStorage.getItem("bookBody");
+					this.bookPhoto = sessionStorage.getItem("bookPhoto");
+					this._selected = 12 - modselect;
+				 }
+				 else if(page == 'add-thoughts'){
+					this.$.paperSpeed.style.visibility = 'hidden';
+					if(oldpage == 'add-thoughts') oldpage = 'company-thoughts';
+					if(oldpage != undefined)
+					  this.previousPage = oldpage;
+					else
+					  this.previousPage = "company-thoughts";
+
+					this.addedit = -1;
+
+					this.addedit = sessionStorage.getItem("addedit");
+					this._selected = 13;
+				 }
+				 else if(page == 'add-article'){
+					this.$.paperSpeed.style.visibility = 'hidden';
+					if(oldpage == 'add-article') oldpage = 'company-thoughts';
+
+					if(oldpage != undefined)
+					  this.previousPage = oldpage;
+					else
+					  this.previousPage = "company-thoughts";
+					this._selected = 15;
+				 }
+				 else if(page == 'user-profile'){
+					this.$.paperSpeed.style.visibility = 'hidden';
+					if(oldpage == 'user-profile') oldpage = 'company-thoughts';
+
+					if(oldpage != undefined)
+					  this.previousPage = oldpage;
+					else
+					  this.previousPage = "company-thoughts";
+					this._selected = 16;
+				 }
+				 else if(page == 'add-podcast'){
+					this.$.paperSpeed.style.visibility = 'hidden';
+					if(oldpage == 'add-podcast') oldpage = 'company-thoughts';
+
+					if(oldpage != undefined)
+					  this.previousPage = oldpage;
+					else
+					  this.previousPage = "company-thoughts";
+					this._selected = 18;
+				 }
+				 else if(page == 'add-video'){
+					this.$.paperSpeed.style.visibility = 'hidden';
+					if(oldpage == 'add-video') oldpage = 'company-thoughts';
+
+					if(oldpage != undefined)
+					  this.previousPage = oldpage;
+					else
+					  this.previousPage = "company-thoughts";
+					this._selected = 19;
+				 }
+				 else if(page == 'about-pldp'){
+					this.$.paperSpeed.style.visibility = 'hidden';
+					if(oldpage == 'about-pldp') oldpage = 'company-thoughts';
+
+					if(oldpage != undefined)
+					  this.previousPage = oldpage;
+					else
+					  this.previousPage = "company-thoughts";
+					this._selected = 20;
+				 }
+				 else if(page == 'add-voicemail'){
+					this.$.paperSpeed.style.visibility = 'hidden';
+					if(oldpage == 'add-voicemail') oldpage = 'company-thoughts';
+
+					if(oldpage != undefined)
+					  this.previousPage = oldpage;
+					else
+					  this.previousPage = "company-thoughts";
+					this._selected = 21;
+				 }
+				 else if(page == 'i-lead'){
+					this._selected = 22;
+				 }else if(page == 'filtered-thoughts'){
+					this._selected = 23;
+				}else if(page == 'filtered-articles'){
+					this._selected = 24;
+				}else if(page == 'filtered-podcasts'){
+					this._selected = 25;
+				}else if(page == 'filtered-videos'){
+					this._selected = 26;
+				}else if(page == 'company-analytics'){
+					this._selected = 27;
+				}
+
+				 // sessionStorage.setItem("_companyid", this._companyid);
+			}
+
+			_pageChanged(page) {
+				// Load page import on demand. Show 404 page if fails
+				this.page = page || 'topleader-thoughts';
+				var resolvedPageUrl = this.resolveUrl(page + '.html');
+				Polymer.importHref(
+						resolvedPageUrl,
+						null,
+						this._showPage404.bind(this),
+						true);
+
+				this._captureClicks(page);
+			}
+			_captureClicks(page){
+				if(this._user != undefined){
+					var database = firebase.database();
+					var userID = this._user.userID;
+					var userName = this._user.firstName + " " + this._user.lastName;
+					var myPhoto;
+					var myCompanyID = this._user.companyID;
+					var myCompanyName = this._user.companyName;
+					var dateRegistered = Date.now();
+
+					if(this._user.photoURL != undefined || this._user.photoURL != ""){
+						myPhoto = this._user.photoURL;
+					}else{
+						myPhoto = "";
+					}
+
+					if(myPhoto == undefined){
+						myPhoto = "";
+					}
+
+					var data = {
+						userID: userID,
+						userName: userName,
+						myPhoto: myPhoto,
+						myCompanyID: myCompanyID,
+						myCompanyName: myCompanyName,
+						dateRegistered: dateRegistered,
+						clickType:"section",
+						clickArea:page
+					}
+
+					database.ref('user-clicks').push(data);
+				}
+				
+			}
+
+			_showPage404() {
+				this.page = 'not-found';
+			}
+
+			_photo(photo){
+
+				let photo_url = "../images/default-user.png";
+
+				if (photo != "" || photo != undefined) { 
+					photo_url = photo;
+				}
+
+				if(photo == null){
+					photo_url = "../images/default-user.png";	
+				}
+
+				return photo_url;
+			}
+
+			_activeChanged(){
+				return "Test";
+			}
+
+			showSnackBar(msg){
+				var x = this.$.snackbar;
+
+				x.innerHTML = msg;
+
+				x.className = "show";
+				setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+			}
+
 			_myLoadElement(elementName, htmlImport) {
 				// Let's remove last loaded element if exists
 				this._removeElement();
+
 				var container = Polymer.dom(this.root).querySelector('#item-holder');
 				var __companyid = this._companyid;
-				var __user = this.user;
+				var __user = this._user;
 				var previousPage = this.previousPage;
 				var company = this.company;
-				let pos = window.scrollY;
-				sessionStorage.setItem('pos', pos);
-				window.scrollTo(0, 0);
+
 				// Now we load it on-the-fly
 				Polymer.importHref(this.resolveUrl(htmlImport), function (e) {
 					// Create a new instance
@@ -795,456 +1523,400 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					myElement._companyid = __companyid;
 					myElement.user = __user;
 					myElement.company = company;
-					myElement.addedit = 1;
-					
+
+					if((elementName === "add-thoughts") || (elementName === "add-article") || (elementName === "add-podcast") || (elementName === "add-video") || (elementName === "add-voicemail") ){
+						myElement.addedit = 0;
+						sessionStorage.setItem("closeElement", false);
+					} 
 				});
 			}
-			
-			_loadElement(){
-				// var name = e.target.getAttribute('elem');
-				this._myLoadElement("load-media", "load-media.html");
+
+			_activeChanged(){
+				return "Test";
 			}
+
+			showSnackBar(msg){
+				var x = this.$.snackbar;
+
+				x.innerHTML = msg;
+
+				x.className = "show";
+				setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+			}
+
+			_loadElement1(e){
+				var elem = Polymer.dom(this.root).querySelector('#'+e.target.id);
+				var caption = elem.getAttribute('caption');
+				var name = elem.getAttribute('indexed');
+				this.itemName = caption;
+
+				Polymer.dom(this.root).querySelector('#paperSpeed').style.visibility = 'hidden';
+
+				this._openItemsModal();
+
+				this._myLoadElement(name, name+".html");
+			}
+
+			_removeLoadElement(){
+				this._removeElement();
+				Polymer.dom(this.root).querySelector('#paperSpeed').style.visibility = 'visible';
+			}
+
+			_loadElement2 () {
+			// Load your element in the next line. Pay attention to the path.
+				this._myLoadElement("my-other-element", "elements/myOtherElement.html");
+			}
+
 			_removeElement () {
 				var container = Polymer.dom(this.root).querySelector('#item-holder');
 				// element.removeChild(element.firstChild);
+
 				var element = container.querySelector("*");
 				if (element) {
 					element.parentNode.removeChild(element);
 				}
 			}
-			_videoClick(e){      
-				var videoClicked = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
-				var src = this.getMediaURL(videoClicked);
-				this.loadsrc = src;
-				this._loadElement();
-			}
-			_getPodcastName(storageName){
-				let strName = '';
-				strName = storageName.slice(storageName.lastIndexOf('/')+1);
-				strName = strName.replace(new RegExp('_', 'g'), ' ');
-				return strName;
-			}
-			_togglerCR(e){
-				var elem = e.currentTarget;
-				//this._popModal({target:e.currentTarget});
-				$(elem).siblings().removeClass('w3-text-blue').addClass('w3-text-grey');
-				$(elem).toggleClass('w3-text-blue w3-text-grey')
-			}
-			_toArray(obj) {
-				if(obj != undefined){
-					return Object.keys(obj).map(function(key) {
-						return obj[key];
-				});
-				}
-				
-			}
-			_objLen(obj) {
-				let len = 0;
-				if(obj != undefined){
-					len = Object.keys(obj).length;
-				}
-				return len;
-			}
-			_photo(photos, textColor) {
-				if (textColor == undefined) {
-					var color = '#ffffff';
-				} else {
-					var color = textColor;
-				}
-				let photo_url = "background-image: url('../data/land.jpg'); color: " + color + ";";
 
-				for (var item in photos) { 
-					if(photos[item].thumbNailUrl){
-						photo_url = "background-image: url('"+photos[item].thumbNailUrl+"'); color: "+color+";";
+			_close(){
+				this.$.paperSpeed.close();
+			}
+
+			_userDataChange(newData, oldData) {
+				if(this._objLen(this._user) > 0){
+					this._userID = this._user.userID;
+
+					if(this._user.welcomePage != undefined) {
+						if(this._user.welcomePage == false){
+							this._openFirstPage();
+						}
 					}else{
-						photo_url = "background-image: url('"+photos[item].url+"'); color: "+color+";";
+						this._openFirstPage();
+					}
+
+					if(this._user.photoURL != undefined || this._user.photoURL) {
+						this.photo = this._user.photoURL;
+					}else{
+						this.photo = "../images/default-user.png";
 					}
 					
-				}
+					//Updates the following tab automatically
+					var database = firebase.database();
+					database.ref('users').child(this._userID).child('following').on('value', (data)=>{
+						this.no_following = this._objLen(data.val());
 
-				return photo_url;
-			}
-			_imageNotFound(photos) {
-				let hideText = false;
+						database.ref('/users/' + this._user.userID).child('analytics').child('following').set(this.no_following);
+					})
 
-				for (var item in photos) { 
-					hideText = true
-				}
+					database.ref('users').child(this._userID).child('follower').on('value', (data)=>{
+						this.no_followers = this._objLen(data.val());
 
-				return hideText;
-			}
-			_profilePhoto(photo){
-				let photo_url = "background-image: url('../images/default-user.png');";
-				if(photo == undefined){
-					photo_url = "background-image: url('../images/default-user.png');";
-				}else if(photo == ""){
-					photo_url = "background-image: url('../images/default-user.png');";
-				}else{
-					photo_url = "background-image: url('"+photo+"');";
-				}
-				return photo_url;
-			}
-			_setProfileInfo(journalUserName, journalUserID, companyName, companyID, photoURL){
-				if(photoURL == "" || photoURL == undefined) photoURL = "../images/default-user.png";
-				var a = {
-					journalUserName: journalUserName,
-					journalUserID: journalUserID,
-					companyName: companyName,
-					companyID: companyID,
-					photoURL: photoURL
-				}
-				return a;
-			}
-			_previewProfile(e){
-				var data = e.currentTarget.getAttribute('data');
-				this.userobj = JSON.parse(data);
-				this._userid = this.userobj.journalUserID;
-				this._openProfileModal();
-			}
-			_openProfileModal(){
-				var modal = Polymer.dom(this.root).querySelector('#preview-profile');
-				modal.style.display = 'block';
-			}
-			_closeProfileModal(){
-				var modal = Polymer.dom(this.root).querySelector('#preview-profile');
-				modal.style.display = 'none';
-			}
-			formatDate(date) {
-				var d = new Date(date),
-				month = '' + (d.getMonth() + 1),
-				day = '' + d.getDate(),
-				year = d.getFullYear(),
-				hours = '' + d.getHours(),
-				minutes = '' + d.getMinutes(),
-				seconds = '' + d.getSeconds(),
-				milliseconds = '' + d.getMilliseconds();
-				var today = new Date(),
-				thisYear = today.getFullYear();
-				// get week day name Sunday - Saturday
-				var dayName = this.getDayMonthStr(d.getDay(), "day", true);
-				// get month name
-				var monthName = this.getDayMonthStr(d.getMonth(), "month", true);
-				// add preceding zeros where needed
-				if (month.length < 2) month = '0' + month;
-				if (day.length < 2) day = '0' + day;
-				if (hours.length < 2) hours = '0' + hours;
-				if (minutes.length < 2) minutes = '0' + minutes;
-				if (seconds.length < 2) seconds = '0' + seconds;
-				if (milliseconds.length < 2) milliseconds = '0' + milliseconds;
-				// format thoughts date
-				// Monday, 04 December 2017 14:21:56
-				var thoughtDate = dayName+", "+day+" "+monthName+" "+year+" "+hours+":"+minutes+":"+seconds;
-				return thoughtDate;
-				// return [year, month, day].join('-');
-			}
-			formatRateTime(date) {
-				var d = new Date(date),
-				month = '' + (d.getMonth() + 1),
-				day = '' + d.getDate(),
-				year = d.getFullYear(),
-				hours = d.getHours() > 12 ? d.getHours() - 12 : d.getHours(),
-				am_pm = d.getHours() >= 12 ? "PM" : "AM",
-				minutes = '' + d.getMinutes(),
-				seconds = '' + d.getSeconds(),
-				milliseconds = '' + d.getMilliseconds();
-				var today = new Date(),
-				thisYear = today.getFullYear();
-				// get week day name Sunday - Saturday
-				var dayName = this.getDayMonthStr(d.getDay(), "day", true);
-				// get month name
-				var monthName = this.getDayMonthStr(d.getMonth(), "month", false);
-				// add preceding zeros where needed
-				if (month.length < 2) month = '0' + month;
-				if (day.length < 2) day = '0' + day;
-				// if (hours.length < 2) hours = '0' + hours;
-				hours = hours < 10 ? "0" + hours : hours;
-				if (minutes.length < 2) minutes = '0' + minutes;
-				if (seconds.length < 2) seconds = '0' + seconds;
-				if (milliseconds.length < 2) milliseconds = '0' + milliseconds;
-				// format thoughts date
-				// 04 Dec 02:21:PM
-				var thoughtDate = day+" "+monthName+" "+hours+":"+minutes+":"+am_pm;
-				return thoughtDate;
-				// return [year, month, day].join('-');
-			}
-			timeSince(date) {
-				if (typeof date !== 'object') {
-					date = new Date(date);
-				}
-				var seconds = Math.floor((new Date() - date) / 1000);
-				var intervalType;
-				var interval = Math.floor(seconds / 31536000);
-				if (interval >= 1) {
-					intervalType = 'year';
-				} else {
-					interval = Math.floor(seconds / 2592000);
-					if (interval >= 1) {
-						intervalType = 'month';
-					} else {
-						interval = Math.floor(seconds / 86400);
-						if (interval >= 1) {
-							intervalType = 'day';
-						} else {
-							interval = Math.floor(seconds / 3600);
-							if (interval >= 1) {
-								intervalType = "hour";
-							} else {
-								interval = Math.floor(seconds / 60);
-								if (interval >= 1) {
-									intervalType = "minute";
-								} else {
-									interval = seconds;
-									intervalType = "second";
+						database.ref('/users/' + this._user.userID).child('analytics').child('followers').set(this.no_followers);
+					})
+
+					var follow_id = localStorage.getItem("follow_id");
+					var that = this;
+					var myPhoto = "";
+					var followDate = Date.now();
+
+					if(this._user.photoURL != undefined || this._user.photoURL != ""){
+						myPhoto = this._user.photoURL;
+					}else{
+						myPhoto = "";
+					}
+
+					if(myPhoto == undefined){
+						myPhoto = "";
+					}
+
+					if((follow_id === null) || (follow_id == undefined)){
+						// console.log("its null");
+					}else{
+						if(this._user.userID !== follow_id){
+							var userRef = database.ref('users/' + follow_id);
+
+							userRef.on('value', function(data) {
+								var childData = data.val();
+								let journalUserName = childData.firstName + " "+childData.lastName;
+
+								var photoURL = "";
+								if(childData.photoURL != undefined || childData.photoURL != ""){
+									photoURL = childData.photoURL;
+								}else{
+									photoURL = "";
 								}
-							}
+
+								if(photoURL == undefined){
+									photoURL = "";
+								}
+
+								var theirdata = {
+									"firstName":childData.firstName,
+									"lastName":childData.lastName,
+									"companyName":childData.companyName,
+									"dateRegistered": followDate,
+									"photoURL":photoURL
+								}
+
+								var mydata = {
+									"firstName":that._user.firstName,
+									"lastName":that._user.lastName,
+									"companyName":that._user.companyName,
+									"dateRegistered": followDate,
+									"photoURL":myPhoto
+								}
+
+								var updates = {}
+								updates["users/"+that._user.userID+"/following/"+follow_id]=theirdata;
+								updates["users/"+follow_id+"/follower/"+that._user.userID]=mydata;
+
+								database.ref().update(updates);
+								
+							});
+
+							let countFollowers = database.ref('users').child(follow_id).child('analytics').child('followers');
+
+							localStorage.removeItem("follow_id");
+
+						}else{
+							console.log("cannot follow my self");
 						}
 					}
-				}
-				if (interval > 1 || interval === 0) {
-					intervalType += 's';
-				}
-				return interval + ' ' + intervalType+' ago';
-			};
-			getDayMonthStr(val, dateParam, long){
-				// days
-				var days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-				var daysShort = ["Sun","Mon","Tue","Wed","Thur","Fri","Sat"];
-				// Months
-				var monthNames = ["January", "February", "March", "April", "May", "June","July", "August", "September","October", "November", "December"];
-				var monthNamesShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun","Jul", "Aug", "Sep","Oct", "Nov", "Dec"];
-				if(dateParam == "day" && long == true){
-					// return day in long format
-					return days[val];
-				}
-				else if(dateParam == "day" && long == false){
-					// return days in short
-					return daysShort[val];
-				}
-				if(dateParam == "month" && long == true){
-					// return month in long format
-					return monthNames[val];
-				}
-				else if(dateParam == "month" && long == false){
-					// return month in short
-					return monthNamesShort[val];
+
+					if(_platform != 'undefined') this.setDeviceType(_platform);
+
+					if((/android|windows|windowsphone/i).test(_platform)) this.setDeviceToken();
+
+					// console.log(this._user.notifications);
+					this._objLenNotifications(this._user.notifications);
 				}
 				
 			}
-			_openPLDP(e){
-				var newsID = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
-				sessionStorage.setItem("PLDP_ArticleAdd", newsID);
-				this.$.pldpDialog.open();
+
+			getContrastYIQ(hexcolor){
+				hexcolor = hexcolor.split('#')[1];
+				var r = parseInt(hexcolor.substr(0,2),16);
+				var g = parseInt(hexcolor.substr(2,2),16);
+				var b = parseInt(hexcolor.substr(4,2),16);
+				var yiq = ((r*299)+(g*587)+(b*114))/1000;
+				return (yiq >= 128) ? '#151515' : 'white';
 			}
-			getMediaURL(url){
-				var res = "";
-				if(url.includes("youtu")){
-					var youtubeID = this.getYoutubeID(url);
-					res = "https://www.youtube.com/embed/"+youtubeID;
-				}else{
-					res = url;
-				}
-				return res;
-			}
-			getYoutubeID(youtubeURL) {
-					var str = youtubeURL;
-					var n = str.indexOf("=");
-					var x = str.indexOf("&");
-					var res = "";
 			
-					if(n == -1){
-						n = str.indexOf("youtu.be");
-						if(x == -1) res = str.substring(n+9);
-						else res = str.substring(n+9, x);
-					}else{
-						if(x == -1) res = str.substring(n+1);
-						else res = str.substring(n+1, x);
-					}
+			_addedit(){
+				// Add Thought
+				this.addedit = 0;
+				sessionStorage.setItem("addedit", this.addedit);
+				this._close();
+			}
+
+			_setAccountDefaults(){
+				var primaryColor, companyLogo, menuTextColor, topBarColor, topBarColorText;
+
+				primaryColor = localStorage.getItem("primaryColor");
+				companyLogo = localStorage.getItem("companyLogo");
+				menuTextColor = localStorage.getItem("menuTextColor");
+
+				this.fullName = localStorage.getItem("fullName");
+				this._userLogo = localStorage.getItem("userLogo");
+
+				topBarColor = localStorage.getItem("topBarColor");
+				topBarColorText = localStorage.getItem("topBarColorText");
+
+				this.updateStyles({'--app-theme-color': primaryColor});
+
+				if(topBarColor != null || topBarColor != undefined){
+					this.updateStyles({'--app-topbar-color': topBarColor});
+					this.updateStyles({'--app-topbar-text': topBarColorText});
+
+					menuTextColor = "color: "+topBarColorText;
+					this.companyBgColor = "background-color: "+topBarColor;
+				}else{
+					this.companyBgColor = "background-color: "+primaryColor;
+				}
+				
+				this.companyLogo = companyLogo;
+				this.menuTextColor = menuTextColor;
+			}
+
+			_setCompanyTypeSidebar(){
+				/*
+					1 -> Global Leadership App
+					2 -> Global Sales App
+					3 -> Global HR App
+					4 -> Public App
+				*/
+				var companyType;
+
+				companyType = localStorage.getItem("companyType");
+
+				if(companyType != undefined && companyType === "1"){
+					this.leadershipapp = true;
+					this.salesapp = false;
+					this.hrapp = false;
+					this.publicapp = false;
+				}
+				else if(companyType != undefined && companyType === "2"){
+					this.leadershipapp = false;
+					this.salesapp = true;
+					this.hrapp = false;
+					this.publicapp = false;
+				}
+				else if(companyType != undefined && companyType === "3"){
+					this.leadershipapp = false;
+					this.salesapp = false;
+					this.hrapp = true;
+					this.publicapp = false;
+				}
+				else if(companyType != undefined && companyType === "4"){
+					this.leadershipapp = false;
+					this.salesapp = false;
+					this.hrapp = false;
+					this.publicapp = true;
+				}
+			}
+			_onCompanyDataReceived(newData, oldData) {
+				for (var item in newData) { 
+					this.company = newData[item];
+					this.companyPhotos = newData[item].photos;
+				}
+
+				var database = firebase.database();
+
+				if(newData[0] != undefined){
+					/*
+						1 -> Global Leadership App
+						2 -> Global Sales App
+						3 -> Global HR App
+						4 -> Public App
+					*/
+					var companyType = newData[0].companyType;
+					localStorage.setItem("companyType", companyType);
+					this._setCompanyTypeSidebar();
+					this._setAccountDefaults();
+
+					var primaryColor = newData[0].primaryColor;
+
+					if(newData[0].topBarColor != undefined) var topBarColor = newData[0].topBarColor;
+					else var topBarColor = newData[0].primaryColor;
+
+					this.updateStyles({'--app-theme-color': primaryColor});
+
+					this.updateStyles({'--app-topbar-color': topBarColor});
+
+					this.companyLogo = newData[0].logo;
+
+					var topBarColorText = this.getContrastYIQ(topBarColor);
+					if(topBarColorText == undefined) topBarColorText = "#000";
+
+					this.updateStyles({'--app-topbar-text': topBarColorText});
 					
-					return res;
-			}
-			getYoutubeThumbnail(youtubeURL) {
-				var res = this.getYoutubeID(youtubeURL);
-				return "https://img.youtube.com/vi/"+res+"/0.jpg";
-			}
-			findObjectByKey(array, key, value) {
-					for (var i = 0; i < array.length; i++) {
-							if (array[i][key] === value) {
-									return array[i];
-							}
+					if(topBarColor != null || topBarColor != undefined){
+						this.menuTextColor = "color: "+topBarColorText;
+						this.companyBgColor = "background-color: "+topBarColor;
+					}else{
+						this.menuTextColor = "color: "+this.getContrastYIQ(newData[0].primaryColor);
+						this.companyBgColor = "background-color: "+primaryColor;
 					}
-					return null;
-			}
-			closePLDPDialog(){
-				this._addToPLDP();
-				sessionStorage.removeItem("PLDP_ArticleAdd");
-				this.$.pldpDialog.close();
-			}
-			_addToPLDP(){
-				let PLDP_ThoughtAdd = sessionStorage.getItem("PLDP_ArticleAdd");
-				let filteredArray = this.findObjectByKey(this.articlesData, "newsID", PLDP_ThoughtAdd);
-				// remove the key
-				delete filteredArray['$key'];
-				// add PLDP user to the thought object
-				filteredArray.PLDPUserID = this.user.userID;
-				filteredArray.PLDPUserName = this.user.firstName+" "+this.user.lastName;
-				// instantiate db
-				let database = firebase.database();
-				// create new record
-				let newThought = database.ref().child('/myPLDP/news').push().key;
-				// delete the thought if already exists
-				let ref = database.ref('myPLDP/news');
-				ref.orderByChild('newsID').equalTo(PLDP_ThoughtAdd)
-						.once('value').then(function(snapshot) {
-								snapshot.forEach(function(childSnapshot) {
-								if(newThought === childSnapshot.key){
-									console.log("Got the new ID");
-								}else{
-									// remove each old child
-									ref.child(childSnapshot.key).remove();
-								}
-						});
-				});
-				
-				let updates = {};
-				updates['/myPLDP/news/' + newThought] = filteredArray;
-				database.ref().update(updates);
-			}
-			_deleteThoughtImg(e){
-				var thoughtPhotoID = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
-				var deldailyThoughtID = Polymer.dom(this.root).querySelector('#'+e.target.id).dataval;
-						
-				sessionStorage.setItem("thoughtPhotoID", thoughtPhotoID);
-				sessionStorage.setItem("deldailyThoughtID", deldailyThoughtID);
-				sessionStorage.setItem("deleteType", "photo");
-				this.$.discardTitle.innerHTML = "Discard Photo";
-				this.$.thoughtTitle.innerHTML = 'Delete selected photo?';
-				this.$.thoughtAuthor.innerHTML = '';
-				this.$.deleteDialog.open();
-			}
-			_deleteThoughtURL(e){
-				var thoughtURLID = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
-				var deldailyThoughtID = Polymer.dom(this.root).querySelector('#'+e.target.id).dataval;
-						
-				sessionStorage.setItem("thoughtURLID", thoughtURLID);
-				sessionStorage.setItem("deldailyThoughtID", deldailyThoughtID);
-				sessionStorage.setItem("deleteType", "url");
-				this.$.discardTitle.innerHTML = "Discard Article Link";
-				this.$.thoughtTitle.innerHTML = 'Delete selected article link?';
-				this.$.thoughtAuthor.innerHTML = '';
-				this.$.deleteDialog.open();
-			}
-			_deleteThoughtPodcast(e){
-				var thoughtPodcastID = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
-				var deldailyThoughtID = Polymer.dom(this.root).querySelector('#'+e.target.id).dataval;
-				var podcastID = Polymer.dom(this.root).querySelector('#'+e.target.id).datapod;
-						
-				sessionStorage.setItem("thoughtPodcastID", thoughtPodcastID);
-				sessionStorage.setItem("podcastID", podcastID);
-				sessionStorage.setItem("deldailyThoughtID", deldailyThoughtID);
-				sessionStorage.setItem("deleteType", "podcast");
-				this.$.discardTitle.innerHTML = "Discard Podcast Link";
-				this.$.thoughtTitle.innerHTML = 'Delete selected podcast link?';
-				this.$.thoughtAuthor.innerHTML = '';
-				this.$.deleteDialog.open();
-			}
-			_deleteThoughtVideo(e){
-				var thoughtVideoID = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
-				var deldailyThoughtID = Polymer.dom(this.root).querySelector('#'+e.target.id).dataval;
-				var videoID = Polymer.dom(this.root).querySelector('#'+e.target.id).datavid;
-						
-				sessionStorage.setItem("thoughtVideoID", thoughtVideoID);
-				sessionStorage.setItem("videoID", videoID);
-				sessionStorage.setItem("deldailyThoughtID", deldailyThoughtID);
-				sessionStorage.setItem("deleteType", "video");
-				this.$.discardTitle.innerHTML = "Discard Video Link";
-				this.$.thoughtTitle.innerHTML = 'Delete selected video link?';
-				this.$.thoughtAuthor.innerHTML = '';
-				this.$.deleteDialog.open();
-			}
-			_deleteArticle(e){
-				var newsID = Polymer.dom(this.root).querySelector('#'+e.target.id).data;
-						
-				sessionStorage.setItem("delnewsID", newsID);
-				sessionStorage.setItem("deleteType", "article");
-				var filteredArray = this.findObjectByKey(this.articlesData, "newsID", newsID);
-				this.$.thoughtTitle.innerHTML = '"'+filteredArray.title+'"';
-				this.$.thoughtAuthor.innerHTML = filteredArray.subtitle;
-				this.$.deleteDialog.open();
-			}
-			deleteArticle(){
-				var deleteType = sessionStorage.getItem("deleteType");
-				var newsID = sessionStorage.getItem("delnewsID");
-				// delete Thought
-				if(deleteType == "article"){
-					// Get a reference to the database service
-					var database = firebase.database();
-					// delete thoughts
-					database.ref('news/'+ newsID).remove();
-					this.showSnackBar("Article deleted successfully!");
-					sessionStorage.removeItem("delnewsID");
+
+					localStorage.setItem("primaryColor", newData[0].primaryColor);
+					localStorage.setItem("menuTextColor", this.menuTextColor);
+					localStorage.setItem("companyLogo", this.companyLogo);
+					localStorage.setItem("topBarColorText", topBarColorText);
+					localStorage.setItem("topBarColor", this.topBarColor);
+
+					var pendingMsgRef = database.ref('dailyThoughts').orderByChild("companyID_status").equalTo(newData[0].companyID+"_pending");
+					var unread = 0;
+					this.pending_string = "0";
+					var that = this;
+
+					pendingMsgRef.on('child_added', function(data) {
+						unread++;
+						if(unread > 20) that.pending_string = "20+";
+						else that.pending_string = ""+unread;
+					});
+
+					pendingMsgRef.on('child_removed', function(data) {
+						unread--;
+						if(unread > 20) that.pending_string = "20+";
+						else that.pending_string = ""+unread;
+					});
+
 				}
-				else if(deleteType == "photo"){
-					var thoughtPhotoID = sessionStorage.getItem("thoughtPhotoID");
-					// Get a reference to the database service
-					var database = firebase.database();
-					// delete thoughts
-					database.ref('dailyThoughts/'+dailyThoughtID+'/photos/'+ thoughtPhotoID).remove();
-					this.showSnackBar("Photo deleted successfully!");
-					sessionStorage.removeItem("thoughtPhotoID");
-					sessionStorage.removeItem("deldailyThoughtID");
-				}
-				else if(deleteType == "url"){
-					var thoughtURLID = sessionStorage.getItem("thoughtURLID");
-					// Get a reference to the database service
-					var database = firebase.database();
-					// delete url
-					database.ref('dailyThoughts/'+dailyThoughtID+'/urls/'+ thoughtURLID).remove();
-					this.showSnackBar("Article deleted successfully!");
-					sessionStorage.removeItem("thoughtURLID");
-					sessionStorage.removeItem("deldailyThoughtID");
-				}
-				else if(deleteType == "podcast"){
-					var thoughtPodcastID = sessionStorage.getItem("thoughtPodcastID");
-					var podcastID = sessionStorage.getItem("podcastID");
-					// Get a reference to the database service
-					var database = firebase.database();
-					// delete podcast from thought
-					database.ref('dailyThoughts/'+dailyThoughtID+'/podcasts/'+ thoughtPodcastID).remove();
-					// delete podcast
-					database.ref('podcasts/'+ podcastID).remove();
-					this.showSnackBar("Podcast deleted successfully!");
-					sessionStorage.removeItem("thoughtPodcastID");
-					sessionStorage.removeItem("podcastID");
-					sessionStorage.removeItem("deldailyThoughtID");
-				}
-				else if(deleteType == "video"){
-					var thoughtVideoID = sessionStorage.getItem("thoughtVideoID");
-					var videoID = sessionStorage.getItem("videoID");
-					// Get a reference to the database service
-					var database = firebase.database();
-					// delete podcast from thought
-					database.ref('dailyThoughts/'+dailyThoughtID+'/videos/'+ thoughtVideoID).remove();
-					// delete podcast
-					database.ref('videos/'+ videoID).remove();
-					this.showSnackBar("Video deleted successfully!");
-					sessionStorage.removeItem("thoughtVideoID");
-					sessionStorage.removeItem("videoID");
-					sessionStorage.removeItem("deldailyThoughtID");
-				}
-				
-				sessionStorage.removeItem("deleteType");
-				this.$.deleteDialog.close();
+
+				sessionStorage.setItem("user1", "Subscriber");
+				sessionStorage.setItem("user2", "Company Staff");
+				sessionStorage.setItem("user3", "I-Leader");
+				sessionStorage.setItem("user4", "Global Contributor");
+				sessionStorage.setItem("user5", "Master Contributor");
+				sessionStorage.setItem("user6", "Company Admin");
+				sessionStorage.setItem("user7", "Platinum Admin");
+				sessionStorage.setItem("user8", "Standard User");
+				sessionStorage.setItem("user9", "Daily Thoughts");
+
+				sessionStorage.setItem("INTERNAL_DAILY_THOUGHT", "1");
+				sessionStorage.setItem("GLOBAL_DAILY_THOUGHT", "2");
+
+				sessionStorage.setItem("DESC_INTERNAL_DAILY_THOUGHT", "Internal Daily Thought");
+				sessionStorage.setItem("DESC_GLOBAL_DAILY_THOUGHT", "Global Daily Thought");
+				sessionStorage.setItem("DESC_ILEAD_DAILY_THOUGHT", "I-LEAD Thought");
+
+				sessionStorage.setItem("APPROVED", "approved");
+				sessionStorage.setItem("DECLINED", "declined");
+				sessionStorage.setItem("PENDING", "pending");
+				sessionStorage.setItem("UNPUBLISHED", "unpublished");
 			}
-			showSnackBar(msg){
-				var x = this.$.snackbar;
-				x.innerHTML = msg;
-				x.className = "show";
-				setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+			logout(){
+				localStorage.removeItem("companyType");
+				localStorage.removeItem("primaryColor");
+				localStorage.removeItem("menuTextColor");
+				localStorage.removeItem("companyLogo");
+				localStorage.removeItem("fullName");
+				localStorage.removeItem("userLogo");
+				localStorage.removeItem("_companyID");
+
+				// this.$.auth.signOut();
+				firebase.auth().signOut();
+				window.location = '.';
+				return;
 			}
-			isEqual(a, b) {
-				return a === b;
+			_onCompanyPhotoChange(newData, oldData){
+				for (var item in newData) { 
+					this._companyPhoto = newData[item];
+				}
 			}
+			addIOSBugfix(){
+				// Get scroll position before moving top
+				scrollTopPosition = $(document).scrollTop();
+				// Add CSS to body "position: fixed"
+				$("body").addClass("iosBugFixCaret");
+				// $("body").css('position: fixed!important; width: 100%!important;');
+			}
+
+			removeIOSBugfix(){
+				// Remove CSS to body "position: fixed"
+				$("body").removeClass("iosBugFixCaret");
+
+				//Go back to initial position in document
+				$(document).scrollTop(scrollTopPosition);
+			}
+
+			loadTerms(){
+				this.currentpage = "terms";
+				this.loadPage('terms-conditions');
+			}
+
+			
+			loadPage(page){
+				var resolvedPageUrl = this.resolveUrl(page + '.html');
+				Polymer.importHref(
+					resolvedPageUrl,
+					null,
+					page + '.html',
+					true);
+        	}
 		}
-		window.customElements.define(ViewArticles.is, ViewArticles);
+
+		window.customElements.define(MyApp.is, MyApp);
 	</script>
+
+<script defer src="../data/jquery.min.js"></script>
 </dom-module>

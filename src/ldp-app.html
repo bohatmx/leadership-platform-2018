@@ -23,21 +23,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="ldp-app">
   <template>
     <!-- Public App -->
-    <!-- <firebase-app
+    <firebase-app
         auth-domain="leadershipplatform-158316.firebaseapp.com"
         database-url="https://leadershipplatform-158316.firebaseio.com"
         api-key="AIzaSyAf_oJi6fgm6-ZrVPeOVdW2DDoeu3v5SxY"
         storage-bucket="leadershipplatform-158316.appspot.com"
-        messaging-sender-id="438289288307">  -->
+        messaging-sender-id="438289288307"> 
     
     <!-- Test App -->    
-    <firebase-app
+    <!-- <firebase-app
         auth-domain="glp-test.firebaseapp.com"
         database-url="https://glp-test.firebaseio.com"
         api-key="AIzaSyBJH4pbQEzEpxtEomcnYjlUfsiFC5nqHoQ"
         storage-bucket="glp-test.appspot.com"
         messaging-sender-id="805735980290">
-    </firebase-app>
+    </firebase-app> -->
 
     <style>
       :host {display: block;background-color: #f6f6f6;}
@@ -476,6 +476,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     var newUser = snapshot.val();
                     that._user = newUser;
                     that._companyID = that._user.companyID;
+                    localStorage.setItem("_companyID",that._companyID);
                     that._publicid = "-LEiZPT-C2PyLu_YLKNU";
  
                     that.approveThoughts = false;

@@ -575,7 +575,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 		<div id="my-followers" class="ldp-modal w3-animate-zoom">
 			<div class="ldp-modal-content w3-round max-modal-width">
 				<div>
-					<span id="close-followers" data="my-followers" on-click="_closeModal" class="w3-button w3-display-topright w3-red w3-text-white w3-medium">&times;</span>
+					<span id="close-followers" data="my-followers" on-click="_closeModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white">&times;</span>
 					<div class="w3-row">
 						<my-followers follow="{{follow}}" user="[[_user]]"></my-followers>
 					</div>
@@ -709,6 +709,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						})
 					}, 500);
 
+					//  set company id
+					var _companyID = localStorage.getItem('_companyID')
+					 this._companyid = _companyID;
 					this._setCompanyTypeSidebar();
 					this._setAccountDefaults();
 
@@ -1870,7 +1873,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				localStorage.removeItem("companyLogo");
 				localStorage.removeItem("fullName");
 				localStorage.removeItem("userLogo");
-
+				localStorage.removeItem("_companyID");
 				// this.$.auth.signOut();
 				firebase.auth().signOut();
 				window.location = '.';
@@ -1916,5 +1919,5 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 		window.customElements.define(MyApp.is, MyApp);
 	</script>
 
-<script src="../data/jquery.min.js"></script>
+<script defer src="../data/jquery.min.js"></script>
 </dom-module>
