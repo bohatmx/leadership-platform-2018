@@ -23,7 +23,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <!-- Firebase Query -->
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <!-- <link rel="import" href="../bower_components/polymerfire/firebase-database-behavior.html"> -->
-<link rel="import" href="preview-profile.html">
+<link rel="lazy-import" href="preview-profile.html">
 
 <dom-module id="my-followers">
     <template>
@@ -113,7 +113,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <div>
                 <span id="close-followers" data="preview-profile" on-click="_closeProfileModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white" style="z-index: 999;">&times;</span>
                 <div class="w3-row">
-                    <preview-profile _userid="{{_userid}}" userobj="{{userobj}}"></preview-profile>
+                    <preview-profile _userid="{{_userid}}" userobj="{{userobj}}" user="{{user}}"></preview-profile>
                 </div>
             </div>
         </div>
@@ -220,8 +220,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 updates["followers/"+journalUserID+"/"+userID]=mydata;
 
                 return database.ref().update(updates).then(() =>{
-                    that._getUpdatedUserData();
-                    // that.refreshFilter();
+                    // that._getUpdatedUserData();
+                    that.refreshFilter();
                     return console.log("Following");
                 });
 
@@ -235,13 +235,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 updates["followers/"+journalUserID+"/"+userID]=null;
 
                 return database.ref().update(updates).then(() =>{
-                    that._getUpdatedUserData();
+                    // that._getUpdatedUserData();
+                    that.refreshFilter();
                     return console.log("Unfollowed");
                 });
                 
             }
 
         }
+        
         isFollowing(journalUserID){
             if(this.user.following != undefined){
                 if(this.user.following){
@@ -275,7 +277,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         var childKey = childSnapshot.key;
                         var childData = childSnapshot.val();
                         that.user = childData;
-                        that.refreshFilter();
+                        // that.refreshFilter();
                     });
                 }
             });
@@ -328,6 +330,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             var selectedTab = this.$.selectedTab;
             var followersTab = this.$.followersTab;
             var followingTab = this.$.followingTab;
+
+            this._getUpdatedUserData();
 
             if(this.follow == 'Followers'){
                 selectedTab.style = "background-color: #ff5722!important;";
@@ -386,6 +390,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
 
             this._userid = userdata.key;
+
+            var page = "preview-profile"
+				var resolvedPageUrl = this.resolveUrl(page + '.html');
+				Polymer.importHref(
+					resolvedPageUrl,
+					null,
+					page + '.html',
+					true);
+                    
             this._openProfileModal();
 
             // this._captureClicks(e.currentTarget.postitem, "viewedUserProfile", this.userobj);

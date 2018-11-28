@@ -280,12 +280,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       updateProfile(){
-        let firstName = this.$.firstName.value;
-        let lastName = this.$.lastName.value;
-        let biography = this.$.biography.value;
+        var firstName = this.$.firstName.value;
+        var lastName = this.$.lastName.value;
+        var biography = this.$.biography.value;
+
+        if(biography == undefined) biography = "";
         // var email = this.$.emailAddress.value;
-        let password = this.$.passwordinput.value;
-        let confirmPassword = this.$.confirmPassword.value;
+        var password = this.$.passwordinput.value;
+        var confirmPassword = this.$.confirmPassword.value;
         var that = this;
 
         var postSubscription = this.$.postSubscription.selected;
@@ -303,15 +305,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var receivePLDPEmails = false;
         }        
 
-        let firstNameVal = this.$.firstName.validate();
-        let lastNameVal = this.$.lastName.validate();
+        var firstNameVal = this.$.firstName.validate();
+        var lastNameVal = this.$.lastName.validate();
         // var emailVal = this.$.emailAddress.validate();
 
-        let photo = this.$.local_photo_input.files[0];
-        let photoDownloadURL = "";
-        let thumbnailURL = "";
-        let photo_upload, thumbnail_upload;
-        let timeInMs = Date.now();
+        var photo = this.$.local_photo_input.files[0];
+        var photoDownloadURL = "";
+        var thumbnailURL = "";
+        var photo_upload, thumbnail_upload;
+        var timeInMs = Date.now();
 
         // validate names
         if(!firstName || !firstNameVal){
@@ -322,11 +324,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.showSnackBar("Lastname is required!");
           return;
         }
-        // if(!email || !emailVal){
-        //   this.showSnackBar("Email is required!");
-        //   return;
-        // }
-        let passVal, confirmVal;
+
+        var passVal, confirmVal;
         if(password){
           passVal = this.$.passwordinput.validate();
           confirmVal = this.$.confirmPassword.validate();
@@ -349,13 +348,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
 
         // Get a reference to the database service
-        let database = firebase.database();
-        let storage = firebase.storage();
+        var database = firebase.database();
+        var storage = firebase.storage();
 
-        let userID = this.user.userID;
+        var userID = this.user.userID;
 
         // Update user data 
-        let updates = {};
+        var updates = {};
         updates['/users/' + userID+'/firstName'] = firstName;
         updates['/users/' + userID+'/lastName'] = lastName;
         updates['/users/' + userID+'/receiveEmails'] = receiveEmails;
@@ -364,32 +363,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         updates['/user/' + this.user.uid+'/receiveEmails'] = receiveEmails;
         updates['/user/' + this.user.uid+'/receivePLDPEmails'] = receivePLDPEmails;
         updates['/user/' + this.user.uid+'/biography'] = biography;
-        if(password && passVal){
-          var user = firebase.auth().currentUser;
-
-          user.updatePassword(password).then(function() {
-            // Update successful.
-          }).catch(function(error) {
-            // An error happened.
-          });
-
-          user.updateProfile({
-            displayName: firstName+" "+lastName
-          }).then(function() {
-            // Update successful.
-          }).catch(function(error) {
-            // An error happened.
-          });
-        }
-
-        database.ref().update(updates).then(function (){
-          // that.showSnackBar("User updated Successfully!");
-        }).catch(function(error) {
-          that.showSnackBar("There was an error updating user detais, please try again!")
-          console.log(error);
-          // An error happened.
-          return;
-        });
 
         var subscriber = {
           userID:this.user.userID,
@@ -401,21 +374,49 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         // subscribe user
         if(receiveEmails == true){
-          subscribe["unsubscribed/"+this.user.userID]=null;
-          subscribe["subscribed/"+this.user.userID]=subscriber;
-
-          var usersubscribed = database.ref().update(subscribe).then(() =>{
-              return console.log("Subscribed: ",receiveEmails);
-          }); 
+          updates["unsubscribed/"+this.user.userID]=null;
+          updates["subscribed/"+this.user.userID]=subscriber;
         }else{
-          subscribe["unsubscribed/"+this.user.userID]=subscriber;
-          subscribe["subscribed/"+this.user.userID]=null;
-
-          var usersubscribed = database.ref().update(subscribe).then(() =>{
-              return console.log("Subscribed: ",receiveEmails);
-          }); 
+          updates["unsubscribed/"+this.user.userID]=subscriber;
+          updates["subscribed/"+this.user.userID]=null;
         }
+        
+        var that = this;
+        database.ref().update(updates).then(function (){
+          if(password && passVal){
+            var user = firebase.auth().currentUser;
 
+            user.updatePassword(password).then(function() {
+              // Update successful.
+              that.showSnackBar("User updated Successfully!");
+            }).catch(function(error) {
+              // An error happened.
+              that.showSnackBar("Error: "+error);
+              return;
+            });
+
+            user.updateProfile({
+              displayName: firstName+" "+lastName
+            }).then(function() {
+              // Update successful.
+            }).catch(function(error) {
+              // An error happened.
+            });
+
+          }else{
+            that.showSnackBar("User updated Successfully!");
+            setTimeout(myFunction, 500);
+            function myFunction(){
+              that.removeFromParent();
+            }
+          }
+        }).catch(function(error) {
+          that.showSnackBar("There was an error updating user detais, please try again!")
+          // An error happened.
+          return;
+        });
+
+        
         // check if the media has been uploaded
         if(photo != undefined){
           // ref for photo and thubnails
@@ -456,10 +457,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           photoTask.on('state_changed', 
             function progress(snapshot){
               let percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              // this.showSnackBar("Uploading Photo...");
+              that.showSnackBar("Please wait, uploading user profile photo...");
             },
             function error(err){
-              that.showSnackBar("Error updating user profile picture!");
+              that.showSnackBar("Error updating user profile photo, please try again!");
               return;
             },
             function complete(){
@@ -468,27 +469,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               // Update user thumbnail 
               let photoupdate = {};
               photoupdate['/users/' + userID+'/photoURL'] = photoDownloadURL;
-              database.ref().update(photoupdate);
+              database.ref().update(photoupdate).then(() => {
+                that.showSnackBar("User photo uploaded successfully!");
+                
+                setTimeout(myFunction, 2000);
+                function myFunction(){
+                  window.location.reload();
+                }
+              }).catch(() => {
+                that.showSnackBar("Error updating user profile photo, please try again!");
+              });
             }
           );
         }
 
-        var that = this;
+        // var that = this;
 
-        setTimeout(myFunction, 2000);
-        function myFunction(){
-          that.removeFromParent();
-        }
-
-        this.showSnackBar("User updated Successfully!");
-
+        // setTimeout(myFunction, 2000);
+        // function myFunction(){
+        //   that.removeFromParent();
+        // }
         this.$.passwordinput.value = "";
         this.$.confirmPassword.value = "";
-
-        if(password && passVal){
-          this.$.currentPassword.value = password;
-        }
-        
       }
 
       removeFromParent(){
@@ -502,7 +504,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         x.innerHTML = msg;
 
         x.className = "show";
-        setTimeout(function(){ x.className = x.className.replace("show", ""); }, 4000);
+        setTimeout(function(){ x.className = x.className.replace("show", ""); }, 6000);
       }
       _photo(photo){
         let photo_url = "background-image: url('../images/profile/default-user.png');";

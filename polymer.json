@@ -10,7 +10,7 @@
 		"src/my-recorder.html","src/not-found.html","src/play-media.html","src/pldp-articles.html",
 		"src/pldp-favorites.html","src/pldp-masterclass.html","src/pldp-podcasts.html","src/pldp-styles.html","src/pldp-thoughts.html","src/pldp-videos.html","src/read-articles.html","src/shared-styles.html","src/sign-in.html","src/thought-card-attachments.html","src/thoughts-management.html",
 		"src/topleader-thoughts.html","src/user-profile.html","src/view-articles.html",
-		"src/view-masterclass.html","src/view-podcasts.html","src/view-thoughts.html","src/w3-styles.html", "src/terms-conditions.html", "src/term-condition.html", "src/filtered-thoughts.html", "src/filtered-articles.html", "src/filtered-podcasts.html", "src/filtered-videos.html", "src/company-analytics.html", "src/welcome-page.html", "src/my-pdfscript.html", "src/follow-button.html"
+		"src/view-masterclass.html","src/view-podcasts.html","src/view-thoughts.html","src/w3-styles.html", "src/terms-conditions.html", "src/term-condition.html", "src/filtered-thoughts.html", "src/filtered-articles.html", "src/filtered-podcasts.html", "src/filtered-videos.html", "src/company-analytics.html", "src/welcome-page.html", "src/my-pdfscript.html", "src/follow-button.html","src/preview-profile.html"
 	],
 	"sources": [
 		"src/**/*","images/**/*","data/**/*","bower.json"

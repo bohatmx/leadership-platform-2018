@@ -30,7 +30,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/l2t-paper-rating/l2t-paper-rating.html">
 <link rel="import" href="app-icons.html">
 <link rel="lazy-import" href="who-liked.html">
-
+<link rel="import" href="preview-profile.html">
 <dom-module id="comments-box">
 	<template>
 		<link rel="import" href="shared-styles.html">
@@ -96,7 +96,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				display: none;
 			}
 			.commentor-photo{
-				background-repeat: no-repeat;
+				background-repeat: round;
 				background-size: cover;
 				display: inline-block;
 				width: 42px;
@@ -170,6 +170,36 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				--paper-fab-background: #1298f1;
 				--paper-fab-keyboard-focus-background: #1298f1;
 			}
+			.ldp-modal{
+				position: fixed;
+				z-index: 99999999;
+				top:0px; right: 0px; left: 0px; bottom: 0px;
+				overflow: auto;
+				padding:50px 10px;
+				background-color: rgba(0,0,0,0.65);
+				display: none;
+				box-shadow: 0px 0px 15px rgba(0,0,0,0.85);
+				max-height: 100%;
+			}
+
+			.ldp-modal-content{
+				position: relative;
+				z-index: 1;
+				background-color: #fff;
+				margin: auto;
+			}
+
+			.ldp-modal-close{
+				position: fixed;
+				right:0px; top:0px;
+				z-index: 99999999999;
+			}
+			.ldp-modal::-webkit-scrollbar {
+			    width: 6px;
+			}
+			.ldp-modal.modal-div{
+				margin: 0px;
+			}
 		</style> 
 		
 		<div class="comments-box">
@@ -203,7 +233,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 							<iron-icon icon="app:send" on-tap="_saveComment"></iron-icon>
 						</div>
 						<div class="w3-left">
-								<div style$="[[_profilePhoto(user.photoURL)]]" class="commentor-photo"></div>
+							<div style$="[[_profilePhoto(user.photoURL)]]" class="commentor-photo" ></div>
 						</div>
 						<div class="w3-rest">
 							<paper-textarea rows="1" class="_myComment" multiple label="Leave a comment..." type="text" auto-validate> </paper-textarea> 
@@ -215,7 +245,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					<template is="dom-repeat" items="{{_sortComments(item.comments)}}" as="comment" sort="_sort" observe="date">
 						<div class="w3-row crh-row">
 							<div class="w3-left">
-									<div style$="[[_profilePhoto(comment.photoURL)]]" class="commentor-photo"></div>
+								<div style$="[[_profilePhoto(comment.photoURL)]]" class="commentor-photo" data="[[comment.commentID]]" on-tap="_previewProfile"></div>
 							</div>
 							<div class="w3-rest">
 								<div class="comment-box-author w3-app-text">
@@ -257,7 +287,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				<div>
 					<span id="spanCloseItemModal" on-click="_closeItemsModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white">&times;</span>
 					<div class="w3-row">
-						<who-liked likesdata="{{likesdata}}"></who-liked>
+						<who-liked likesdata="{{likesdata}}" user="{{user}}"></who-liked>
 					</div>
 					<div id="item-holder" class="w3-row w3-border w3-round-small w3-margin-bottom"></div>
 				</div>
@@ -274,6 +304,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				<paper-button class="w3-red" on-tap="deleteComment">DELETE</paper-button>
 			</div>
 		</paper-dialog>
+
+		<div id="preview-profile" class="ldp-modal w3-animate-zoom">
+			<div class="ldp-modal-content w3-round max-modal-width">
+				<div>
+					<span id="close-followers" data="preview-profile" on-click="_closeProfileModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white" style="z-index: 999;">&times;</span>
+					<div class="w3-row">
+						<preview-profile _userid="{{_userid}}" userobj="{{userobj}}" user="{{user}}"></preview-profile>
+					</div>
+				</div>
+			</div>
+		</div>
 	</template>
 
 	<script>
@@ -318,6 +359,55 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						notify: true
 					}
 				};
+			}
+
+			_previewProfile(e){
+				var commentID = e.currentTarget.data;
+				var comments = this.item.comments;
+				var filteredArray = [];
+
+				for(var x in comments){
+					if(x == commentID){
+						filteredArray = comments[x];
+					}
+				}
+
+				// console.log("user in comment: ", this.user)
+
+				if(filteredArray){
+					var photoURL = filteredArray.photoURL;
+
+					if(photoURL == "" || photoURL == undefined) photoURL = "../images/default-user.png";
+					var a = {
+						journalUserName: filteredArray.journalUserName,
+						journalUserID: filteredArray.journalUserID,
+						companyName: filteredArray.companyName,
+						companyID: filteredArray.companyID,
+						photoURL: photoURL
+					}
+
+					this.userobj = a;
+					this._userid = filteredArray.journalUserID;
+
+					// var page = "preview-profile"
+					// var resolvedPageUrl = this.resolveUrl(page + '.html');
+					// Polymer.importHref(
+					// 	resolvedPageUrl,
+					// 	null,
+					// 	page + '.html',
+					// 	true);
+						
+					this._openProfileModal();
+				}
+			}
+
+			_openProfileModal(){
+				var modal = Polymer.dom(this.root).querySelector('#preview-profile');
+				modal.style.display = 'block';
+			}
+			_closeProfileModal(){
+				var modal = Polymer.dom(this.root).querySelector('#preview-profile');
+				modal.style.display = 'none';
 			}
 			
 			isNotCurrentUser(user){

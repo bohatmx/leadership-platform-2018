@@ -45,7 +45,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="w3-styles.html">
 <!-- <script src="https://code.jquery.com/jquery-2.1.4.js"></script> -->
-<link rel="import" href="preview-profile.html">
+<link rel="lazy-import" href="preview-profile.html">
 
 <dom-module id="view-podcasts">
 	<template>
@@ -270,7 +270,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				<div>
 					<span id="close-followers" data="preview-profile" on-click="_closeProfileModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white" style="z-index: 999;">&times;</span>
 					<div class="w3-row">
-						<preview-profile _userid="{{_userid}}" userobj="{{userobj}}"></preview-profile>
+						<preview-profile _userid="{{_userid}}" userobj="{{userobj}}" user="{{user}}"></preview-profile>
 					</div>
 				</div>
 			</div>
@@ -279,18 +279,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			<div class="spinner" style="position: fixed;">
 				<paper-spinner  active="{{isloading}}"></paper-spinner>
 				<div style="width: 100%; padding-top: 10px;" class="w3-row w3-center" id="spinnerMessage">
-				
-					<template is="dom-if" if="{{ !isloading }}">
-						<img hidden="{{!noIdea}}"src="https://png.icons8.com/material/200/666666/no-idea.png">
-					   </template>
-						<h4> {{loadingmessage}}</h4> 
+
+					<template is="dom-if" if="[[isEqual(thoughtype, 'filteredthoughts')]]">
+						<img hidden="{{!noIdea}}" src="https://png.icons8.com/material/200/666666/no-idea.png">
+					</template>
+					<h4> {{loadingmessage}}</h4> 
 				</div>
 			</div>
 			<div class="main-card" style="width:100%;">
 				<template id="podcastsList" is="dom-repeat" items="[[podcastsData]]" as="item" sort="_sort" observe="dateScheduled">
 					<!-- <div class="podcast-item" id="modal-[[item.podcastID]]"> -->
 						<div class="modal-div" id="modal-[[item.podcastID]]">
-							<div class="card-container w3-animate-zoom" data="[[item]]">
+							<div class="w3-animate-zoom" data="[[item]]">
 									<div class="w3-card w3-white" style="border-radius:2px; border:1px solid #bbb">
 									<span class="w3-button w3-display-topright w3-red w3-medium w3-hide closer-for-modal">&times;</span>
 									<div class="container card-header w3-row">
@@ -681,7 +681,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 					}
 
-				},10000)
+				},25000)
 			}
 			_setProfileInfo(journalUserName, journalUserID, companyName, companyID, photoURL){
 				if(photoURL == "" || photoURL == undefined) photoURL = "../images/default-user.png";
@@ -698,6 +698,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				var data = e.currentTarget.getAttribute('data');
 				this.userobj = JSON.parse(data);
 				this._userid = this.userobj.journalUserID;
+
+				var page = "preview-profile"
+				var resolvedPageUrl = this.resolveUrl(page + '.html');
+				Polymer.importHref(
+					resolvedPageUrl,
+					null,
+					page + '.html',
+					true);
+
 				this._openProfileModal();
 			}
 			_openProfileModal(){

@@ -16,7 +16,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
-<link rel="import" href="preview-profile.html">
+<link rel="lazy-import" href="preview-profile.html">
 
 <dom-module id="who-liked">
     <template>
@@ -71,7 +71,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <div>
                 <span id="close-followers" data="preview-profile" on-click="_closeProfileModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white" style="z-index: 999;">&times;</span>
                 <div class="w3-row">
-                    <preview-profile _userid="{{_userid}}" userobj="{{userobj}}"></preview-profile>
+                    <preview-profile _userid="{{_userid}}" userobj="{{userobj}}" user="{{user}}"></preview-profile>
                 </div>
             </div>
         </div>
@@ -87,6 +87,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
         static get properties() {
             return {
+                user: {
+                    type: Object,
+                    notify: true
+                },
                 likesdata: {
                     type: Object,
                     notify: true,
@@ -165,6 +169,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
 
             this._userid = userdata.journalUserID;
+
+            var page = "preview-profile"
+            var resolvedPageUrl = this.resolveUrl(page + '.html');
+            Polymer.importHref(
+                resolvedPageUrl,
+                null,
+                page + '.html',
+                true);
+
             this._openProfileModal();
 
             // this._captureClicks(e.currentTarget.postitem, "viewedUserProfile", this.userobj);

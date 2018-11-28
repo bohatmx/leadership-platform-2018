@@ -28,7 +28,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="comments-box.html">
 <link rel="import" href="app-icons.html">
 <link rel="import" href="shared-styles.html">
-<link rel="import" href="preview-profile.html">
+<link rel="lazy-import" href="preview-profile.html">
 
 <dom-module id="view-articles">
 	<template>
@@ -195,7 +195,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				<div>
 					<span id="close-followers" data="preview-profile" on-click="_closeProfileModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white" style="z-index: 999;">&times;</span>
 					<div class="w3-row">
-						<preview-profile _userid="{{_userid}}" userobj="{{userobj}}"></preview-profile>
+						<preview-profile _userid="{{_userid}}" userobj="{{userobj}}" user="{{user}}"></preview-profile>
 					</div>
 				</div>
 			</div>
@@ -555,7 +555,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						that.loadingmessage = "";
 					}
 
-				}, 10000)
+				}, 25000)
 
 			}
 			_sort(a, b) {  
@@ -899,6 +899,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				var data = e.currentTarget.getAttribute('data');
 				this.userobj = JSON.parse(data);
 				this._userid = this.userobj.journalUserID;
+
+				var page = "preview-profile"
+				var resolvedPageUrl = this.resolveUrl(page + '.html');
+				Polymer.importHref(
+					resolvedPageUrl,
+					null,
+					page + '.html',
+					true);
+					
 				this._openProfileModal();
 			}
 			_openProfileModal(){

@@ -21,6 +21,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <!-- Firebase Query -->
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-database-behavior.html">
+<link rel="import" href="follow-button.html" defer>
 
 <dom-module id="preview-profile">
 	<template>
@@ -35,14 +36,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             max-height: 80vh; 
             overflow-y: auto;
         }
-
 		.ldp-logo{
 			display: flex;
 			flex-direction: row;
 			align-items: center;
 			justify-content: center;
 		}
-
 		iron-image{
 			width: 100%;
 			height: 120px;
@@ -73,12 +72,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             border-radius: 10px;
             -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
         }
+		follow-button{
+            width: -moz-fit-content;
+            width: fit-content;
+			display: -webkit-inline-box;
+        }
 		
 	</style>
 	<firebase-query
 		id="qryuser"
 		path="/users/{{userobj.journalUserID}}/analytics"
-		data="{{userData}}">
+		data="{{userData}}"
+		disabled="true">
 	</firebase-query>
 
 	<div class="w3-row">
@@ -88,9 +93,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				<div class="w3-center w3-mobile w3-round">
 					<div class="w3-row w3-text-dark-grey" style="font-size: x-large;">[[userobj.journalUserName]]</div>
 					<div class="w3-row" style="font-size: medium; color: var(--app-primary-color);">[[userobj.companyName]]</div>
+					<div class="w3-row w3-padding">
+						<follow-button on-tap="followUser" class$="followBTNOther [[_isFollowingStyle(userobj.journalUserID)]]" text="[[isFollowing(userobj.journalUserID)]]" data="[[userobj]]" user="[[user]]"></follow-button>
+					</div>
 				</div>
+				
 				<div class="w3-row w3-mobile">
-					<div class="w3-row" style="margin-top: -100px;">
+					<div class="w3-row" style="margin-top: -150px;">
 						<div class="w3-col s6 w3-center">
 							<div class="w3-text-dark-grey" style="font-size: xx-large;">[[followers]]</div>
 							<div class="w3-text-grey" style="font-size: smaller;">Followers</div>
@@ -101,7 +110,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						</div>
 					</div>
 					<!-- <hr> -->
-					<div class="w3-row w3-padding-16 profile-theme-color profile-text-color" style="margin-top: 70px;">
+					<div class="w3-row w3-padding-16 profile-theme-color profile-text-color" style="margin-top: 110px;">
 						<div class="w3-col s3 m3 l3 w3-center">
 							<div style="font-size: xx-large;">[[thoughts]]</div>
 							<div style="font-size: smaller;">Messages</div>
@@ -135,10 +144,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 	<!-- <firebase-query
 		id="qryuserdet"
-		path="/user"
-		order-by-child="userID"
-		equal-to="{{_userid}}"
-		data="{{userDetails}}">
+		path="/users"
+		order-by-child="uid"
+		equal-to="{{uid}}"
+		data="{{userInfo}}"
+		disabled="false">
 	</firebase-query> -->
 
 	</template>
@@ -147,6 +157,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 		static get is() { return 'preview-profile'; }
 		ready(){
 			super.ready();
+			
+			Polymer.RenderStatus.afterNextRender(this, () => {
+				var that = this;
+				// this.uid = this.user.uid;
+				setTimeout(function(){
+					that.$.qryuser.disabled = false;
+					// that.$.qryuserdet.disabled = false;
+				}, 200);
+				
+			});
+
 	  }
 	  static get properties() {
 		return {
@@ -176,8 +197,149 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				type: String,
 				value: "0"
 			},
+			user: {
+				type: Object
+			}
 		};
 	  }
+
+		_isFollowingStyle(journalUserID){
+			if(this.user){
+				let userID = this.user.userID;
+
+				if(userID === journalUserID){
+					return "w3-hide";
+				}
+				else{
+					if(this.user.following){
+						let following =  this.user.following;
+						let isfollowing = following[journalUserID];
+
+						return isfollowing ? 'following' : '';
+					}
+					else {return "";}
+
+				}
+			}
+		}
+
+		isFollowing(journalUserID){
+			if(this.user){
+				if(this.user.following != undefined){
+					if(this.user.following){
+						let following =  this.user.following;
+						let isfollowing = following[journalUserID];
+						
+						if(isfollowing){
+							return 'Following';
+						}else{
+							return 'Follow';
+						}
+					
+					}else {
+						return "Follow";
+					}
+				}else {
+					return "Follow";
+				}
+			}
+            
+        }
+
+		followUser(e){
+            // console.log("clicked ", );
+            let database = firebase.database();
+
+            var data = e.currentTarget.data;
+            var filteredArray = data;
+
+            let following = e.currentTarget.text;
+            let userID = this.user.userID;
+            var that = this;
+            var myPhoto = "";
+
+            let journalUserID = filteredArray.journalUserID;
+            let journalUserName = filteredArray.journalUserName;
+            var followDate = Date.now();
+
+            if(this.user.photoURL != undefined || this.user.photoURL != ""){
+                myPhoto = this.user.photoURL;
+            }else{
+                myPhoto = "";
+            }
+
+            if(myPhoto == undefined){
+                myPhoto = "";
+            }
+
+            if(following == "Follow"){
+                var name = "following";
+                var arr = e.currentTarget.className.split(" ");
+                
+                if (arr.indexOf(name) == -1) {
+                    e.currentTarget.className += " " + name;
+                    e.currentTarget.text = "Following";
+                }
+
+                var photoURL = this._profilePhoto(filteredArray.photoURL);
+
+                var theirdata = {
+                    "firstName":filteredArray.journalUserName,
+                    "lastName":"",
+                    "companyName":filteredArray.companyName,
+                    "dateRegistered":followDate,
+                    "photoURL":photoURL,
+                    "userID":journalUserID
+                }
+
+                var mydata = {
+                    "firstName":that.user.firstName,
+                    "lastName":that.user.lastName,
+                    "companyName":that.user.companyName,
+                    "dateRegistered": followDate,
+                    "photoURL":myPhoto,
+                    "userID": userID
+                }
+
+                var updates = {}
+                updates["users/"+userID+"/following/"+journalUserID]=theirdata;
+                updates["users/"+journalUserID+"/follower/"+userID]=mydata;
+                updates["followers/"+journalUserID+"/"+userID]=mydata;
+
+                return database.ref().update(updates).then(() =>{
+                    return console.log("Following");
+                });
+
+            }else{
+                e.currentTarget.className = e.currentTarget.className.replace(/\bfollowing\b/g, "");
+                e.currentTarget.text = "Follow";
+
+                var updates = {}
+                updates["users/"+userID+"/following/"+journalUserID]=null;
+                updates["users/"+journalUserID+"/follower/"+userID]=null;
+                updates["followers/"+journalUserID+"/"+userID]=null;
+
+                return database.ref().update(updates).then(() =>{
+                    return console.log("Unfollowed");
+                });
+                
+            }
+
+        }
+		_profilePhoto(photo){
+            let photo_url = "../images/default-user.png";
+
+            if(photo == undefined){
+                photo_url = "../images/default-user.png";
+            }else if(photo == ""){
+                photo_url = "../images/default-user.png";
+            }else{
+                photo_url = ''+photo+'';
+            }
+
+            return photo_url;
+        }
+        
 
 		_userDataChange(newData, oldData) {
 			this.articles = "-";
@@ -214,7 +376,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					if(newData[item].$key == "following") {
 						if(newData[item].$val < 0) {
 							this.following = "-";
-						}else this.following = ""+newData[item].$val};
+						}else this.following = ""+newData[item].$val
+					};
 				}
 					
 			} 

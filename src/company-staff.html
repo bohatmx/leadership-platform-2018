@@ -38,7 +38,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
     <template is="dom-if" if="[[_companyid]]">
       <firebase-query id="users" path="/users" order-by-child="companyID" equal-to="[[_companyid]]" limit-to-first="{{minData}}"
-        data="{{usersData}}">
+        data="{{usersData}}" disabled="true">
       </firebase-query>
       <!-- order-by-child="companyID"
           equal-to="[[_companyid]]" -->
@@ -219,7 +219,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div class="w3-modal-content w3-animate-right w3-card-2">
         <div class="modal-header w3-theme-l1">
           <span id="closeModal" class="w3-button w3-display-topright w3-red w3-text-white">&times;</span>
-          <h2 class="w3-text-blue">
+          <h2 class="w3-text-white">
             <iron-icon icon="app:group-add"></iron-icon>&nbsp;Upload Users
           </h2>
         </div>
@@ -255,7 +255,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div class="w3-modal-content w3-animate-right w3-card-4">
         <header class="w3-container w3-theme-l1">
           <span id="closeSingleUser" class="w3-button w3-display-topright w3-red w3-text-white">&times;</span>
-          <h2 class="w3-text-blue">
+          <h2 class="w3-text-white">
             <iron-icon icon="app:person-add"></iron-icon>&nbsp;New User
           </h2>
         </header>
@@ -265,9 +265,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <paper-listbox id="categoryList" slot="dropdown-content" attr-for-selected="value" selected="{{selectedCategory}}"
               no-animations="true" style="min-width: 340px;">
               <paper-item value="Standard User">Standard User</paper-item>
-              <paper-item value="Master Contributor (Gold)">Master Contributor (Gold)</paper-item>
-              <paper-item value="Global Contributor (Top Leader)">Global Contributor (Top Leader)</paper-item>
-              <paper-item value="Platinum Admin">Platinum Admin</paper-item>
+              <template is="dom-if" if="[[_isSuperAdmin]]">
+                <paper-item value="Global Contributor">Global Contributor</paper-item>
+                <paper-item value="Company Admin">Company Admin</paper-item>
+              </template>
             </paper-listbox>
           </paper-dropdown-menu>
           <paper-input id="firstName" name="firstName" always-float-label label="Firstname" type="text" required
@@ -282,6 +283,36 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </footer>
       </div>
     </div>
+
+    <div id="user-type" class="ldp-modal w3-animate-zoom">
+			<div class="ldp-modal-content w3-round max-modal-width">
+				<div class="w3-container w3-padding-large">
+					<span id="closeUserType" data="user-type" on-click="_closeUserTypeModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white">&times;</span>
+					<div class="w3-large w3-border-bottom" style="padding:20px 15px">
+						<b class="w3-text-dark-gray w3-center"><iron-icon icon="app:create"></iron-icon>&nbsp;Change Type</b>
+          </div>
+          <div class="w3-row w3-margin">
+            <paper-dropdown-menu autofocus id="dropdown_menu" label="User Category" value="{{selectedType}}" style="width: -webkit-fill-available;"
+            tabindex="0" horizontal-align="right">
+              <paper-listbox id="typeList" slot="dropdown-content" attr-for-selected="value" selected="{{selectedType}}"
+                no-animations="true" style="min-width: 340px;">
+                <paper-item value="Standard User">Standard User</paper-item>
+                <template is="dom-if" if="[[_isSuperAdmin]]">
+                  <paper-item value="Global Contributor">Global Contributor</paper-item>
+                  <paper-item value="Company Admin">Company Admin</paper-item>
+                </template>
+                
+              </paper-listbox>
+            </paper-dropdown-menu>
+          </div>
+					<div class="w3-row w3-light-grey w3-padding">
+						<paper-button raised class="w3-blue" on-tap="updateUserType">
+              <iron-icon icon="app:send"></iron-icon>&nbsp;SUBMIT
+            </paper-button>
+					</div>
+				</div>
+			</div>
+		</div>
 
     <!-- <div class="container search-bar">
       <paper-search-bar hide-filter-button="true" placeholder="Search for Staff Members"></paper-search-bar>
@@ -299,9 +330,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <template is="dom-repeat" items="[[usersData]]" as="item" initial-count="10" target-framerate="10">
           <li class="w3-bar" style="padding: 8px 0;">
             <img class="w3-third w3-padding-small w3-circle" style="width:36px; height: 36px;" src="[[_profilePhoto(item.photoURL)]]">
-            <div class="w3-rest w3-bar-item">
-              <span class="w3-medium w3-text-blue">[[item.firstName]] [[item.lastName]]</span><span class$="[[_isDisabled(item.disabled)]] w3-tag w3-tiny w3-round">[[_isDisabledText(item.disabled)]]</span><br>
-              <span>[[item.email]]</span>
+            <div class="w3-rest w3-bar-item" style="min-width:280px;">
+              <span class="w3-medium w3-text-dark-gray">[[item.firstName]] [[item.lastName]]</span><span class$="[[_isDisabled(item.disabled)]] w3-tag w3-tiny w3-round">[[_isDisabledText(item.disabled)]]</span><br>
+              <span class="w3-margin-bottom">[[item.email]]</span><br>
+              <br>
+              <span class="followBTNOther following w3-padding w3-card w3-hover-blue-gray" style="cursor:pointer;" on-tap="_openUserTypeModal" data="[[item.userID]]">[[_getUserTypeDesc(item.userType)]] <iron-icon icon="app:arrow-drop-down-circle"></iron-icon></span>
             </div>
             <!--  This is the Trash icon -->
             <paper-icon-button isdisabled="[[item.disabled]]" username="[[item.firstName]] [[item.lastName]]" data="[[item.userID]]"
@@ -339,32 +372,45 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       ready() {
         super.ready();
 
-        var modal = Polymer.dom(this.root).querySelector('#myModal');
-        var modalsingleUser = Polymer.dom(this.root).querySelector('#singleUser');
-        var span = Polymer.dom(this.root).querySelector('#closeModal');
-        var spanSingleUSer = Polymer.dom(this.root).querySelector('#closeSingleUser');
-        var pickFileLabel = Polymer.dom(this.root).querySelector('#pickFileLabel');
-        var hideRemoveFile = Polymer.dom(this.root).querySelector('#hideRemoveFile');
-        var filename = Polymer.dom(this.root).querySelector('#filename');
-        var selectFileForm = Polymer.dom(this.root).querySelector('#selectFileForm');
         var that = this;
 
-        span.addEventListener('click', function (e) {
-          pickFileLabel.style = "display: block;";
-          filename.innerHTML = "";
-          hideRemoveFile.style = "display: none";
-          selectFileForm.reset();
-          modal.style.display = "none";
+        Polymer.RenderStatus.afterNextRender(this, () => {
+          var modal = Polymer.dom(this.root).querySelector('#myModal');
+          var modalsingleUser = Polymer.dom(this.root).querySelector('#singleUser');
+          var span = Polymer.dom(this.root).querySelector('#closeModal');
+          var spanSingleUSer = Polymer.dom(this.root).querySelector('#closeSingleUser');
+          var pickFileLabel = Polymer.dom(this.root).querySelector('#pickFileLabel');
+          var hideRemoveFile = Polymer.dom(this.root).querySelector('#hideRemoveFile');
+          var filename = Polymer.dom(this.root).querySelector('#filename');
+          var selectFileForm = Polymer.dom(this.root).querySelector('#selectFileForm');
+          var that = this;
+
+          if((this._companyid == "-KgsUcgfo7z1U9MXgd9i") || (this._companyid=="-LDVbbRyIMhukVtTVQ0n") ){
+            this._isSuperAdmin = true;
+          }
+
+          span.addEventListener('click', function (e) {
+            pickFileLabel.style = "display: block;";
+            filename.innerHTML = "";
+            hideRemoveFile.style = "display: none";
+            selectFileForm.reset();
+            modal.style.display = "none";
+          });
+
+          spanSingleUSer.addEventListener('click', function (e) {
+            // ios 11 bug caret position
+            if (iOS && iOS11) {
+              that.removeIOSBugfix();
+            }
+            this.selectedCategory = "";
+            modalsingleUser.style.display = "none";
+          });
+
+          // this.$.users.disabled=false;
+          Polymer.dom(this.root).querySelector('#users').disabled = false;
         });
 
-        spanSingleUSer.addEventListener('click', function (e) {
-          // ios 11 bug caret position
-          if (iOS && iOS11) {
-            that.removeIOSBugfix();
-          }
-          this.selectedCategory = "";
-          modalsingleUser.style.display = "none";
-        });
+        
       }
       static get properties() {
         return {
@@ -384,12 +430,109 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Boolean,
             value: true
           },
+          _isSuperAdmin: {
+            type: Boolean,
+            value: false
+          },
           isloadingmore: {
             type: Boolean,
             value: true
+          },
+          edituserid:{
+            type:String,
+            value: ""
           }
         };
       }
+      _getUserTypeDesc(type){
+        var userTypes = {
+          4: "Global Contributor",
+          5: "Master Contributor",
+          7: "Company Admin",
+          8: "Standard User",
+          10: "Corporate I-Leader",
+          11: "Organisation Contributor",
+        }
+
+        var typedesc = userTypes[type];
+
+        return typedesc ? typedesc : "Standard User";
+      }
+      _getUserType(type){
+        var userTypes = {
+          "Global Contributor": 4,
+          "Master Contributor": 5,
+          "Company Admin": 7,
+          "Standard User": 8,
+          "Corporate I-Leader": 10,
+          "Organisation Contributor": 11
+        }
+
+        var typedesc = userTypes[type];
+
+        return typedesc ? typedesc : 8;
+      }
+      updateUserType(){
+        let database = firebase.database();
+
+        var that = this;
+        const userProfile = this.usersData.find((value) => value.userID === that.edituserid ? value : null);
+        var selected = this.selectedType;
+        var uid = userProfile.uid;
+        var userID = userProfile.userID;
+        var companyID = userProfile.companyID;
+        var userType = this._getUserType(selected);
+
+        var currUserType = this.user.userType;
+        var currUserID = this.user.userID;
+
+        if(currUserID == userID){
+          if((currUserType == 7) && (userType != 7) ){
+            this.showSnackBar('Could not remove Admin Role from your own account!');
+            return
+          }
+        }
+
+        // Update user data 
+        let updates = {};
+        updates['/users/' + userID + '/companyID_userType'] = companyID+"_"+userType;
+        updates['/users/' + userID + '/userType'] = userType;
+        updates['/users/' + userID + '/userDescription'] = selected;
+        updates['/user/' + uid + '/companyID_userType'] = companyID+"_"+userType;
+        updates['/user/' + uid + '/userType'] = userType;
+        updates['/user/' + uid + '/userDescription'] = selected;
+
+        this._closeUserTypeModal();
+        database.ref().update(updates).then(()=>{
+          that.showSnackBar('User updated successfully.');
+        }).catch(()=>{
+          that.showSnackBar('Error updating user details.');
+        });
+        
+      }
+      _openUserTypeModal(e){
+        this.edituserid = e.currentTarget.data;
+        var that = this;
+        const userProfile = this.usersData.find((value) => value.userID === that.edituserid ? value : null);
+        this.selectedType = this._getUserTypeDesc(userProfile.userType);
+
+        // ios 11 bug caret position
+        if (iOS && iOS11) {
+          this.addIOSBugfix();
+        }
+				var modal = Polymer.dom(this.root).querySelector('#user-type');
+				modal.style.display = 'block';
+			}
+
+			_closeUserTypeModal(){
+        // ios 11 bug caret position
+        if (iOS && iOS11) {
+          this.removeIOSBugfix();
+        }
+
+				var modal = Polymer.dom(this.root).querySelector('#user-type');
+				modal.style.display = 'none';
+			}
       _loadMorePosts() {
         this.scrollPos = window.scrollY;
         this.isloadingmore = true;
@@ -413,7 +556,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           that.loadmore = false;
           that.isloadingmore = false;
 
-        }, 10000)
+        }, 25000)
       }
       attached() {
         // Use the document element
@@ -428,6 +571,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         let active = e.target.isdisabled
         let disabled = true;
         let disabledText = 'Deactivate';
+
+        const userProfile = this.usersData.find((value) => value.userID === userID ? value : null);
+        var currUserID = this.user.userID;
+
+        if(currUserID == userProfile.userID){
+          this.showSnackBar('Cannot deactivate your own account!');
+          return
+        }
 
         active ? disabled = false : true;
         disabled ? disabledText = 'Deactivate' : disabledText = 'Activate';
@@ -456,10 +607,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       findAndDeleteDocument(documentPathUrl, objectId) {
         // Get a reference to the database service
         const database = firebase.database();
-
         database.ref(`${documentPathUrl}/${objectId}`).remove();
-
-
 
       }
 
@@ -475,13 +623,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           const userProfile = this.usersData.find((value) => value.userID === data ? value : null);
 
+          var currUserID = this.user.userID;
+
+          if(currUserID == userProfile.userID){
+            this.showSnackBar('Cannot delete your own account!');
+            return
+          }
+
           //TODO: User Paper Dialog to Confirmation with (Yes) / (No) buttons 
           //Confirm user deletion action 
 
           const answerEmail = prompt(
             `Are your sure you want to remove ${userProfile.firstName} ${userProfile.lastName} \n ( Please type in the email of the User !) `
           );
-
 
           if (answerEmail === '' || answerEmail === null || answerEmail !== userProfile.email) {
             this.showSnackBar('User not deleted: Incorrect email address provided.');
@@ -591,18 +745,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         let userDescription = "Standard User";
         let userType = 8;
 
-        if (this.selectedCategory == "Global Contributor (Top Leader)") {
+        if (this.selectedCategory == "Global Contributor") {
           userDescription = this.selectedCategory;
           userType = 4;
-        } else if (this.selectedCategory == "Master Contributor (Gold)") {
+        } else if (this.selectedCategory == "Master Contributor") {
           userDescription = this.selectedCategory;
           userType = 5;
-        } else if (this.selectedCategory == "Platinum Admin") {
+        } else if (this.selectedCategory == "Company Admin") {
           userDescription = this.selectedCategory;
           userType = 7;
         } else if (this.selectedCategory == "Standard User") {
           userDescription = this.selectedCategory;
           userType = 8;
+        } else if (this.selectedCategory == "Corporate I-Leader") {
+          userDescription = this.selectedCategory;
+          userType = 10;
+        } else if (this.selectedCategory == "Organisation Contributor") {
+          userDescription = this.selectedCategory;
+          userType = 11;
         }
 
         // get date and time

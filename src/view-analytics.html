@@ -31,11 +31,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="my-icons.html">
 <dom-module id="view-analytics">
   <template>
-    <template is="dom-if" if="[[_companyid]]">
+    <!-- <template is="dom-if" if="[[_companyid]]"> -->
         <firebase-query
             id="qry_overallanalytics"
             path="/company-analytics/{{_companyid}}/{{currPeriod}}"
-            data="{{overallData}}">
+            data="{{overallData}}"
+            disabled="true">
         </firebase-query>
 
         <firebase-query
@@ -43,15 +44,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             path="/company-analytics/{{_companyid}}/{{useractive}}/{{activeUsersPeriod}}"
             order-by-child="total"
             limit-to-last="{{minData}}"
-            data="{{activeUsersData}}">
+            data="{{activeUsersData}}"
+            disabled="true">
         </firebase-query>
 
         <firebase-query
             id="qry_noofusers"
             path="/company-analytics/{{_companyid}}/counts"
-            data="{{noOfUsersData}}">
+            data="{{noOfUsersData}}"
+            disabled="true">
         </firebase-query>
-    </template>
+    <!-- </template> -->
 
     <style include="w3-styles">
         /* Phone and tablet */
@@ -306,7 +309,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <firebase-query
         id="qry_companies"
-        data="{{appCompanies}}">
+        data="{{appCompanies}}"
+        disable="true">
     </firebase-query>
   </template>
 
@@ -422,6 +426,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         };
       }
+
+      connectedCallback() {
+        super.connectedCallback();
+        
+
+        Polymer.RenderStatus.afterNextRender(this, () => {
+            var that = this;
+
+            setTimeout(function(){
+                that.$.qry_overallanalytics.disabled=false;
+                that.$.qry_activeusers.disabled=false;
+                that.$.qry_noofusers.disabled=false;
+                that.$.qry_companies.disabled=false;
+            }, 200);
+            
+        });
+      }
     
       _getNos(nos){
           var res = "_"
@@ -499,8 +520,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _appCompaniesReceived(newData, oldData){
         if(newData.length > 0){
+            // ios 11 bug caret position
+            if (iOS && iOS11) {
+                this.addIOSBugfix();
+            }
             this.iscompaniesloaded = false;
         }
+      }
+
+      addIOSBugfix() {
+        // Get scroll position before moving top
+        scrollTopPosition = $(document).scrollTop();
+        console.log('iOS device')
+        // Add CSS to body "position: fixed"
+        $("body").addClass("iosBugFixCaret");
       }
 
       _sort(a, b) {  
@@ -752,7 +785,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             if(this.user.companyanalytics){
                 var qry_companies = Polymer.dom(that.root).querySelector("#qry_companies")
-                qry_companies.path="companies";
+                qry_companies.path="active-companies";
             }
 
             this.isloading = false;
