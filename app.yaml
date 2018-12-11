@@ -6,35 +6,43 @@ handlers:
 - url: /bower_components
   static_dir: build/es6-unbundled/bower_components
   secure: always
+  expiration: "4d 5h"
 
 - url: /images
   static_dir: build/es6-unbundled/images
   secure: always
+  expiration: "4d 5h"
 
 - url: /data
   static_dir: build/es6-unbundled/data
   secure: always
+  expiration: "4d 5h"
 
 - url: /src
   static_dir: build/es6-unbundled/src
   secure: always
+  expiration: "1d"
 
 - url: /manifest.json
   static_files: build/es6-unbundled/manifest.json
   upload: build/es6-unbundled/manifest.json
   secure: always
+  expiration: "4d 5h"
 
 - url: /service-worker.js
   static_files: build/es6-unbundled/service-worker.js
   upload: build/es6-unbundled/service-worker.js
   secure: always
+  expiration: "0m"
 
 - url: /firebase-messaging-sw.js
   static_files: build/es6-unbundled/firebase-messaging-sw.js
   upload: build/es6-unbundled/firebase-messaging-sw.js
   secure: always
+  expiration: "4d 5h"
 
 - url: /.*
   static_files: build/es6-unbundled/index.html
   upload: build/es6-unbundled/index.html
   secure: always
+  expiration: "0m"

@@ -32,6 +32,15 @@ module.exports = {
       },
     },
     {
+      urlPattern: /\/src\/.*.html/,
+      handler: 'fastest',
+      options: {
+        cache: {
+          name: 'app-src-files',
+        },
+      },
+    },
+    {
       urlPattern: /.*\.(png|jpg|gif|svg)/i,
       handler: 'fastest',
       options: {

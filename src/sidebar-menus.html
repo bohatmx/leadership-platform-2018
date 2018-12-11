@@ -18,253 +18,559 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="app-icons.html">
 <link rel="import" href="w3-styles.html">
 <link rel="import" href="shared-styles.html">
+<!-- Firebase Query -->
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 
 <dom-module id="sidebar-menus">
-    <template>
-    <style include="shared-styles"></style>
-    <style include="w3-styles">
-        :host {
-            display: block;
-        }
-        iron-selector a{
-            text-decoration: none;
-            display: block;
-            padding:7px 5px;
-            position: relative;
-        }
-        .a-border-top{
-            border-top: 1px solid rgba(255,255,255, 0.05);
-        }
-        iron-selector a .sb-link-icon, iron-selector a .sb-link-text{
-            color:#fff;
-        }
-        iron-selector a .sb-link-text{
-            padding: 10px 10px;
-            font-size: 10pt;
-        }
-        iron-selector a:hover{
-            background-color: rgba(255,255,255,0.05);
-        }
-        iron-selector a iron-icon{
-            color:#fff;
-        }
+		<template>
+		<style include="shared-styles"></style>
+		<style include="w3-styles">
+				:host {
+						display: block;
+				}
+				iron-selector a{
+						text-decoration: none;
+						display: block;
+						padding:7px 5px;
+						position: relative;
+				}
+				.a-border-top{
+						border-top: 1px solid rgba(255,255,255, 0.05);
+				}
+				iron-selector a .sb-link-icon, iron-selector a .sb-link-text{
+						color:#fff;
+				}
+				iron-selector a .sb-link-text{
+						padding: 10px 10px;
+						font-size: 10pt;
+				}
+				iron-selector a:hover{
+						background-color: rgba(255,255,255,0.05);
+				}
+				iron-selector a iron-icon{
+						color:#fff;
+				}
+
+				.hidden {
+						display: none;
+						visibility: hidden;
+
+				}
 			
-    </style>
-    <!-- Corporate Leadership App Menus -->
-    <template is="dom-if" if="[[leadershipapp]]">
-        <iron-selector selected="{{page}}" attr-for-selected="name" class="drawer-list" role="navigation">
-            <div class="w3-row w3-padding w3-small w3-sb-title w3-sb-title-text">Leadership Messages</div>
-            <a name="company-thoughts" href="company-thoughts#" class="w3-row">
-                <paper-ripple></paper-ripple>
-                <div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
-                    <paper-icon-button icon="smapp:business"></paper-icon-button>
-                </div>
-                <div class="w3-rest sb-link-text">Organisational</div>
-            </a>
-            <a name="i-lead" href="i-lead#" class="w3-row a-border-top">
-                <paper-ripple></paper-ripple>
-                <div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
-                    <paper-icon-button icon="smapp:ac-unit"></paper-icon-button>
-                </div>
-                <div class="w3-rest sb-link-text">I-LEAD</div>
-            </a>
-            <a name="topleader-thoughts" href="topleader-thoughts#" class="w3-row a-border-top">
-                <paper-ripple></paper-ripple>
-                <div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
-                    <paper-icon-button icon="smapp:group"></paper-icon-button>
-                </div>
-                <div class="w3-rest sb-link-text">Global Contributors</div>
-            </a>
-            <a name="daily-thoughts" href="daily-thoughts#" class="w3-row a-border-top">
-                <paper-ripple></paper-ripple>
-                <div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
-                    <paper-icon-button icon="smapp:speaker-notes"></paper-icon-button>
-                </div>
-                <div class="w3-rest sb-link-text">Daily</div>
-            </a>
-            <a name="leadership-thoughts" href="leadership-thoughts#" class="w3-row a-border-top">
-                <paper-ripple></paper-ripple>
-                <div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
-                    <paper-icon-button icon="smapp:person-pin"></paper-icon-button>
-                </div>
-                <div class="w3-rest sb-link-text">My Posts</div>
-            </a>
-            <div class="w3-row w3-padding w3-small w3-sb-title w3-sb-title-text">Leadership Media</div>
-            <a name="leadership-videos" href="leadership-videos#" class="w3-row">
-                <paper-ripple></paper-ripple>
-                <div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
-                    <paper-icon-button icon="smapp:videocam"></paper-icon-button>
-                </div>
-                <div class="w3-rest sb-link-text">Videos</div>
-            </a>
-            <a name="leadership-podcasts" href="leadership-podcasts#" class="w3-row a-border-top">
-                <paper-ripple></paper-ripple>
-                <div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
-                    <paper-icon-button icon="smapp:mic"></paper-icon-button>
-                </div>
-                <div class="w3-rest sb-link-text">Podcasts & Audios</div>
-            </a>
-            <div class="w3-row w3-padding w3-small w3-sb-title w3-sb-title-text">Leadership Read</div>
-            <a name="leadership-articles" href="leadership-articles#" class="w3-row">
-                <paper-ripple></paper-ripple>
-                <div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
-                    <paper-icon-button icon="smapp:remove-red-eye"></paper-icon-button>
-                </div>
-                <div class="w3-rest sb-link-text">Articles</div>
-            </a>
-            <a name="leadership-ebooks" href="leadership-ebooks#" class="w3-row a-border-top">
-                <paper-ripple></paper-ripple>
-                <div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
-                    <paper-icon-button icon="smapp:library-books"></paper-icon-button>
-                </div>
-                <div class="w3-rest sb-link-text">eBooks</div>
-            </a>
-            <div class="w3-row w3-padding w3-small w3-sb-title w3-sb-title-text">Leadership Development Plan (LDP)</div>
-            <a name="my-pldp" href="my-pldp" class="w3-row">
-                <paper-ripple></paper-ripple>
-                <div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
-                    <paper-icon-button icon="smapp:library-books"></paper-icon-button>
-                </div>
-                <div class="w3-rest sb-link-text">Personal (PLDP)</div>
-            </a>
-            <template is="dom-if" if="[[hidecompany]]">
-                <div class="w3-row w3-padding w3-small w3-sb-title w3-sb-title-text">Company Profile</div>
-                    <!-- <a name="ldp-companies" href="ldp-companies" class="w3-row">
-                        <paper-ripple></paper-ripple>
-                        <div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
-                            <paper-icon-button icon="smapp:work"></paper-icon-button>
-                        </div>
-                        <div class="w3-rest sb-link-text">Companies</div>
-                    </a> -->
-                    <a name="company-analytics" href="company-analytics" onclick="window.location.replace('company-analytics')" class="w3-row">
-                        <paper-ripple></paper-ripple>
-                        <div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
-                            <paper-icon-button icon="smapp:insert-chart"></paper-icon-button>
-                        </div>
-                        <div class="w3-rest sb-link-text">Analytics</div>
-                    </a>
-                
-                <a name="company-staff" href="company-staff" class="w3-row a-border-top">
-                    <paper-ripple></paper-ripple>
-                    <div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
-                        <paper-icon-button icon="smapp:person"></paper-icon-button>
-                    </div>
-                    <div class="w3-rest sb-link-text">Company Staff</div>
-                </a>
-                <a hidden$="{{notcompanyadmin}}" name="thoughts-management" href="thoughts-management" class="w3-row a-border-top w3-padding-bottom">
-                    <paper-ripple></paper-ripple>
-                    <div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
-                        <paper-icon-button icon="smapp:book"></paper-icon-button>
-                    </div>
-                    <div class="w3-rest sb-link-text">Messages Management
-                        <div class="w3-new-badge nt w3-deep-orange" style="left:26px!important; top:6px!important; z-index:222; position:absolute;">
-                            {{pendingstring}}
-                        </div>
-                    </div>
-                </a>
-            </template>
-        </iron-selector>
-    </template>
-    <!-- End Leadership  App Menus -->
+		</style>
+		<!-- Corporate Leadership App Menus -->
+		<template is="dom-if" if="[[leadershipapp]]">
+				<iron-selector selected="{{page}}" attr-for-selected="name" class="drawer-list" role="navigation" fallback-selection="company-thoughts">
+						<div class="w3-row w3-padding w3-small w3-sb-title w3-sb-title-text">Leadership Messages</div>
+						<a name="company-thoughts" href="company-thoughts#" class="w3-row">
+								<paper-ripple></paper-ripple>
+								<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
+										<paper-icon-button icon="smapp:business"></paper-icon-button>
+								</div>
+								<div class="w3-rest sb-link-text">Organisational
+												<template is="dom-if" if="{{companythoughts}}">
+														<div class="w3-new-badge nt w3-deep-orange" style="left:26px!important; top:6px!important; z-index:222; position:absolute;">
+																{{companythoughts}}
+														</div>
+												</template>
+		
+										</div>
+						</a>
+						<a name="i-lead" href="i-lead#" class="w3-row a-border-top">
+								<paper-ripple></paper-ripple>
+								<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
+										<paper-icon-button icon="smapp:ac-unit"></paper-icon-button>
+								</div>
+								<div class="w3-rest sb-link-text">I-LEAD
+										<template is="dom-if" if="{{ileadpublic}}">
+												<div class="w3-new-badge nt w3-deep-orange" style="left:26px!important; top:6px!important; z-index:222; position:absolute;">
+														{{ileadpublic}}
+												</div>
+										</template>
+								</div>
+						</a>
+						<a name="topleader-thoughts" href="topleader-thoughts#" class="w3-row a-border-top">
+								<paper-ripple></paper-ripple>
+								<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
+										<paper-icon-button icon="smapp:group"></paper-icon-button>
+								</div>
+								<div class="w3-rest sb-link-text">Global Contributors
+												<template is="dom-if" if="{{topleaderthoughts}}">
+														<div class="w3-new-badge nt w3-deep-orange" style="left:26px!important; top:6px!important; z-index:222; position:absolute;">
+																{{topleaderthoughts}}
+														</div>
+												</template>
+										</div>
+						</a>
+						<a name="daily-thoughts" href="daily-thoughts#" class="w3-row a-border-top">
+								<paper-ripple></paper-ripple>
+								<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
+										<paper-icon-button icon="smapp:speaker-notes"></paper-icon-button>
+								</div>
+								<div class="w3-rest sb-link-text">Daily
+										<template is="dom-if" if="{{dailythoughts}}">
+												<div class="w3-new-badge nt w3-deep-orange" style="left:26px!important; top:6px!important; z-index:222; position:absolute;">
+														{{dailythoughts}}
+												</div>
 
-    <!-- Public App Menus -->
-    <template is="dom-if" if="[[publicapp]]">
-        <iron-selector selected="{{page}}" attr-for-selected="name" class="drawer-list" role="navigation">
-            <div class="w3-row w3-padding w3-small w3-sb-title w3-sb-title-text">Leadership Messages</div>
-            <a name="i-lead" href="i-lead#" class="w3-row">
-                <paper-ripple></paper-ripple>
-                <div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
-                    <paper-icon-button icon="smapp:ac-unit"></paper-icon-button>
-                </div>
-                <div class="w3-rest sb-link-text">I-LEAD</div>
-            </a>
-            <a name="topleader-thoughts" href="topleader-thoughts#" class="w3-row a-border-top">
-                <paper-ripple></paper-ripple>
-                <div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
-                    <paper-icon-button icon="smapp:group"></paper-icon-button>
-                </div>
-                <div class="w3-rest sb-link-text">Global Contributors</div>
-            </a>
-            <a name="daily-thoughts" href="daily-thoughts#" class="w3-row a-border-top">
-                <paper-ripple></paper-ripple>
-                <div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
-                    <paper-icon-button icon="smapp:speaker-notes"></paper-icon-button>
-                </div>
-                <div class="w3-rest sb-link-text">Daily</div>
-            </a>
-            <a name="leadership-thoughts" href="leadership-thoughts#" class="w3-row a-border-top">
-                <paper-ripple></paper-ripple>
-                <div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
-                    <paper-icon-button icon="smapp:person-pin"></paper-icon-button>
-                </div>
-                <div class="w3-rest sb-link-text">My Posts</div>
-            </a>
-            <div class="w3-row w3-padding w3-small w3-sb-title w3-sb-title-text">Leadership Media</div>
-            <a name="leadership-videos" href="leadership-videos#" class="w3-row">
-                <paper-ripple></paper-ripple>
-                <div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
-                    <paper-icon-button icon="smapp:videocam"></paper-icon-button>
-                </div>
-                <div class="w3-rest sb-link-text">Videos</div>
-            </a>
-            <a name="leadership-podcasts" href="leadership-podcasts#" class="w3-row a-border-top">
-                <paper-ripple></paper-ripple>
-                <div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
-                    <paper-icon-button icon="smapp:mic"></paper-icon-button>
-                </div>
-                <div class="w3-rest sb-link-text">Podcasts & Audios</div>
-            </a>
-            <div class="w3-row w3-padding w3-small w3-sb-title w3-sb-title-text">Leadership Read</div>
-            <a name="leadership-articles" href="leadership-articles#" class="w3-row">
-                <paper-ripple></paper-ripple>
-                <div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
-                    <paper-icon-button icon="smapp:remove-red-eye"></paper-icon-button>
-                </div>
-                <div class="w3-rest sb-link-text">Articles</div>
-            </a>
-            <a name="leadership-ebooks" href="leadership-ebooks#" class="w3-row a-border-top">
-                <paper-ripple></paper-ripple>
-                <div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
-                    <paper-icon-button icon="smapp:library-books"></paper-icon-button>
-                </div>
-                <div class="w3-rest sb-link-text">eBooks</div>
-            </a>
-            <div class="w3-row w3-padding w3-small w3-sb-title w3-sb-title-text">Leadership Development Plan (LDP)</div>
-            <a name="my-pldp" href="my-pldp" class="w3-row">
-                <paper-ripple></paper-ripple>
-                <div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
-                    <paper-icon-button icon="smapp:library-books"></paper-icon-button>
-                </div>
-                <div class="w3-rest sb-link-text">Personal (PLDP)</div>
-            </a>
-        </iron-selector>
-    </template>
-    <!-- End Public App Menus -->
+										</template>
+								</div>
+						</a>
+						<a name="leadership-thoughts" href="leadership-thoughts#" class="w3-row a-border-top">
+								<paper-ripple></paper-ripple>
+								<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
+										<paper-icon-button icon="smapp:person-pin"></paper-icon-button>
+								</div>
+								<div class="w3-rest sb-link-text">My Posts</div>
+						</a>
+						<div class="w3-row w3-padding w3-small w3-sb-title w3-sb-title-text">Leadership Media</div>
+						<a name="leadership-videos" href="leadership-videos#" class="w3-row">
+								<paper-ripple></paper-ripple>
+								<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
+										<paper-icon-button icon="smapp:videocam"></paper-icon-button>
+								</div>
+								<div class="w3-rest sb-link-text">Videos
+										<template is="dom-if" if="{{videoCount}}">
+												<div class="w3-new-badge nt w3-deep-orange" style="left:26px!important; top:6px!important; z-index:222; position:absolute;">
+														{{videoCount}}
+												</div>
+										</template>
+								</div>
+						</a>
+						<a name="leadership-podcasts" href="leadership-podcasts#" class="w3-row a-border-top">
+								<paper-ripple></paper-ripple>
+								<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
+										<paper-icon-button icon="smapp:mic"></paper-icon-button>
+								</div>
+								<div class="w3-rest sb-link-text">Podcasts & Audios
+										<template is="dom-if" if="{{podcastsCount}}">
+												<div class="w3-new-badge nt w3-deep-orange" style="left:26px!important; top:6px!important; z-index:222; position:absolute;">
+														{{podcastsCount}}
+												</div>
+										</template>
+								</div>
+						</a>
+						<div class="w3-row w3-padding w3-small w3-sb-title w3-sb-title-text">Leadership Read</div>
+						<a name="leadership-articles" href="leadership-articles#" class="w3-row">
+								<paper-ripple></paper-ripple>
+								<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
+										<paper-icon-button icon="smapp:remove-red-eye"></paper-icon-button>
+								</div>
+								<div class="w3-rest sb-link-text">Articles
+										<template is="dom-if" if="{{articlesCount}}">
+												<div class="w3-new-badge nt w3-deep-orange" style="left:26px!important; top:6px!important; z-index:222; position:absolute;">
+														{{articlesCount}}
+												</div>
+										</template>
+								</div>
+						</a>
+						<a name="leadership-ebooks" href="leadership-ebooks#" class="w3-row a-border-top">
+								<paper-ripple></paper-ripple>
+								<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
+										<paper-icon-button icon="smapp:library-books"></paper-icon-button>
+								</div>
+								<div class="w3-rest sb-link-text">eBooks</div>
+						</a>
+						<div class="w3-row w3-padding w3-small w3-sb-title w3-sb-title-text">Leadership Development Plan (LDP)</div>
+						<a name="my-pldp" href="my-pldp" class="w3-row">
+								<paper-ripple></paper-ripple>
+								<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
+										<paper-icon-button icon="smapp:library-books"></paper-icon-button>
+								</div>
+								<div class="w3-rest sb-link-text">Personal (PLDP)</div>
+						</a>
+						<template is="dom-if" if="[[hidecompany]]">
+								<div class="w3-row w3-padding w3-small w3-sb-title w3-sb-title-text">Company Profile</div>
+										<!-- <a name="ldp-companies" href="ldp-companies" class="w3-row">
+												<paper-ripple></paper-ripple>
+												<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
+														<paper-icon-button icon="smapp:work"></paper-icon-button>
+												</div>
+												<div class="w3-rest sb-link-text">Companies</div>
+										</a> onclick="window.location.replace('company-analytics')" -->
+										<a name="company-analytics" href="company-analytics" class="w3-row">
+												<paper-ripple></paper-ripple>
+												<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
+														<paper-icon-button icon="smapp:insert-chart"></paper-icon-button>
+												</div>
+												<div class="w3-rest sb-link-text">Analytics</div>
+										</a>
+								
+								<a name="company-staff" href="company-staff" class="w3-row a-border-top">
+										<paper-ripple></paper-ripple>
+										<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
+												<paper-icon-button icon="smapp:person"></paper-icon-button>
+										</div>
+										<div class="w3-rest sb-link-text">Company Staff</div>
+								</a>
+								<a hidden$="{{notcompanyadmin}}" name="thoughts-management" href="thoughts-management" class="w3-row a-border-top w3-padding-bottom">
+										<paper-ripple></paper-ripple>
+										<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
+												<paper-icon-button icon="smapp:book"></paper-icon-button>
+										</div>
+										<div class="w3-rest sb-link-text">Messages Management
+												<div class="w3-new-badge nt w3-deep-orange" style="left:26px!important; top:6px!important; z-index:222; position:absolute;">
+														{{pendingstring}}
+												</div>
+										</div>
+								</a>
+						</template>
+				</iron-selector>
+		</template>
+		<!-- End Leadership  App Menus -->
 
-    </template>
-    <script>
+		<!-- Public App Menus -->
+		<template is="dom-if" if="[[publicapp]]">
+				<iron-selector selected="{{page}}" attr-for-selected="name" class="drawer-list" role="navigation" fallback-selection="i-lead">
+						<div class="w3-row w3-padding w3-small w3-sb-title w3-sb-title-text">Leadership Messages</div>
+						<a name="i-lead" href="i-lead#" class="w3-row">
+								<paper-ripple></paper-ripple>
+								<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
+										<paper-icon-button icon="smapp:ac-unit"></paper-icon-button>
+								</div>
+								<div class="w3-rest sb-link-text">I-LEAD
+										<template is="dom-if" if="{{ileadpublic}}">
+												<div class="w3-new-badge nt w3-deep-orange" style="left:26px!important; top:6px!important; z-index:222; position:absolute;">
+														{{ileadpublic}}
+												</div>
+										</template>
+								</div>
+						</a>
+						<a name="topleader-thoughts" href="topleader-thoughts#" class="w3-row a-border-top">
+								<paper-ripple></paper-ripple>
+								<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
+										<paper-icon-button icon="smapp:group"></paper-icon-button>
+								</div>
+								<div class="w3-rest sb-link-text">Global Contributors
+										<template is="dom-if" if="{{topleaderthoughts}}">
+												<div class="w3-new-badge nt w3-deep-orange" style="left:26px!important; top:6px!important; z-index:222; position:absolute;">
+														{{topleaderthoughts}}
+												</div>
+										</template>
+								</div>
+						</a>
+						<a name="daily-thoughts" href="daily-thoughts#" class="w3-row a-border-top">
+								<paper-ripple></paper-ripple>
+								<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
+										<paper-icon-button icon="smapp:speaker-notes"></paper-icon-button>
+								</div>
+								<div class="w3-rest sb-link-text">Daily
+										<template is="dom-if" if="{{dailythoughts}}">
+												<div class="w3-new-badge nt w3-deep-orange" style="left:26px!important; top:6px!important; z-index:222; position:absolute;">
+														{{dailythoughts}}
+												</div>
 
-    class SidebarMenus extends Polymer.Element {
-        static get is() { return 'sidebar-menus'; }
-        ready(){
-            super.ready();
-        }
-        static get properties() {
-        return {
-            page:{
-                type: String,
-                notify: true
-            },
-            leadershipapp: Boolean,
-            publicapp: Boolean,
-            salesapp: Boolean,
-            hrapp: Boolean,
-            hidecompany: Boolean,
-            notcompanyadmin: Boolean,
-            pendingstring: String
-        };
-      }
-    }
-    window.customElements.define(SidebarMenus.is, SidebarMenus);
-    </script>
+										</template>
+								</div>
+						</a>
+						<a name="leadership-thoughts" href="leadership-thoughts#" class="w3-row a-border-top">
+								<paper-ripple></paper-ripple>
+								<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
+										<paper-icon-button icon="smapp:person-pin"></paper-icon-button>
+								</div>
+								<div class="w3-rest sb-link-text">My Posts</div>
+						</a>
+						<div class="w3-row w3-padding w3-small w3-sb-title w3-sb-title-text">Leadership Media</div>
+						<a name="leadership-videos" href="leadership-videos#" class="w3-row">
+								<paper-ripple></paper-ripple>
+								<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
+										<paper-icon-button icon="smapp:videocam"></paper-icon-button>
+								</div>
+								<div class="w3-rest sb-link-text">Videos
+										<template is="dom-if" if="{{videoCount}}">
+												<div class="w3-new-badge nt w3-deep-orange" style="left:26px!important; top:6px!important; z-index:222; position:absolute;">
+														{{videoCount}}
+												</div>
+										</template>
+								</div>
+						</a>
+						<a name="leadership-podcasts" href="leadership-podcasts#" class="w3-row a-border-top">
+								<paper-ripple></paper-ripple>
+								<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
+										<paper-icon-button icon="smapp:mic"></paper-icon-button>
+								</div>
+								<div class="w3-rest sb-link-text">Podcasts & Audios
+										<template is="dom-if" if="{{podcastsCount}}">
+												<div class="w3-new-badge nt w3-deep-orange" style="left:26px!important; top:6px!important; z-index:222; position:absolute;">
+														{{podcastsCount}}
+												</div>
+										</template>
+								</div>
+						</a>
+						<div class="w3-row w3-padding w3-small w3-sb-title w3-sb-title-text">Leadership Read</div>
+						<a name="leadership-articles" href="leadership-articles#" class="w3-row">
+								<paper-ripple></paper-ripple>
+								<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
+										<paper-icon-button icon="smapp:remove-red-eye"></paper-icon-button>
+								</div>
+								<div class="w3-rest sb-link-text">Articles
+										<template is="dom-if" if="{{articlesCount}}">
+												<div class="w3-new-badge nt w3-deep-orange" style="left:26px!important; top:6px!important; z-index:222; position:absolute;">
+														{{articlesCount}}
+												</div>
+										</template>
+								</div>
+						</a>
+						<a name="leadership-ebooks" href="leadership-ebooks#" class="w3-row a-border-top">
+								<paper-ripple></paper-ripple>
+								<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
+										<paper-icon-button icon="smapp:library-books"></paper-icon-button>
+								</div>
+								<div class="w3-rest sb-link-text">eBooks</div>
+						</a>
+						<div class="w3-row w3-padding w3-small w3-sb-title w3-sb-title-text">Leadership Development Plan (LDP)</div>
+						<a name="my-pldp" href="my-pldp" class="w3-row">
+								<paper-ripple></paper-ripple>
+								<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
+										<paper-icon-button icon="smapp:library-books"></paper-icon-button>
+								</div>
+								<div class="w3-rest sb-link-text">Personal (PLDP)</div>
+						</a>
+				</iron-selector>
+		</template>
+		<!-- End Public App Menus -->
+
+		</template>
+		<script>
+
+		class SidebarMenus extends Polymer.Element {
+				static get is() { return 'sidebar-menus'; }
+				ready(){
+						super.ready();
+				}
+				static get properties() {
+				return {
+						page:{
+								type: String,
+								notify: true
+						},
+						leadershipapp: Boolean,
+						publicapp: Boolean,
+						userid: {
+								type: String,
+								notify: true,
+								observer: "userIdReceived"
+						},
+						salesapp: Boolean,
+						hrapp: Boolean,
+						hidecompany: Boolean,
+						notcompanyadmin: Boolean,
+						pendingstring: String,
+						userNotificationData: {
+								type: Object,
+								observer: "userNotificationDataChanged"
+						},
+						thoughtsCount: {
+								type: Object
+
+						},
+						articlesCount: {
+								type: Number,
+								value: 0
+						},
+						thoughts: {
+								type: Object
+						},
+						podcastsCount: {
+								type: Number,
+								value: 0
+						},
+						videoCount: {
+								type: Number,
+								value: 0
+						},
+						minData: {
+								type: Number,
+								value: 10
+						},
+						seen: {
+								type: Boolean,
+								value: false
+						},
+						indexThought: {
+								type: Number,
+								value: 0
+						},
+						dailythoughts: {
+								type: Number,
+								value: 0
+						},
+						companythoughts: {
+								type: Number,
+								value: 0
+						},
+						topleaderthoughts: {
+								type: Number,
+								value: 0
+						},
+						ileadcorporate: {
+								type: Number,
+								value: 0
+						},
+						ileadpublic: {
+								type: Number,
+								value: 0
+						}
+
+				};
+			}
+
+						/**
+						 * 
+						 *
+						 */
+						 OnNotificationLoaded(userNotificationData) {
+
+// // Create a list of notification types
+// let thoughts, podcasts, articles, video;
+// podcasts = 0
+// articles = 0
+// video = 0
+
+// 1. Query for /dailyThoughts for each thought that has seen = false, and 
+// 2. Check if thought has thoughttype 
+// 3. 
+
+// Iterate through the notification data
+
+switch (userNotificationData.notificationType) {
+		case 'thought':
+
+				if (userNotificationData.thoughtType == 'dailythoughts') {
+						this.dailythoughts++
+				} else if (userNotificationData.thoughtType == 'companythoughts') {
+						this.companythoughts++
+				} else if (userNotificationData.thoughtType == 'topleaderthoughts') {
+						this.topleaderthoughts++
+				} else if (userNotificationData.thoughtType == 'ileadcorporate') {
+						this.ileadcorporate++
+				} else if (userNotificationData.thoughtType == 'ileadpublic') {
+						this.ileadpublic++
+				} else {
+						this.default++
+				}
+
+
+				break;
+		case 'podcast':
+				this.podcastsCount++
+
+				break;
+		case 'article':
+				this.articlesCount++
+
+				break;
+		case 'video':
+				this.videoCount++
+
+				break;
+
+		default:
+
+				break;
+}
+}
+
+async userIdReceived() {
+var that = this;
+var database = firebase.database();
+
+var userNotificationRef = await database.ref('/users/' + this.userid + '/notifications')
+		.orderByChild("seen").equalTo(that.seen)
+
+
+userNotificationRef.on('child_added', (snapshot) => {
+		that.OnNotificationLoaded(snapshot.val());
+})
+userNotificationRef.on('child_removed', (snapshot) => {
+		var userNotificationData = snapshot.val();
+
+		switch (userNotificationData.notificationType) {
+				case 'thought':
+
+						if (userNotificationData.thoughtType == 'dailythoughts') {
+								this.dailythoughts = 0
+						} else if (userNotificationData.thoughtType == 'companythoughts') {
+								this.companythoughts = 0
+						} else if (userNotificationData.thoughtType == 'topleaderthoughts') {
+								this.topleaderthoughts = 0
+						} else if (userNotificationData.thoughtType == 'ileadcorporate') {
+								this.ileadcorporate = 0
+						} else if (userNotificationData.thoughtType == 'ileadpublic') {
+								this.ileadpublic = 0
+						} else {
+								this.default = 0
+						}
+
+						break;
+				case 'podcast':
+						this.podcastsCount = 0
+
+						break;
+				case 'article':
+						this.articlesCount = 0
+
+						break;
+				case 'video':
+						this.videoCount = 0
+
+						break;
+
+				default:
+
+						break;
+		}
+
+})
+}
+userNotificationDataChanged(a, b) {
+var notifications;
+var unread = 0;
+
+//Updates the following tab automatically
+var database = firebase.database();
+var that = this;
+var seen = false;
+
+if (a != undefined) {
+		var newCount = a.length;
+		if (newCount > 0) {
+				var notificationsRef = database.ref('/users/' + this.userid + '/notifications').orderByChild(
+						"s").equalTo(seen);
+
+
+				notificationsRef.on('child_added', function (data) {
+						var unread = 0;
+						unread++;
+
+						if (unread > 0) that.unread_notifications += unread;
+
+						if (that.unread_notifications > 20) that.unreadstring = "20+";
+						else that.unreadstring = "" + that.unread_notifications;
+				});
+
+				notificationsRef.on('child_removed', function (data) {
+						var unread = 0;
+						unread++;
+						if (unread > 0) that.unread_notifications = that.unread_notifications -
+								unread;
+
+						if (that.unread_notifications > 20) that.unreadstring = "20+";
+						else that.unreadstring = "" + that.unread_notifications;
+				});
+
+				this.isloading = false;
+		}
+} else {
+		this.isloading = false;
+}
+
+setTimeout(function () {
+		that.isloading = false;
+}, 8000)
+}
+}
+
+window.customElements.define(SidebarMenus.is, SidebarMenus);
+		</script>
 </dom-module>

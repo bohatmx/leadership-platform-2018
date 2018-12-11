@@ -245,23 +245,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
         
         isFollowing(journalUserID){
-            if(this.user.following != undefined){
-                if(this.user.following){
-                    let following =  this.user.following;
-                    let isfollowing = following[journalUserID];
+            if(this.user){
+				if(this.user.following != undefined){
+                    if(this.user.following){
+                        let following =  this.user.following;
+                        let isfollowing = following[journalUserID];
+                        
+                        if(isfollowing){
+                            return 'Following';
+                        }else{
+                            return 'Follow';
+                        }
                     
-                    if(isfollowing){
-                        return 'Following';
-                    }else{
-                        return 'Follow';
+                    }else {
+                        return "Follow";
                     }
-                
                 }else {
                     return "Follow";
-                }
-            }else {
-                return "Follow";
-            }
+                }		
+			}else return "Follow";
             
         }
 
@@ -284,22 +286,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
 
         _isFollowingStyle(journalUserID){
-            let userID = this.user.userID;
+            if(this.user){
+                let userID = this.user.userID;
 
-            if(userID === journalUserID){
-                return "w3-hide";
-            }
-            else{
-                if(this.user.following){
-                    let following =  this.user.following;
-                    let isfollowing = following[journalUserID];
-
-                    return isfollowing ? 'following' : '';
+                if(userID === journalUserID){
+                    return "w3-hide";
                 }
-                else {return "";}
+                else{
+                    if(this.user){
+                        if(this.user.following){
+                            let following =  this.user.following;
+                            let isfollowing = following[journalUserID];
 
-            }
-            
+                            return isfollowing ? 'following' : '';
+                        }
+                        else {return "";}	
+                    }else {return "";}
+                }
+            }else return "";
         }
 
         _usersDataChange(newData, oldData) {
@@ -348,10 +352,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 followingTab.style = "background-color: #ff5722!important;";
 
                 this.mylist = [];
-                
-                if(this.user.following != undefined){
-                    this.mylist = this._toArray(this.user.following);
-                }
+
+                if(this.user){
+					if(this.user.following != undefined){
+                        this.mylist = this._toArray(this.user.following);
+                    }	
+				} 
             }
             
             this.$.resultList.render();

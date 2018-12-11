@@ -51,186 +51,191 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 	<template>
 		<template is="dom-if" if="[[_companyid]]">
 
-				<template is="dom-if" if="[[isEqual(thoughtype, 'podcasts')]]">
+			<template is="dom-if" if="[[isEqual(thoughtype, 'podcasts')]]">
 
-					<template is="dom-if" if="[[!mypost]]">
-						<firebase-query
-							id="podcasts"
-							path="/podcasts"
-							order-by-child="companyID_status"
-							equal-to="[[_companyid]]_approved"
-							limit-to-last="{{minData}}"
-							data="{{podcastsData}}">
-						</firebase-query>
+				<template is="dom-if" if="[[!mypost]]">
+					<firebase-query id="podcasts" path="/podcasts" order-by-child="companyID_status" equal-to="[[_companyid]]_approved"
+					 limit-to-last="{{minData}}" data="{{podcastsData}}">
+					</firebase-query>
 
-						<firebase-query
-							id="podcastsG"
-							path="/podcasts"
-							order-by-child="dailyThoughtType_status"
-							equal-to="2_approved"
-							limit-to-last="{{minData}}"
-							data="{{podcastsData}}">
-						</firebase-query>
-						<!-- order-by-child="company_status"
+					<firebase-query id="podcastsG" path="/podcasts" order-by-child="dailyThoughtType_status" equal-to="2_approved"
+					 limit-to-last="{{minData}}" data="{{podcastsData}}">
+					</firebase-query>
+					<!-- order-by-child="company_status"
 							equal-to="general_true" -->
-					</template>
-				
-					<template is="dom-if" if="[[mypost]]">
-						<firebase-query
-							id="mypodcasts"
-							path="/podcasts"
-							order-by-child="postOwner"
-							equal-to="[[user.userID]]"
-							limit-to-last="{{minData}}"
-							data="{{podcastsData}}">
-						</firebase-query>
-					</template>
+				</template>
+
+				<template is="dom-if" if="[[mypost]]">
+					<firebase-query id="mypodcasts" path="/podcasts" order-by-child="postOwner" equal-to="[[user.userID]]"
+					 limit-to-last="{{minData}}" data="{{podcastsData}}">
+					</firebase-query>
+				</template>
 
 			</template>
 			<template is="dom-if" if="[[isEqual(thoughtype, 'filteredpodcasts')]]">
-				<firebase-query
-					id="filteredpodcasts"
-					path="/podcasts"
-					equal-to="[[filterid]]"
-					data="{{podcastsData}}">
+				<firebase-query id="filteredpodcasts" path="/podcasts" equal-to="[[filterid]]" data="{{podcastsData}}">
 				</firebase-query>
 			</template>
 		</template>
-			<style include="w3-styles"></style>
-			<style include="shared-styles">
-				:host {
-					/* Label and underline color when the input is focused */
-					--paper-input-container-focus-color: #fff;
+		<style include="w3-styles"></style>
+		<style include="shared-styles">
+			:host {
+				/* Label and underline color when the input is focused */
+				--paper-input-container-focus-color: #fff;
 
-					/* Label and underline color when the input is invalid */
-					--paper-input-container-invalid-color: red;
+				/* Label and underline color when the input is invalid */
+				--paper-input-container-invalid-color: red;
 
-					/* Input foreground color */
-					--paper-input-container-label:{
-						font-size: 12px;
-						margin-bottom: 4px;
-						color: #757575;
-					};
-					--paper-input-container-input-focus:{
-						font-size: 14px;
-						margin-bottom: 4px;
-						color: var(--app-primary-text);
-					};
+				/* Input foreground color */
+				--paper-input-container-label: {
+					font-size: 12px;
+					margin-bottom: 4px;
+					color: #757575;
 				}
-				.avatar {
-					height: 40px;
-					width: 40px;
-					border-radius: 0px;
-					box-sizing: border-box;
-					background-color: #DDD;
+
+				;
+
+				--paper-input-container-input-focus: {
+					font-size: 14px;
+					margin-bottom: 4px;
+					color: var(--app-primary-text);
 				}
-				.rate-color-post {
-					--rating-icon-color: var(--app-primary-color);
-					--rating-ink-color: var(--app-primary-color);
-				}
-				.rate-color {
-					--rating-icon-color: #9e9e9e;
-					--rating-ink-color: #9e9e9e;
-				}/*
+
+				;
+			}
+
+			.avatar {
+				height: 40px;
+				width: 40px;
+				border-radius: 0px;
+				box-sizing: border-box;
+				background-color: #DDD;
+			}
+
+			.rate-color-post {
+				--rating-icon-color: var(--app-primary-color);
+				--rating-ink-color: var(--app-primary-color);
+			}
+
+			.rate-color {
+				--rating-icon-color: #9e9e9e;
+				--rating-ink-color: #9e9e9e;
+			}
+
+			/*
 				.thought-card{
 					display: flex;
 					flex-direction: row;
 				}*/
-				.comments-box{
-					display: -webkit-flex;
-					display: flex;
-					padding: 10px 16px;
-				}
-				.comments-info{
-					display: -webkit-flex;
-					display: flex;
-					flex-direction: column;
-					max-width: 80%;
-				}
-				.comment-details{
-					display: -webkit-flex;
-					display: flex;
-					flex-direction: row;
-					margin-bottom: 6px;
-				}
-				.comment-author{
-					margin-right: 16px;
-					color: var(--app-primary-color);
-				}
-				.pageComments{
-					padding: 0 8px;
-					background-color: #f7f7f7;
-				}
-				.comment-date{
-					color: #9e9e9e !important;
-				}
-				.comment-msg{
-				 color: var(--app-primary-text);
-				}
-				.comment-input{
-					background-color: #ffffff;
-					padding: 0 16px;
-					border-radius: 2px;
-				}
-				.comment-area{
-					display: flex;
-					flex-direction: row;
-					padding-bottom: 10px;
-					padding-top: 10px;
-				}
-				.comment-input{
-					flex-grow: 8;
-					margin-left: -10px;
-				}
-				.comment-btn{
-					margin: 10px;
-					color: var(--app-primary-color);
-				}
-				.podcast-type{
-					/* color: var(--app-primary-color); */
-					font-style: italic;
-				}
-				hr{
-						margin-top: 20px;
-				}
-				@media screen and (max-width: 900px) {
-					.main-card{
-						margin: 0px;
-					}
-				}
-				.audio-container{
-					bottom: 0px;
-					position: sticky;
-					padding: 20px;
-					border: 1px solid #e6e6e6;
-				}
-				.pldp-text{
-					margin: 0;
-					padding: 0;
-				}
+			.comments-box {
+				display: -webkit-flex;
+				display: flex;
+				padding: 10px 16px;
+			}
 
-				.pldp-link{
-					text-decoration: none;
-					text-transform: uppercase;
-					text-align: -webkit-center;
-					display: flex;
-					align-items: center;
-					color: var(--paper-dialog-button-color, var(--primary-color));
-					-webkit-user-select: none;
-					user-select: none;
-					padding: 0 8px 0 2px;
-				}
+			.comments-info {
+				display: -webkit-flex;
+				display: flex;
+				flex-direction: column;
+				max-width: 80%;
+			}
 
-			</style>
+			.comment-details {
+				display: -webkit-flex;
+				display: flex;
+				flex-direction: row;
+				margin-bottom: 6px;
+			}
+
+			.comment-author {
+				margin-right: 16px;
+				color: var(--app-primary-color);
+			}
+
+			.pageComments {
+				padding: 0 8px;
+				background-color: #f7f7f7;
+			}
+
+			.comment-date {
+				color: #9e9e9e !important;
+			}
+
+			.comment-msg {
+				color: var(--app-primary-text);
+			}
+
+			.comment-input {
+				background-color: #ffffff;
+				padding: 0 16px;
+				border-radius: 2px;
+			}
+
+			.comment-area {
+				display: flex;
+				flex-direction: row;
+				padding-bottom: 10px;
+				padding-top: 10px;
+			}
+
+			.comment-input {
+				flex-grow: 8;
+				margin-left: -10px;
+			}
+
+			.comment-btn {
+				margin: 10px;
+				color: var(--app-primary-color);
+			}
+
+			.podcast-type {
+				/* color: var(--app-primary-color); */
+				font-style: italic;
+			}
+
+			hr {
+				margin-top: 20px;
+			}
+
+			@media screen and (max-width: 900px) {
+				.main-card {
+					margin: 34px 0px !important;
+				}
+			}
+
+			.audio-container {
+				bottom: 0px;
+				position: sticky;
+				padding: 20px;
+				border: 1px solid #e6e6e6;
+			}
+
+			.pldp-text {
+				margin: 0;
+				padding: 0;
+			}
+
+			.pldp-link {
+				text-decoration: none;
+				text-transform: uppercase;
+				text-align: -webkit-center;
+				display: flex;
+				align-items: center;
+				color: var(--paper-dialog-button-color, var(--primary-color));
+				-webkit-user-select: none;
+				user-select: none;
+				padding: 0 8px 0 2px;
+			}
+		</style>
 		<div id="media"></div>
 		<!-- <div class="container search-bar" hidden="[[isEqual(thoughtype, 'filteredpodcasts')]]">
 			<paper-search-bar hide-filter-button="true" placeholder="[[placeholder]]"></paper-search-bar>
 		</div> -->
 		<div class="container">
-			<paper-dialog id="imgDialog"  class="image-dailog">
+			<paper-dialog id="imgDialog" class="image-dailog">
 				<!-- <h2>Scrollable</h2> -->
 				<paper-dialog-scrollable>
-						<iron-image class="thought-expand-img" sizing="cover" src="" id="showImage"></iron-image>
+					<iron-image class="thought-expand-img" sizing="cover" src="" id="showImage"></iron-image>
 				</paper-dialog-scrollable>
 				<div class="buttons">
 					<paper-button dialog-dismiss>Close</paper-button>
@@ -239,17 +244,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 		</div>
 		<div class="container">
 			<paper-dialog id="pldpDialog">
-				<h2><paper-icon-button icon="myicons:event-note" class="blue"></paper-icon-button>My PLDP</h2>
+				<h2>
+					<paper-icon-button icon="myicons:event-note" class="blue"></paper-icon-button>My PLDP
+				</h2>
 				<hr>
 				<paper-dialog-scrollable>
-						<p>Based on what you just listened to, would you like to add an Action to your PLDP (Personal Leadership Development Plan)?</p>
+					<p>Based on what you just listened to, would you like to add an Action to your PLDP (Personal Leadership
+						Development Plan)?</p>
 				</paper-dialog-scrollable>
 				<hr>
 				<div class="buttons">
-				<paper-button dialog-dismiss>Close</paper-button>
+					<paper-button dialog-dismiss>Close</paper-button>
 					<a href="my-pldp" name="name" class="pldp-link" on-tap="closePLDPDialog">Proceed
 					</a>
-			</div>
+				</div>
 			</paper-dialog>
 		</div>
 		<div id="play-media" class="w3-modal w3-animate-zoom" style="z-index: 999999999999 !important;">
@@ -257,7 +265,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				<div>
 					<span id="close-media" data="play-media" on-click="_closeMediaModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white">&times;</span>
 					<div class="w3-medium" style="padding:20px 50px">
-						<b class="w3-text-dark-grey"><iron-icon icon="app:play-circle-outline"></iron-icon>&nbsp;[[media_title]]</b>
+						<b class="w3-text-dark-grey">
+							<iron-icon icon="app:play-circle-outline"></iron-icon>&nbsp;[[media_title]]
+						</b>
 					</div>
 					<div class="w3-row">
 						<play-media loadsrc="{{loadsrc}}"></play-media>
@@ -265,10 +275,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				</div>
 			</div>
 		</div>
-		<div id="preview-profile" class="ldp-modal w3-animate-zoom">
+		<div id="preview-profile" class="ldp-modal w3-animate-zoom" style="z-index: 9999999999;">
 			<div class="ldp-modal-content w3-round max-modal-width">
 				<div>
-					<span id="close-followers" data="preview-profile" on-click="_closeProfileModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white" style="z-index: 999;">&times;</span>
+					<span id="close-followers" data="preview-profile" on-click="_closeProfileModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white"
+					 style="z-index: 999;">&times;</span>
 					<div class="w3-row">
 						<preview-profile _userid="{{_userid}}" userobj="{{userobj}}" user="{{user}}"></preview-profile>
 					</div>
@@ -277,63 +288,71 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 		</div>
 		<section class="thought-card" id="thoughts-Holder">
 			<div class="spinner" style="position: fixed;">
-				<paper-spinner  active="{{isloading}}"></paper-spinner>
+				<paper-spinner active="{{isloading}}"></paper-spinner>
 				<div style="width: 100%; padding-top: 10px;" class="w3-row w3-center" id="spinnerMessage">
 
 					<template is="dom-if" if="[[isEqual(thoughtype, 'filteredthoughts')]]">
 						<img hidden="{{!noIdea}}" src="https://png.icons8.com/material/200/666666/no-idea.png">
 					</template>
-					<h4> {{loadingmessage}}</h4> 
+					<h4> {{loadingmessage}}</h4>
 				</div>
 			</div>
 			<div class="main-card" style="width:100%;">
 				<template id="podcastsList" is="dom-repeat" items="[[podcastsData]]" as="item" sort="_sort" observe="dateScheduled">
 					<!-- <div class="podcast-item" id="modal-[[item.podcastID]]"> -->
-						<div class="modal-div" id="modal-[[item.podcastID]]">
-							<div class="w3-animate-zoom" data="[[item]]">
-									<div class="w3-card w3-white" style="border-radius:2px; border:1px solid #bbb">
-									<span class="w3-button w3-display-topright w3-red w3-medium w3-hide closer-for-modal">&times;</span>
-									<div class="container card-header w3-row">
-										<div class="card-avatar w3-left" style$="[[_profilePhoto(item.photoURL)]] cursor: pointer;" data$="[[_setProfileInfo(item.userName, item.userID, item.companyName, item.companyID, item.photoURL)]]" on-tap="_previewProfile"></div>
-										<div class="container card-company-container">
-											<div class="row card-postedby w3-medium">
-												<div>[[item.userName]]</div>
-												<paper-button on-tap="followUser" data="[[item.podcastID]]" 
-												class$="followBTN [[isFollowingStyle(item.userID)]]">[[isFollowing(item.userID)]]</paper-button>
-											</div>
-											<div class="row card-company">[[item.companyName]]</div>
+					<div class="modal-div" id="modal-[[item.podcastID]]">
+						<div class="w3-animate-zoom" data="[[item]]">
+							<div class="w3-card w3-white" style="border-radius:2px; border:1px solid #bbb">
+								<span class="w3-button w3-display-topright w3-red w3-medium w3-hide closer-for-modal">&times;</span>
+								<div class="container card-header w3-row">
+									<div class="card-avatar w3-left" style$="[[_profilePhoto(item.photoURL)]] cursor: pointer;" data$="[[_setProfileInfo(item.userName, item.userID, item.companyName, item.companyID, item.photoURL)]]"
+									 on-tap="_previewProfile"></div>
+									<div class="container card-company-container">
+										<div class="row card-postedby w3-medium">
+											<div>[[item.userName]]</div>
+											<paper-button on-tap="followUser" data="[[item.podcastID]]" class$="followBTN [[isFollowingStyle(item.userID)]]">[[isFollowing(item.userID)]]</paper-button>
 										</div>
-										<div class="thought-date">
-											[[_formate_date(item.dateScheduled)]]
-										</div>
+										<div class="row card-company">[[item.companyName]]</div>
 									</div>
-									<div class="w3-row w3-relative" id="modal-content-[[item.podcastID]]">
-										<template is="dom-if" if="[[isEqual(item.userID, user.userID)]]">
-											<edit-post user="[[user]]" itemid="[[item.podcastID]]" ref="podcasts" item="[[item]]"></edit-post>
-										</template>
-										<div title="[[_getPodcastName(item.storageName)]]" class="w3-left w3-padding-small" id="listen[[item.dateRegistered]]" on-tap="_handleClick" data="[[item.url]]" itemid="[[item.podcastID]]">
-											<img src="/images/[[item.podcastDescription]].png" style="width: 60px">
-										</div>
-										<div class="w3-rest">
-											<div title="[[_getPodcastName(item.storageName)]]" class="w3-text-dark-grey w3-padding-small" id="col[[item.dateRegistered]]" name="[[item.dateRegistered]]" on-tap="_handleClick" data="[[item.url]]" itemid="[[item.podcastID]]">
-												<div>[[_getPodcastName(item.storageName)]]</div>
-											</div>
-											<div class="row w3-small w3-padding-small w3-text-grey" style="font-style: italic;">[[item.author]]</div>
-											<div class="w3-text-red w3-medium w3-right">
-												<paper-button id="pldp[[item.dateRegistered]]" class="w3-text-red w3-medium" data="[[item.podcastID]]" on-tap="_openPLDP">My PLDP</paper-button>
-											</div>
-										</div>
+									<div class="thought-date">
+										[[_formate_date(item.dateScheduled)]]
 									</div>
-									<comments-box user="[[user]]" item="[[item]]" thetype="[[item.podcastDescription]]" entityid="[[item.podcastID]]" firebaseref="podcasts"></comments-box>
 								</div>
+								<div class="w3-row w3-relative" id="modal-content-[[item.podcastID]]">
+									<template is="dom-if" if="[[isEqual(item.userID, user.userID)]]">
+										<edit-post user="[[user]]" itemid="[[item.podcastID]]" ref="podcasts" item="[[item]]"></edit-post>
+									</template>
+									<div title="[[_getPodcastName(item.storageName)]]" class="w3-left w3-padding-small" id="listen[[item.dateRegistered]]"
+									 on-tap="_handleClick" data="[[item.url]]" itemid="[[item.podcastID]]">
+										<img src="/images/[[item.podcastDescription]].png" style="width: 60px">
+									</div>
+									<div class="w3-rest">
+										<div title="[[_getPodcastName(item.storageName)]]" class="w3-text-dark-grey w3-padding-small" id="col[[item.dateRegistered]]"
+										 name="[[item.dateRegistered]]" on-tap="_handleClick" data="[[item.url]]" itemid="[[item.podcastID]]">
+											<div>[[_getPodcastName(item.storageName)]]</div>
+										</div>
+										<div class="row w3-small w3-padding-small w3-text-grey" style="font-style: italic;">[[item.author]]</div>
+										<div class="w3-text-red w3-medium w3-right">
+											<paper-button id="pldp[[item.dateRegistered]]" class="w3-text-red w3-medium" data="[[item.podcastID]]"
+											 on-tap="_openPLDP">My PLDP</paper-button>
+										</div>
+									</div>
+								</div>
+								<comments-box user="[[user]]" item="[[item]]" thetype="[[item.podcastDescription]]" entityid="[[item.podcastID]]"
+								 firebaseref="podcasts"></comments-box>
 							</div>
-							
 						</div>
+
+					</div>
 					<!-- </div> -->
 				</template>
 				<div class="w3-row w3-center" style="width: 100%" hidden="[[isEqual(thoughtype, 'filteredpodcasts')]]">
-					<div class="w3-row w3-text-green" style="width: 100%"><paper-button hidden="{{loadmore}}" on-tap="_loadMorePosts">Listen to More Podcasts</paper-button></div>
-					<div class="w3-row" style="width: 100%"><paper-spinner  active="{{isloadingmore}}"></paper-spinner></div>
+					<div class="w3-row w3-text-green" style="width: 100%">
+						<paper-button hidden="{{loadmore}}" on-tap="_loadMorePosts">Listen to More Podcasts</paper-button>
+					</div>
+					<div class="w3-row" style="width: 100%">
+						<paper-spinner active="{{isloadingmore}}"></paper-spinner>
+					</div>
 				</div>
 			</div>
 		</section>
@@ -342,8 +361,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 	<script>
 		class ViewPodcasts extends Polymer.Element {
-			static get is() { return 'view-podcasts'; }
-			ready(){
+			static get is() {
+				return 'view-podcasts';
+			}
+			ready() {
 				super.ready();
 			}
 			static get properties() {
@@ -359,17 +380,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						type: Number,
 						value: 6
 					},
-					scrollPos:{
+					scrollPos: {
 						type: Number,
 						value: 0
 					},
 					hasNoFilter: {
-						type:Boolean,
+						type: Boolean,
 						value: true
 					},
-					filterid:{
-						type:String,
-						notify:true,
+					filterid: {
+						type: String,
+						notify: true,
 					},
 					podcastsData: {
 						type: Object,
@@ -384,11 +405,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						value: true,
 						notify: true
 					},
-					loadingmessage:{
+					loadingmessage: {
 						type: String,
 						value: 'Loading...'
 					},
-					noIdea:{
+					noIdea: {
 						type: Boolean,
 						value: false
 					},
@@ -431,47 +452,53 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						type: Boolean,
 						value: false
 					},
-					mypost:{
+					mypost: {
 						type: Boolean,
 						value: false
 					},
 				};
 			}
-			connectedCallback() { 
+			connectedCallback() {
 				super.connectedCallback();
-				
+
 			}
-			isFollowing(journalUserID){
-				if(this.user.following != undefined){
-					if(this.user.following){
-					let following =  this.user.following;
-					let isfollowing = following[journalUserID];
+			isFollowing(journalUserID) {
+				if (this.user) {
+					if (this.user.following != undefined) {
+						if (this.user.following) {
+							let following = this.user.following;
+							let isfollowing = following[journalUserID];
 
-					return isfollowing ? 'Following' : 'Follow';
-					}else return "Follow";
-				}else return "Follow";
-				
+							return isfollowing ? 'Following' : 'Follow';
+						} else return "Follow";
+					} else return "Follow";
+				} else return "Follow";
+
 			}
 
-			isFollowingStyle(journalUserID){
-				let userID = this.user.userID;
+			isFollowingStyle(journalUserID) {
+				if (this.user) {
+					let userID = this.user.userID;
 
-				if(userID === journalUserID){
-					return "w3-hide";
-				}
-				else{
-					if(this.user.following){
-						let following =  this.user.following;
-						let isfollowing = following[journalUserID];
+					if (userID === journalUserID) {
+						return "w3-hide";
+					} else {
+						if (this.user) {
+							if (this.user.following) {
+								let following = this.user.following;
+								let isfollowing = following[journalUserID];
 
-						return isfollowing ? 'following' : '';
+								return isfollowing ? 'following' : '';
+							} else {
+								return "";
+							}
+						} else {
+							return "";
+						}
 					}
-					else {return "";}
-
-				}
-				
+				} else return "";
 			}
-			followUser(e){
+			followUser(e) {
 				let database = firebase.database();
 				let itemID = e.target.data;
 
@@ -486,61 +513,61 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				let journalUserName = filteredArray.userName;
 				var followDate = Date.now();
 
-				if(this.user.photoURL != undefined || this.user.photoURL != ""){
+				if (this.user.photoURL != undefined || this.user.photoURL != "") {
 					myPhoto = this.user.photoURL;
-				}else{
+				} else {
 					myPhoto = "";
 				}
 
-				if(myPhoto == undefined){
+				if (myPhoto == undefined) {
 					myPhoto = "";
 				}
 
-				if(following == "Follow"){
+				if (following == "Follow") {
 					$(e.target).addClass('following');
 
 					e.target.innerHTML = "Following";
 					that.updateFollowBTN(journalUserID, following);
 
 					var photoURL = "";
-					if(filteredArray.photoURL != undefined || filteredArray.photoURL != ""){
+					if (filteredArray.photoURL != undefined || filteredArray.photoURL != "") {
 						photoURL = filteredArray.photoURL;
-					}else{
+					} else {
 						photoURL = "";
 					}
 
-					if(photoURL == undefined){
+					if (photoURL == undefined) {
 						photoURL = "";
 					}
 
 					var theirdata = {
-						"firstName":filteredArray.userName,
-						"lastName":"",
-						"companyName":filteredArray.companyName,
-						"dateRegistered":followDate,
-						"photoURL":photoURL,
-						"userID":journalUserID
+						"firstName": filteredArray.userName,
+						"lastName": "",
+						"companyName": filteredArray.companyName,
+						"dateRegistered": followDate,
+						"photoURL": photoURL,
+						"userID": journalUserID
 					}
 
 					var mydata = {
-						"firstName":that.user.firstName,
-						"lastName":that.user.lastName,
-						"companyName":that.user.companyName,
+						"firstName": that.user.firstName,
+						"lastName": that.user.lastName,
+						"companyName": that.user.companyName,
 						"dateRegistered": followDate,
-						"photoURL":myPhoto,
+						"photoURL": myPhoto,
 						"userID": userID
 					}
 
 					var updates = {}
-					updates["users/"+userID+"/following/"+journalUserID]=theirdata;
-					updates["users/"+journalUserID+"/follower/"+userID]=mydata;
-					updates["followers/"+journalUserID+"/"+userID]=mydata;
+					updates["users/" + userID + "/following/" + journalUserID] = theirdata;
+					updates["users/" + journalUserID + "/follower/" + userID] = mydata;
+					updates["followers/" + journalUserID + "/" + userID] = mydata;
 
-					return database.ref().update(updates).then(() =>{
+					return database.ref().update(updates).then(() => {
 						return console.log("Following");
 					});
 
-				}else{
+				} else {
 					that.isFollowingStyle(journalUserID);
 
 					$(e.target).removeClass('following');
@@ -548,32 +575,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					that.updateFollowBTN(journalUserID, following);
 
 					var updates = {}
-					updates["users/"+userID+"/following/"+journalUserID]=null;
-					updates["users/"+journalUserID+"/follower/"+userID]=null;
-					updates["followers/"+journalUserID+"/"+userID]=null;
+					updates["users/" + userID + "/following/" + journalUserID] = null;
+					updates["users/" + journalUserID + "/follower/" + userID] = null;
+					updates["followers/" + journalUserID + "/" + userID] = null;
 
-					return database.ref().update(updates).then(() =>{
+					return database.ref().update(updates).then(() => {
 						return console.log("Unfollowed");
 					});
-					
+
 				}
 
 			}
-			updateFollowBTN(journalUserID, following){
+			updateFollowBTN(journalUserID, following) {
 				var that = this;
 				var thoughtCard = Polymer.dom(that.root).querySelector("#thoughts-Holder");
 
-				$(thoughtCard).find('.modal-div').each(function(i, e){
+				$(thoughtCard).find('.modal-div').each(function (i, e) {
 					var followBTN = $(e).find('.followBTN')[0];
 					var itemID = $(followBTN).prop('data');
 					let filteredArray = that.findObjectByKey(that.podcastsData, "podcastID", itemID);
 					let thoughtUserID = filteredArray.userID;
 
-					if(thoughtUserID === journalUserID){
-						if(following == "Follow"){
+					if (thoughtUserID === journalUserID) {
+						if (following == "Follow") {
 							$(followBTN).addClass('following');
 							followBTN.innerHTML = "Following";
-						}else{
+						} else {
 							that.isFollowingStyle(journalUserID);
 							$(followBTN).removeClass('following');
 							followBTN.innerHTML = "Follow";
@@ -582,7 +609,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				});
 			}
 
-			_captureClicks(journalID, res, obj){
+			_captureClicks(journalID, res, obj) {
 				var database = firebase.database();
 				var userID = this.user.userID;
 				var userName = this.user.firstName + " " + this.user.lastName;
@@ -592,13 +619,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				var dateRegistered = Date.now();
 				var postType = "podcasts";
 
-				if(this.user.photoURL != undefined || this.user.photoURL != ""){
+				if (this.user.photoURL != undefined || this.user.photoURL != "") {
 					myPhoto = this.user.photoURL;
-				}else{
+				} else {
 					myPhoto = "";
 				}
 
-				if(myPhoto == undefined){
+				if (myPhoto == undefined) {
 					myPhoto = "";
 				}
 
@@ -611,14 +638,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				var journalCompanyName = filteredArray.companyName;
 				var journalDateRegistered = filteredArray.dateRegistered;
 				var journalPhotoURL;
-				
-				if(filteredArray.photoURL != undefined || filteredArray.photoURL != ""){
+
+				if (filteredArray.photoURL != undefined || filteredArray.photoURL != "") {
 					journalPhotoURL = filteredArray.photoURL;
-				}else{
+				} else {
 					journalPhotoURL = "";
 				}
 
-				if(journalPhotoURL == undefined){
+				if (journalPhotoURL == undefined) {
 					journalPhotoURL = "";
 				}
 
@@ -637,42 +664,42 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					journalCompanyName: journalCompanyName,
 					journalDateRegistered: journalDateRegistered,
 					journalPhotoURL: journalPhotoURL,
-					clickType:"posts",
-					clickArea:res,
-					clickItem:obj
+					clickType: "posts",
+					clickArea: res,
+					clickItem: obj
 				}
 
 				database.ref('user-clicks').push(data);
 			}
 
 
-			_loadMorePosts(){
+			_loadMorePosts() {
 				this.scrollPos = window.scrollY;
 				this.isloadingmore = true;
 				this.minData += 6;
 			}
-			_onpodcastsDataReceived(newData, oldData){
+			_onpodcastsDataReceived(newData, oldData) {
 				var that = this;
 
-				if(newData.length > 0){
+				if (newData.length > 0) {
 					this.isloading = false;
 					this.loadingmessage = "";
 					this.loadmore = false;
 					this.isloadingmore = false;
 					this.noIdea = false;
 
-					setTimeout(function(){
+					setTimeout(function () {
 						window.scrollTo({
 							top: that.scrollPos,
 							behavior: "instant"
 						});
 					}, 1000);
-				} 
+				}
 
-				setTimeout(function(){
+				setTimeout(function () {
 					that.isloading = false;
 
-					if(that.podcastsData.length == 0) { 
+					if (that.podcastsData.length == 0) {
 						that.noIdea = true;
 						that.loadingmessage = "Podcast was removed by Author";
 					} else {
@@ -681,10 +708,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 					}
 
-				},25000)
+				}, 25000)
 			}
-			_setProfileInfo(journalUserName, journalUserID, companyName, companyID, photoURL){
-				if(photoURL == "" || photoURL == undefined) photoURL = "../images/default-user.png";
+			_setProfileInfo(journalUserName, journalUserID, companyName, companyID, photoURL) {
+				if (photoURL == "" || photoURL == undefined) photoURL = "../images/default-user.png";
 				var a = {
 					journalUserName: journalUserName,
 					journalUserID: journalUserID,
@@ -694,7 +721,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				}
 				return a;
 			}
-			_previewProfile(e){
+			_previewProfile(e) {
 				var data = e.currentTarget.getAttribute('data');
 				this.userobj = JSON.parse(data);
 				this._userid = this.userobj.journalUserID;
@@ -709,23 +736,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				this._openProfileModal();
 			}
-			_openProfileModal(){
+			_openProfileModal() {
 				var modal = Polymer.dom(this.root).querySelector('#preview-profile');
 				modal.style.display = 'block';
 			}
-			_closeProfileModal(){
+			_closeProfileModal() {
 				var modal = Polymer.dom(this.root).querySelector('#preview-profile');
 				modal.style.display = 'none';
 			}
-			_sort(a, b) {  
+			_sort(a, b) {
 				if (a.dateScheduled > b.dateScheduled) return -1;
 				if (a.dateScheduled < b.dateScheduled) return 1;
 				return 0;
 			}
-			_handleClick(e){
-				var podcastClicked = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).data;
-				var podcastTitle = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).title;
-				var podcastID = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).itemid;
+			_handleClick(e) {
+				var podcastClicked = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
+				var podcastTitle = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).title;
+				var podcastID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).itemid;
 
 				var src = this.getMediaURL(podcastClicked);
 				this.media_title = podcastTitle;
@@ -743,12 +770,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 			}
 
-			_openMediaModal(){
+			_openMediaModal() {
 				var modal = Polymer.dom(this.root).querySelector('#play-media');
 				modal.style.display = 'block';
 			}
 
-			_closeMediaModal(){
+			_closeMediaModal() {
 				this.loadsrc = "";
 				var modal = Polymer.dom(this.root).querySelector('#play-media');
 				modal.style.display = 'none';
@@ -764,7 +791,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				let pos = window.scrollY;
 
 				sessionStorage.setItem('pos', pos);
-				
+
 				window.scrollTo(0, 0);
 				document.body.style.overflow = 'hidden';
 
@@ -781,49 +808,49 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					myElement.isloading = true;
 				});
 			}
-			_loadElement(){
+			_loadElement() {
 				// var name = e.target.getAttribute('elem');
 				this._myLoadElement("load-media", "load-media.html");
 			}
-			_removeElement () {
+			_removeElement() {
 				var container = Polymer.dom(this.root).querySelector('#media');
 
 				var element = container.querySelector("*");
 				if (element) {
-						element.parentNode.removeChild(element);
+					element.parentNode.removeChild(element);
 				}
 			}
-			_oncommentsData(){
-				this.commentsData.sort(function(a, b) {
-				var nameA = a.dateRegistered; // ignore upper and lowercase
-				var nameB = b.dateRegistered; // ignore upper and lowercase
-				if (nameA < nameB) {
-					return 1;
-				}
-				if (nameA > nameB) {
-					return -1;
-				}
-				return 0;
+			_oncommentsData() {
+				this.commentsData.sort(function (a, b) {
+					var nameA = a.dateRegistered; // ignore upper and lowercase
+					var nameB = b.dateRegistered; // ignore upper and lowercase
+					if (nameA < nameB) {
+						return 1;
+					}
+					if (nameA > nameB) {
+						return -1;
+					}
+					return 0;
 				});
-					
+
 			}
-			_sortComments(obj){
-				
-				if(obj != undefined){
+			_sortComments(obj) {
+
+				if (obj != undefined) {
 					// var modObj = obj;
 					// modObj.sort();
-					return Object.keys(obj).map(function(key) {
+					return Object.keys(obj).map(function (key) {
 						return obj[key];
 					});
 				}
 			}
 
-			_closeModal(e){
+			_closeModal(e) {
 				var selectedElem = e.currentTarget.id;
-				let podcast_ID = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).data;
+				let podcast_ID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
 
-				var modal = Polymer.dom(this.root).querySelector('#modal-'+podcast_ID);
-				var modalC = Polymer.dom(this.root).querySelector('#modal-content-'+podcast_ID);
+				var modal = Polymer.dom(this.root).querySelector('#modal-' + podcast_ID);
+				var modalC = Polymer.dom(this.root).querySelector('#modal-content-' + podcast_ID);
 
 				$(modal).removeClass('w3-modal');
 				$(modalC).removeClass('w3-modal-content');
@@ -831,15 +858,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				modal.style.display = 'block';
 			}
 
-			toggleComRate(e){
+			toggleComRate(e) {
 				var selectedElem = e.currentTarget.id;
-				let podcast_ID = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).data;
-				
-				var pages = Polymer.dom(this.root).querySelector('#page'+podcast_ID);
+				let podcast_ID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
+
+				var pages = Polymer.dom(this.root).querySelector('#page' + podcast_ID);
 				pages.selectNext();
 
-				var modal = Polymer.dom(this.root).querySelector('#modal-'+podcast_ID);
-				var modalC = Polymer.dom(this.root).querySelector('#modal-content-'+podcast_ID);
+				var modal = Polymer.dom(this.root).querySelector('#modal-' + podcast_ID);
+				var modalC = Polymer.dom(this.root).querySelector('#modal-content-' + podcast_ID);
 
 				$(modal).find('.closer-for-modal').removeClass('w3-hide');
 
@@ -847,91 +874,91 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				$(modalC).addClass('w3-modal-content');
 				modal.style.display = 'block';
 			}
-			toggle(e){
-				var a = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).data;
+			toggle(e) {
+				var a = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
 
 				var selectedElem = e.currentTarget.id;
 
-				this.opened = Polymer.dom(this.root).querySelector('#collapse'+a).opened;
-						
+				this.opened = Polymer.dom(this.root).querySelector('#collapse' + a).opened;
+
 				var res = selectedElem.substring(0, 3);
-				
-				if(res == 'blu'){
-					this._selected = 'page-1-'+a;
-				}else if(res == 'gre'){
-					this._selected = 'page-2-'+a;
-				}else if(res == 'cam'){
-					this._selected = 'page-3-'+a;
-				}else if(res == 'red'){
-					this._selected = 'page-4-'+a;
+
+				if (res == 'blu') {
+					this._selected = 'page-1-' + a;
+				} else if (res == 'gre') {
+					this._selected = 'page-2-' + a;
+				} else if (res == 'cam') {
+					this._selected = 'page-3-' + a;
+				} else if (res == 'red') {
+					this._selected = 'page-4-' + a;
 				}
 
-				if((this.lastSelected == this._selected) && (this.opened)){
-					Polymer.dom(this.root).querySelector('#collapse'+a).toggle();
+				if ((this.lastSelected == this._selected) && (this.opened)) {
+					Polymer.dom(this.root).querySelector('#collapse' + a).toggle();
 				}
 
-				if((this.lastSelected == this._selected) && (!this.opened)){
-					Polymer.dom(this.root).querySelector('#collapse'+a).toggle();
+				if ((this.lastSelected == this._selected) && (!this.opened)) {
+					Polymer.dom(this.root).querySelector('#collapse' + a).toggle();
 				}
 
-				if((this.lastSelected != this._selected) && (!this.opened)){
-					Polymer.dom(this.root).querySelector('#collapse'+a).toggle();
+				if ((this.lastSelected != this._selected) && (!this.opened)) {
+					Polymer.dom(this.root).querySelector('#collapse' + a).toggle();
 				}
 
 				this.lastSelected = this._selected;
 
 			}
-			_getVideoName(storageName){
+			_getVideoName(storageName) {
 				let strName = '';
-				strName = storageName.slice(storageName.lastIndexOf('/')+1);
+				strName = storageName.slice(storageName.lastIndexOf('/') + 1);
 				strName = strName.replace(new RegExp('_', 'g'), ' ');
 				return strName;
 			}
-			_dialogImgOpen(e){
-				var a = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).src;
+			_dialogImgOpen(e) {
+				var a = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).src;
 				var b = this.$.showImage;
 				b.src = a;
 				this.$.imgDialog.open();
 			}
-			_getPodcastName(storageName){
+			_getPodcastName(storageName) {
 				let strName = '';
-				strName = storageName.slice(storageName.lastIndexOf('/')+1);
+				strName = storageName.slice(storageName.lastIndexOf('/') + 1);
 				strName = strName.replace(new RegExp('_', 'g'), ' ');
 				return strName;
 			}
 
-			_togglerCR(e){
+			_togglerCR(e) {
 				var elem = e.currentTarget;
 				//this._popModal({target:e.currentTarget});
 				$(elem).siblings().removeClass('w3-text-blue').addClass('w3-text-grey');
 				$(elem).toggleClass('w3-text-blue w3-text-grey')
 			}
 
-			_saveComment(e){
-				let podcast_ID = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).data;
-				let comment = Polymer.dom(this.root).querySelector('#input'+podcast_ID).value;
+			_saveComment(e) {
+				let podcast_ID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
+				let comment = Polymer.dom(this.root).querySelector('#input' + podcast_ID).value;
 
 				// Validate thought
-				if ((comment == undefined) || (comment.trim() == "")){
+				if ((comment == undefined) || (comment.trim() == "")) {
 					this.showSnackBar("Please enter a comment!");
 					return;
 				}
 
 				var journalUserID = this.user.userID;
-				var journalUserName = this.user.firstName+" "+this.user.lastName;
+				var journalUserName = this.user.firstName + " " + this.user.lastName;
 
 				var companyID = this.user.companyID;
 				var companyName = this.user.companyName;
 
 				var photoURL = "";
 
-				if(this.user.photoURL != undefined || this.user.photoURL != ""){
+				if (this.user.photoURL != undefined || this.user.photoURL != "") {
 					photoURL = this.user.photoURL;
-				}else{
+				} else {
 					photoURL = "";
 				}
 
-				if(photoURL == undefined){
+				if (photoURL == undefined) {
 					photoURL = "";
 				}
 
@@ -944,7 +971,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				var newCommentKey = database.ref().child('comments').push().key;
 
-				if(comment == undefined){
+				if (comment == undefined) {
 					comment = "";
 				}
 
@@ -970,35 +997,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				database.ref().update(updates);
 
 				// Write the new comments on thoughts data
-				var newTypeCommentKey = database.ref().child('/podcasts/' + podcast_ID +'/comments').push().key;
+				var newTypeCommentKey = database.ref().child('/podcasts/' + podcast_ID + '/comments').push().key;
 				var commentUpdates = {};
-				commentUpdates['/podcasts/'+podcast_ID+'/comments/'+newTypeCommentKey] = data;
+				commentUpdates['/podcasts/' + podcast_ID + '/comments/' + newTypeCommentKey] = data;
 				database.ref().update(commentUpdates);
 
-				Polymer.dom(this.root).querySelector('#input'+podcast_ID).value = "";
+				Polymer.dom(this.root).querySelector('#input' + podcast_ID).value = "";
 			}
-			_saveRateValue(e){
-				let podcast_ID = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).data;
-				let rating = Polymer.dom(this.root).querySelector('#rateThought'+podcast_ID).rating;
+			_saveRateValue(e) {
+				let podcast_ID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
+				let rating = Polymer.dom(this.root).querySelector('#rateThought' + podcast_ID).rating;
 				// let rating = this.$.rateThought.rating;
 				// let comment = this.$.rateComment.value;
 				let comment = "";
 
 				var journalUserID = this.user.userID;
-				var journalUserName = this.user.firstName+" "+this.user.lastName;
+				var journalUserName = this.user.firstName + " " + this.user.lastName;
 
 				var companyID = this.user.companyID;
 				var companyName = this.user.companyName;
 
 				var photoURL = "";
 
-				if(this.user.photoURL != undefined || this.user.photoURL != ""){
+				if (this.user.photoURL != undefined || this.user.photoURL != "") {
 					photoURL = this.user.photoURL;
-				}else{
+				} else {
 					photoURL = "";
 				}
 
-				if(photoURL == undefined){
+				if (photoURL == undefined) {
 					photoURL = "";
 				}
 
@@ -1012,7 +1039,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				var newRateKey = database.ref().child('ratings').push().key;
 
-				if(comment == undefined){
+				if (comment == undefined) {
 					comment = "";
 				}
 
@@ -1039,65 +1066,65 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				database.ref().update(updates);
 
 				// Write the new rating on thoughts data
-				var newTypeRateKey = database.ref().child('/podcasts/' + podcast_ID +'/ratings').push().key;
+				var newTypeRateKey = database.ref().child('/podcasts/' + podcast_ID + '/ratings').push().key;
 				var rateUpdates = {};
-				rateUpdates['/podcasts/' + podcast_ID +'/ratings/'+newTypeRateKey] = data;
+				rateUpdates['/podcasts/' + podcast_ID + '/ratings/' + newTypeRateKey] = data;
 				database.ref().update(rateUpdates);
 
-				Polymer.dom(this.root).querySelector('#rateThought'+podcast_ID).rating = 2;
+				Polymer.dom(this.root).querySelector('#rateThought' + podcast_ID).rating = 2;
 				// this.$.rateComment.value = "";
 
 				this.showSnackBar("Rating posted successfully!");
 			}
 			_toArray(obj) {
-				if(obj != undefined){
-					return Object.keys(obj).map(function(key) {
+				if (obj != undefined) {
+					return Object.keys(obj).map(function (key) {
 						return obj[key];
-				});
+					});
 				}
-				
+
 			}
 			_objLen(obj) {
 				let len = 0;
-				if(obj != undefined){
+				if (obj != undefined) {
 					len = Object.keys(obj).length;
 				}
 				return len;
 			}
-			_photo(photos){
+			_photo(photos) {
 				let photo_url = "background-image: url('../data/land.jpg');";
 
-				for (var item in photos) { 
-					photo_url = "background-image: url('"+photos[item].url+"');";
+				for (var item in photos) {
+					photo_url = "background-image: url('" + photos[item].url + "');";
 				}
 
 				return photo_url;
 			}
-			_profilePhoto(photo){
+			_profilePhoto(photo) {
 				let photo_url = "background-image: url('../images/default-user.png');";
 
-				if(photo == undefined){
+				if (photo == undefined) {
 					photo_url = "background-image: url('../images/default-user.png');";
-				}else if(photo == ""){
+				} else if (photo == "") {
 					photo_url = "background-image: url('../images/default-user.png');";
-				}else{
-					photo_url = "background-image: url('"+photo+"');";
+				} else {
+					photo_url = "background-image: url('" + photo + "');";
 				}
 
 				return photo_url;
 			}
 			formatDate(date) {
 				var d = new Date(date),
-				month = '' + (d.getMonth() + 1),
-				day = '' + d.getDate(),
-				year = d.getFullYear(),
-				hours = '' + d.getHours(),
-				minutes = '' + d.getMinutes(),
-				seconds = '' + d.getSeconds(),
-				milliseconds = '' + d.getMilliseconds();
+					month = '' + (d.getMonth() + 1),
+					day = '' + d.getDate(),
+					year = d.getFullYear(),
+					hours = '' + d.getHours(),
+					minutes = '' + d.getMinutes(),
+					seconds = '' + d.getSeconds(),
+					milliseconds = '' + d.getMilliseconds();
 
 				var today = new Date(),
-				thisYear = today.getFullYear();
+					thisYear = today.getFullYear();
 
 				// get week day name Sunday - Saturday
 				var dayName = this.getDayMonthStr(d.getDay(), "day", true);
@@ -1115,24 +1142,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				// format thoughts date
 				// Monday, 04 December 2017 14:21:56
-				var thoughtDate = dayName+", "+day+" "+monthName+" "+year+" "+hours+":"+minutes+":"+seconds;
+				var thoughtDate = dayName + ", " + day + " " + monthName + " " + year + " " + hours + ":" + minutes + ":" +
+					seconds;
 
 				return thoughtDate;
 				// return [year, month, day].join('-');
 			}
 			formatRateTime(date) {
 				var d = new Date(date),
-				month = '' + (d.getMonth() + 1),
-				day = '' + d.getDate(),
-				year = d.getFullYear(),
-				hours = d.getHours() > 12 ? d.getHours() - 12 : d.getHours(),
-				am_pm = d.getHours() >= 12 ? "PM" : "AM",
-				minutes = '' + d.getMinutes(),
-				seconds = '' + d.getSeconds(),
-				milliseconds = '' + d.getMilliseconds();
+					month = '' + (d.getMonth() + 1),
+					day = '' + d.getDate(),
+					year = d.getFullYear(),
+					hours = d.getHours() > 12 ? d.getHours() - 12 : d.getHours(),
+					am_pm = d.getHours() >= 12 ? "PM" : "AM",
+					minutes = '' + d.getMinutes(),
+					seconds = '' + d.getSeconds(),
+					milliseconds = '' + d.getMilliseconds();
 
 				var today = new Date(),
-				thisYear = today.getFullYear();
+					thisYear = today.getFullYear();
 
 				// get week day name Sunday - Saturday
 				var dayName = this.getDayMonthStr(d.getDay(), "day", true);
@@ -1151,7 +1179,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				// format thoughts date
 				// 04 Dec 02:21:PM
-				var thoughtDate = day+" "+monthName+" "+hours+":"+minutes+":"+am_pm;
+				var thoughtDate = day + " " + monthName + " " + hours + ":" + minutes + ":" + am_pm;
 
 				return thoughtDate;
 				// return [year, month, day].join('-');
@@ -1196,87 +1224,87 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					intervalType += 's';
 				}
 
-				return interval + ' ' + intervalType+' ago';
+				return interval + ' ' + intervalType + ' ago';
 			};
-			getDayMonthStr(val, dateParam, long){
+			getDayMonthStr(val, dateParam, long) {
 				// days
-				var days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-				var daysShort = ["Sun","Mon","Tue","Wed","Thur","Fri","Sat"];
+				var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+				var daysShort = ["Sun", "Mon", "Tue", "Wed", "Thur", "Fri", "Sat"];
 
 				// Months
-				var monthNames = ["January", "February", "March", "April", "May", "June","July", "August", "September","October", "November", "December"];
-				var monthNamesShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun","Jul", "Aug", "Sep","Oct", "Nov", "Dec"];
+				var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September",
+					"October", "November", "December"
+				];
+				var monthNamesShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-				if(dateParam == "day" && long == true){
+				if (dateParam == "day" && long == true) {
 					// return day in long format
 					return days[val];
-				}
-				else if(dateParam == "day" && long == false){
+				} else if (dateParam == "day" && long == false) {
 					// return days in short
 					return daysShort[val];
 				}
-				if(dateParam == "month" && long == true){
+				if (dateParam == "month" && long == true) {
 					// return month in long format
 					return monthNames[val];
-				}
-				else if(dateParam == "month" && long == false){
+				} else if (dateParam == "month" && long == false) {
 					// return month in short
 					return monthNamesShort[val];
 				}
-				
+
 			}
-			getMediaURL(url){
+			getMediaURL(url) {
 				var res = "";
 				var checkHTTP;
 
-				if(url.includes("youtu")){
+				if (url.includes("youtu")) {
 					var youtubeID = this.getYoutubeID(url);
-					res = "https://www.youtube.com/embed/"+youtubeID;
-				}else{
+					res = "https://www.youtube.com/embed/" + youtubeID;
+				} else {
 					checkHTTP = url.indexOf("http:");
-					if(checkHTTP == -1) res = url;
+					if (checkHTTP == -1) res = url;
 					else res = url.replace("http:", "https:");
 				}
 
 				return res;
 			}
 			getYoutubeID(youtubeURL) {
-					var str = youtubeURL;
-					var n = str.indexOf("=");
-					var x = str.indexOf("&");
-					var res = "";
-			
-					if(n == -1){
-						n = str.indexOf("youtu.be");
-						if(x == -1) res = str.substring(n+9);
-						else res = str.substring(n+9, x);
-					}else{
-						if(x == -1) res = str.substring(n+1);
-						else res = str.substring(n+1, x);
-					}
-					
-					return res;
+				var str = youtubeURL;
+				var n = str.indexOf("=");
+				var x = str.indexOf("&");
+				var res = "";
+
+				if (n == -1) {
+					n = str.indexOf("youtu.be");
+					if (x == -1) res = str.substring(n + 9);
+					else res = str.substring(n + 9, x);
+				} else {
+					if (x == -1) res = str.substring(n + 1);
+					else res = str.substring(n + 1, x);
+				}
+
+				return res;
 			}
 			findObjectByKey(array, key, value) {
-					for (var i = 0; i < array.length; i++) {
-							if (array[i][key] === value) {
-									return array[i];
-							}
+				for (var i = 0; i < array.length; i++) {
+					if (array[i][key] === value) {
+						return array[i];
 					}
-					return null;
+				}
+				return null;
 			}
-			_openPLDP(e){
-				var thoughtID = Polymer.dom(this.root).querySelector('#'+e.currentTarget.id).data;
+			_openPLDP(e) {
+				var thoughtID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
 				sessionStorage.setItem("PLDP_PodcastAdd", thoughtID);
 				this.$.pldpDialog.open();
 				this._captureClicks(thoughtID, "Open PLDP", "button");
 			}
-			closePLDPDialog(){
+			closePLDPDialog() {
 				this._addToPLDP();
 				sessionStorage.removeItem("PLDP_PodcastAdd");
 				this.$.pldpDialog.close();
 			}
-			_addToPLDP(){
+			_addToPLDP() {
 				let PLDP_PodcastAdd = sessionStorage.getItem("PLDP_PodcastAdd");
 
 				let filteredArray = this.findObjectByKey(this.podcastsData, "podcastID", PLDP_PodcastAdd);
@@ -1286,7 +1314,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				// add PLDP user to the thought object
 				filteredArray.PLDPUserID = this.user.userID;
-				filteredArray.PLDPUserName = this.user.firstName+" "+this.user.lastName;
+				filteredArray.PLDPUserName = this.user.firstName + " " + this.user.lastName;
 
 				// instantiate db
 				let database = firebase.database();
@@ -1297,17 +1325,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				// delete the thought if already exists
 				let ref = database.ref('myPLDP/podcasts');
 				ref.orderByChild('podcastID').equalTo(PLDP_PodcastAdd)
-						.once('value').then(function(snapshot) {
-								snapshot.forEach(function(childSnapshot) {
-								if(newPodcast === childSnapshot.key){
-									console.log("Got the new ID");
-								}else{
-									// remove each old child
-									ref.child(childSnapshot.key).remove();
-								}
+					.once('value').then(function (snapshot) {
+						snapshot.forEach(function (childSnapshot) {
+							if (newPodcast === childSnapshot.key) {
+								console.log("Got the new ID");
+							} else {
+								// remove each old child
+								ref.child(childSnapshot.key).remove();
+							}
 						});
-				});
-				
+					});
+
 				let updates = {};
 				updates['/myPLDP/podcasts/' + newPodcast] = filteredArray;
 				database.ref().update(updates);
@@ -1317,24 +1345,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			isEqual(a, b) {
 				return a === b;
 			}
-			showSnackBar(msg){
+			showSnackBar(msg) {
 				var x = this.$.snackbar;
 
 				x.innerHTML = msg;
 				x.className = "show";
-				setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+				setTimeout(function () {
+					x.className = x.className.replace("show", "");
+				}, 3000);
 			}
-			_formate_date(dt){
+			_formate_date(dt) {
 				var date = new Date(dt);
-				var day = date.getDate() < 10 ? '0'+date.getDate() : date.getDate();
-				var hours = date.getHours() < 10 ? '0'+date.getHours() : date.getHours();
-				var minutes = date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes();
+				var day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate();
+				var hours = date.getHours() < 10 ? '0' + date.getHours() : date.getHours();
+				var minutes = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes();
 				var locale = 'en-us';
-				var month = date.toLocaleString(locale, { month: "long" });
+				var month = date.toLocaleString(locale, {
+					month: "long"
+				});
 				var year = date.getFullYear();
 				var am_pm = date.getHours() >= 12 ? "PM" : "AM"
 
-				return day+' '+month+' '+year+' '+hours+':'+minutes+" "+am_pm;
+				return day + ' ' + month + ' ' + year + ' ' + hours + ':' + minutes + " " + am_pm;
 			}
 		}
 

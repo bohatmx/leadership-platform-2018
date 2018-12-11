@@ -175,7 +175,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 		
 		</div>	
 		
-		<div id="preview-profile" class="ldp-modal w3-animate-zoom">
+		<div id="preview-profile" class="ldp-modal w3-animate-zoom" style="z-index: 9999999999;">
 			<div class="ldp-modal-content w3-round max-modal-width">
 				<div>
 					<span id="close-followers" data="preview-profile" on-click="_closeProfileModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white" style="z-index: 999;">&times;</span>
@@ -188,6 +188,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 		</div>
 		<section class="thought-card" id="thoughts-Holder">
 				<div class="main-card" style="width:100%;">
+					
 					<template id="videosList" is="dom-repeat" items="[[videosData]]" as="item" sort="_sort" observe="dateScheduled">
 						<div class="modal-div">
 							<div class="vidi-item card-container w3-animate-zoom" data="[[item]]">
@@ -210,11 +211,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 								<div class="w3-row" style="padding-top: 8px;">
 									<div class="w3-center" style="width:auto; height: 220px">
 										<template is="dom-if" if="[[isEqual(item.UploadExternal, 'external')]]">
-											<img id="img[[item.dateRegistered]]" src$="[[getYoutubeThumbnail(item.url)]]" alt="LP" 
-												style="width:auto; max-height: 220px; cursor: pointer;" data="[[item.url]]" on-click="_handleClick" uploadtype="[[item.UploadExternal]]">
+											<img id="img[[item.dateRegistered]]" src$="[[getYoutubeThumbnail(item.url)]]" alt="LP" style="max-width:100%; max-height: 220px; cursor: pointer;" data="[[item.url]]" on-click="_handleClick" uploadtype="[[item.UploadExternal]]">
 										</template>
 										<template is="dom-if" if="[[isEqual(item.UploadExternal, 'upload')]]">
-											<video id="thumb[[item.dateRegistered]]" style="width:auto; max-height: 120px;  cursor: pointer;" data="[[item.url]]" on-click="_handleClick" uploadtype="[[item.UploadExternal]]">
+											<video id="thumb[[item.dateRegistered]]" style="max-width:100%; max-height: 120px;  cursor: pointer;" data="[[item.url]]" on-click="_handleClick" uploadtype="[[item.UploadExternal]]">
 												<source src="[[item.url]]" type="video/mp4">
 												<source src="[[item.url]]" type="video/ogg">
 												Your browser does not support video.
@@ -342,33 +342,36 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				};
 			}
 			isFollowing(journalUserID){
-				if(this.user.following != undefined){
-					if(this.user.following){
-					let following =  this.user.following;
-					let isfollowing = following[journalUserID];
-
-					return isfollowing ? 'Following' : 'Follow';
-					}else return "Follow";
-				}else return "Follow";
-				
-			}
-
-			isFollowingStyle(journalUserID){
-				let userID = this.user.userID;
-
-				if(userID === journalUserID){
-					return "w3-hide";
-				}
-				else{
-					if(this.user.following){
+				if(this.user){
+					if(this.user.following != undefined){
+						if(this.user.following){
 						let following =  this.user.following;
 						let isfollowing = following[journalUserID];
 
-						return isfollowing ? 'following' : '';
-					}
-					else {return "";}
+						return isfollowing ? 'Following' : 'Follow';
+						}else return "Follow";
+					}else return "Follow";
+				}else return "Follow";
+			}
 
-				}
+			isFollowingStyle(journalUserID){
+				if(this.user){
+					let userID = this.user.userID;
+					if(userID === journalUserID){
+						return "w3-hide";
+					}
+					else{
+						if(this.user){
+							if(this.user.following){
+								let following =  this.user.following;
+								let isfollowing = following[journalUserID];
+
+								return isfollowing ? 'following' : '';
+							}
+							else {return "";}
+						}else {return "";}
+					}
+				}else return "";
 				
 			}
 			followUser(e){
@@ -656,6 +659,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				
 			}
 			getMediaURL(url){
+
 				var res = "";
 				var checkHTTP;
 
@@ -667,6 +671,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					if(checkHTTP == -1) res = url;
 					else res = url.replace("http:", "https:");
 				}
+
+				console.log("link: ", res)
 				
 				return res;
 			}
@@ -688,8 +694,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				return res;
 			}
 			getYoutubeThumbnail(youtubeURL) {
-				var res = this.getYoutubeID(youtubeURL);
-				return "https://img.youtube.com/vi/"+res+"/0.jpg";
+				// check if it's TED link
+				var n = youtubeURL.includes(".ted.com");
+				if(n){
+					return "https://firebasestorage.googleapis.com/v0/b/leadershipplatform-158316.appspot.com/o/mailassets%2Fted-thumb-min.jpg?alt=media&token=6eeec5c4-9c2b-49dd-8c49-51919efdbcdc"
+				}else{
+					var res = this.getYoutubeID(youtubeURL);
+					return "https://img.youtube.com/vi/"+res+"/0.jpg";
+				}
 			}
 			findObjectByKey(array, key, value) {
 					for (var i = 0; i < array.length; i++) {

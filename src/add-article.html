@@ -24,6 +24,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
 <link rel="import" href="../bower_components/paper-styles/shadow.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/l2t-paper-color/l2t-paper-color.html">
 
 <!-- Paper items -->
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
@@ -728,6 +729,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           podcasturlInput = "";
         }
 
+      if(!this.isURL(podcasturlInput)){
+        this.showSnackBar("Please enter a valid podcast link!")
+        return;
+      }
+
         // check url input if len > 0
         if(podcasturlInput.length > 0){
           let podcastLink = document.createElement('a');
@@ -916,6 +922,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           videourlInput = "";
         }
 
+        if(!this.isURL(videourlInput)){
+          this.showSnackBar("Please enter a valid video link!")
+          return;
+        }
+
         // check url input if len > 0
         if(videourlInput.length > 0){
           let videoLink = document.createElement('a');
@@ -1074,7 +1085,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         //set status
         var status = checkStatus;
-        console.log(dateScheduled);
+        // console.log(dateScheduled);
 
         // format date
         datetime = this.formatDate(datetime);
@@ -1090,6 +1101,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           articleLink = "";
 
         }else{
+          if(articleLink == undefined){
+            articleLink = "";
+          }
+
+          if(!this.isURL(articleLink)){
+            this.showSnackBar("Please enter a valid article link!")
+            return;
+          }
           // this.photo = "";
           content = "";
         }
@@ -1639,6 +1658,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.lastSelected = this._selected;
 
       }
+      isURL(str) {
+        var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name and extension
+        '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+        '(\\:\\d+)?'+ // port
+        '(\\/[-a-z\\d%@_.~+&:]*)*'+ // path
+        '(\\?[;&a-z\\d%@_.,~+&:=-]*)?'+ // query string
+        '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+        return pattern.test(str);
+      }
       handleArticle(){
         let articleDesc = this.$.articleDesc.value;
         let urlInput = this.$.urlInput.value;
@@ -1653,6 +1682,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         if(urlInput == undefined){
           urlInput = "";
+        }
+        
+        if(!this.isURL(urlInput)){
+          this.showSnackBar("Please enter a valid article link!")
+          return;
         }
 
         // check url input if len > 0

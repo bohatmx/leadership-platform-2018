@@ -73,7 +73,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 			@media screen and (max-width: 900px) {
 				.main-card {
-					margin: 0px;
+					margin: 34px 0px !important;
 				}
 			}
 
@@ -109,11 +109,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			</div>
 		</div>
 
-		<div id="preview-profile" class="ldp-modal w3-animate-zoom">
+		<div id="preview-profile" class="ldp-modal w3-animate-zoom" style="z-index: 9999999999;">
 			<div class="ldp-modal-content w3-round max-modal-width">
 				<div>
 					<span id="close-followers" data="preview-profile" on-click="_closeProfileModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white"
-					 style="z-index: 999;">&times;</span>
+					 style="z-index: 9999999;">&times;</span>
 					<div class="w3-row">
 						<preview-profile _userid="{{_userid}}" userobj="{{userobj}}" user="{{user}}"></preview-profile>
 					</div>
@@ -134,10 +134,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						<h4>{{loadingmessage}}</h4> 
 					</div>
 				</div>
-				<template id="thoughtsList" is="dom-repeat" items="[[thoughtsData]]" as="item" sort="_sort" observe="dateScheduled" initial-count="3" target-framerate="3">
+				<template id="thoughtsList" is="dom-repeat" items="[[thoughtsData]]" as="item" sort="_sort" observe="dateScheduled"
+				 initial-count="3" target-framerate="10">
 					<div class="modal-div w3-animate-zoom">
 						<div class="card-container fadeInUp">
-							<span class="w3-button w3-display-topright w3-red w3-medium w3-hide closer-for-modal" style="z-index:999999;">&times;</span>
+							<span class="w3-button w3-display-topright w3-red w3-medium w3-hide closer-for-modal" style="z-index:9999;">&times;</span>
 							<div class="container card-header">
 								<div class="header-det w3-row">
 									<div class="card-avatar" style$="[[_profilePhoto(item.photoURL)]] cursor: pointer;" data$="[[_setProfileInfo(item.journalUserName, item.journalUserID, item.companyName, item.companyID, item.photoURL)]]"
@@ -251,24 +252,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				var that = this;
 
 				Polymer.RenderStatus.afterNextRender(this, () => {
-					setTimeout(function(){
-						if(that.thoughtype == "companythoughts"){
-							that.equalto=that._companyid+"_approved";
-							that.orderchild="publish_status";
-						}else if(that.thoughtype == "dailythoughts"){
-							that.equalto="daily_approved";
-							that.orderchild="publish_status";
-						}else if(that.thoughtype == "mythoughts"){
-							that.equalto=that.user.userID+"";
-							that.orderchild="journalUserID";
-						}else if(that.thoughtype == "topleaderthoughts"){
-							that.equalto="hc_approved";
-							that.orderchild="publish_status";
-						}
+					// setTimeout(function(){
+						// if(that.thoughtype == "companythoughts"){
+						// 	that.equalto=that._companyid+"_approved";
+						// 	that.orderchild="publish_status";
+						// }else if(that.thoughtype == "dailythoughts"){
+						// 	that.equalto="daily_approved";
+						// 	that.orderchild="publish_status";
+						// }else if(that.thoughtype == "mythoughts"){
+						// 	that.equalto=that.user.userID+"";
+						// 	that.orderchild="journalUserID";
+						// }else if(that.thoughtype == "topleaderthoughts"){
+						// 	that.equalto="hc_approved";
+						// 	that.orderchild="publish_status";
+						// }
 
-						that.$.qry_viewthought.disabled=false;
-						that.qrypath="/dailyThoughts";
-					}, 200);					
+						// that.$.qry_viewthought.disabled=false;
+						// that.qrypath="/dailyThoughts";
+					// }, 200);					
 				});
 
 				// setTimeout(function(){
@@ -392,7 +393,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				if(this.thoughtype == "companythoughts"){
 					this.equalto=this._companyid+"_approved";
 					this.orderchild="publish_status";
+				}else if(this.thoughtype == "dailythoughts"){
+					this.equalto="daily_approved";
+					this.orderchild="publish_status";
+				}else if(this.thoughtype == "mythoughts"){
+					this.equalto=this.user.userID+"";
+					this.orderchild="journalUserID";
+				}else if(this.thoughtype == "topleaderthoughts"){
+					this.equalto="hc_approved";
+					this.orderchild="publish_status";
 				}
+
+				this.$.qry_viewthought.disabled=false;
+				this.qrypath="/dailyThoughts";
 			}
 			_filterIDChanged(){
 				var that = this;
@@ -470,35 +483,41 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				return val;
 			}
 
-			isFollowing(journalUserID) {
-				if (this.user.following != undefined) {
-					if (this.user.following) {
-						let following = this.user.following;
-						let isfollowing = following[journalUserID];
+			isFollowing(journalUserID) {	
+				if (this.user) {
+					if (this.user.following != undefined) {
+						if (this.user.following) {
+							let following = this.user.following;
+							let isfollowing = following[journalUserID];
 
-						return isfollowing ? 'Following' : 'Follow';
+							return isfollowing ? 'Following' : 'Follow';
+						} else return "Follow";
 					} else return "Follow";
 				} else return "Follow";
-
 			}
 
 			isFollowingStyle(journalUserID) {
-				let userID = this.user.userID;
+				if (this.user) {
+					let userID = this.user.userID;
 
-				if (userID === journalUserID) {
-					return "w3-hide";
-				} else {
-					if (this.user.following) {
-						let following = this.user.following;
-						let isfollowing = following[journalUserID];
-
-						return isfollowing ? 'following' : '';
+					if (userID === journalUserID) {
+						return "w3-hide";
 					} else {
-						return "";
+						if (this.user) {
+							if (this.user.following) {
+								let following = this.user.following;
+								let isfollowing = following[journalUserID];
+
+								return isfollowing ? 'following' : '';
+							} else {
+								return "";
+							}
+						} else {
+							return "";
+						}
+
 					}
-
-				}
-
+				} else return "";
 			}
 			_openWebsite(e) {
 				var obj = {
@@ -1030,7 +1049,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				} else {
 					var color = textColor;
 				}
-				let photo_url = "background-image: url('../data/land.jpg'); color: " + color + ";";
+				let photo_url = "background-image: url('../data/land.jpg'); color: " + color + ";background-repeat: round;background-size: cover;height: 280px;";
 
 				for (var item in photos) { 
 					if(photos[item].thumbNailUrl){

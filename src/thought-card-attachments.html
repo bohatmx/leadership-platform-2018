@@ -38,13 +38,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .action-item{
         float: left;
         margin: 5px;
-        border:1px solid #888;
+        /* border:1px solid #888; */
         box-shadow: 0px 0px 10px #aaa;
-        border-radius:20px;
+        /* border-radius:20px; */
         background-color: #fbfbfb;
         color:#404e57;
         position: relative;
         cursor: pointer;
+        padding: 4px;
       }
 
       .action-item.nbr{
@@ -53,6 +54,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         box-shadow: 0px 0px 10px #ddd;
         border-color:#ccc;
         border-radius:0px !important;
+      }
+
+      paper-icon-button.giant {
+        width: 36px;
+        height: 36px;
+        padding: 2px;
       }
 
       .tca{
@@ -131,19 +138,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <div class="w3-row">
       <div class="card-actions">
-        <div class="horizontal justified">
-          <paper-icon-button class="w3-text-blue" icon="myicons:small-link" on-click="_toggle" data-tca="tca-links"></paper-icon-button>
-          <paper-icon-button class="w3-text-green" icon="myicons:small-mic" on-click="_toggle" data-tca="tca-podcasts"></paper-icon-button>
-          <paper-icon-button class="w3-text-grey" icon="myicons:small-videocam" on-click="_toggle" data-tca="tca-videos"></paper-icon-button>
-          <paper-icon-button class="w3-text-red" icon="myicons:small-image" on-click="_toggle" data-tca="tca-photos"></paper-icon-button>
-          <!-- <paper-icon-button class="w3-text-brown" icon="myicons:small-share" data="[[item.dailyThoughtID]]" id="share[[item.dateRegistered]]"></paper-icon-button> -->
-          <paper-button id="pldp[[item.dateRegistered]]" class="w3-text-red thought-actions pldp-text w3-small" data="[[item.dailyThoughtID]]" on-tap="_openPLDP" hidden$="[[ispldp]]">My PLDP</paper-button>
+        <div class="w3-row">
+          <table style="min-width: -webkit-fill-available;min-width: -moz-available;">
+            <tr class="w3-light-grey" style="min-height:16px!important;">
+              <td colspan="5" class="w3-padding w3-text-blue" style="height:16px!important;"><span>[[_attachmentsExists(item)]]</span></td>
+            </tr>
+            <tr>
+              <td><paper-icon-button class="w3-text-blue giant" icon="myicons:small-link" on-click="_toggle" data-tca="tca-links"></paper-icon-button></td>
+              <td><paper-icon-button class="w3-text-green giant" icon="myicons:small-mic" on-click="_toggle" data-tca="tca-podcasts"></paper-icon-button></td>
+              <td><paper-icon-button class="w3-text-grey giant" icon="myicons:small-videocam" on-click="_toggle" data-tca="tca-videos"></paper-icon-button></td>
+              <td><paper-icon-button class="w3-text-red giant" icon="myicons:small-image" on-click="_toggle" data-tca="tca-photos"></paper-icon-button></td>
+              <td><paper-button id="pldp[[item.dateRegistered]]" class="w3-text-red thought-actions pldp-text w3-small" data="[[item.dailyThoughtID]]" on-tap="_openPLDP" hidden$="[[ispldp]]">My PLDP</paper-button></td>
+            </tr>
+            <tr>
+              <td><paper-button class="w3-text-blue thought-actions giant" on-click="_toggle" data-tca="tca-links">[[_objLen(item.urls)]]</paper-button></td>
+              <td><paper-button class="w3-text-green thought-actions giant" on-click="_toggle" data-tca="tca-podcasts">[[_objLen(item.podcasts)]]</paper-button></td>
+              <td><paper-button class="w3-text-grey thought-actions giant" on-click="_toggle" data-tca="tca-videos">[[_objLen(item.videos)]]</paper-button></td>
+              <td><paper-button class="w3-text-red thought-actions giant" on-click="_toggle" data-tca="tca-photos">[[_objLen(item.photos)]]</paper-button></td>
+              <td></td>
+            </tr>
+          </table>
         </div>
         <div class="horizontal justified">
-          <paper-button class="w3-text-blue thought-actions" on-click="_toggle" data-tca="tca-links">[[_objLen(item.urls)]]</paper-button>
-          <paper-button class="w3-text-green thought-actions" on-click="_toggle" data-tca="tca-podcasts">[[_objLen(item.podcasts)]]</paper-button>
-          <paper-button class="w3-text-grey thought-actions" on-click="_toggle" data-tca="tca-videos">[[_objLen(item.videos)]]</paper-button>
-          <paper-button class="w3-text-red thought-actions" on-click="_toggle" data-tca="tca-photos">[[_objLen(item.photos)]]</paper-button>
+          
+          <!-- <paper-icon-button class="w3-text-brown" icon="myicons:small-share" data="[[item.dailyThoughtID]]" id="share[[item.dateRegistered]]"></paper-icon-button> -->
+          
+        </div>
+        <div class="horizontal justified">
+          
         </div>
       </div>
     </div>
@@ -601,6 +623,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				});
 				}
 			}
+
+      _attachmentsExists(item){
+        if((item.urls) || (item.podcasts) || (item.videos) ){
+          return "View attachment(s) below"
+        }else return "";
+      }
 
 			_objLen(obj) {
 				let len = 0;

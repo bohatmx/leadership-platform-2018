@@ -428,6 +428,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         x.className = "show";
         setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
       }
+      isURL(str) {
+        var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name and extension
+        '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+        '(\\:\\d+)?'+ // port
+        '(\\/[-a-z\\d%@_.~+&:]*)*'+ // path
+        '(\\?[;&a-z\\d%@_.,~+&:=-]*)?'+ // query string
+        '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+        return pattern.test(str);
+      }
       _saveNewVideo(){
         let author = this.$.videoAuthor.value;
         let title = this.$.videoTitle.value;
@@ -567,9 +577,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         else if(UploadExternal == 'external'){
           // Validate video link
           if ((videourlInput == undefined) || (videourlInput.trim() == "")){
-            this.showSnackBar("Please enter video External URL !");
+            this.showSnackBar("Please enter a video URL !");
             return;
           }else{
+            if(!this.isURL(videourlInput)){
+              this.showSnackBar("Please enter a valid video link!")
+              return;
+            }
             // Get a key for a new video.
             var newvideoKey = database.ref().child('videos').push().key;
 

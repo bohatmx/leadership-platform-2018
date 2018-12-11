@@ -35,9 +35,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 	<template>
 		<link rel="import" href="shared-styles.html">
 		<style include="w3-styles">
+			* {
+				transition: .5s all;
+			}
+			.comment-actions {
+				display: inline-block;
+			}
 			.comment-box .comments-bar {
 				margin-top: 5px;
 				border-top: 1px solid rgb(158, 160, 167);
+			}
+			
+			/* TODO: Add a startWith child subcomment*/
+			.open-reply {
+				color: red;
+				transition: .5s all;
+				transform: rotate(-90deg);
+			}
+			.more-comments {
+				color: #3498db;
+				transition: .5s all;
+			
+		
+			}
+			.comment__datetime {
+				display: block;
 			}
 			.w3-app-text{
 				color: var(--app-primary-color);
@@ -106,13 +128,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				box-shadow: 0px 0px 5px rgba(0,0,0,0.3);
 			}
 
+			*.hidden {
+				display: none;	
+				visibility: hidden;
+			}
 			.comment-box-author{
 				padding: 12px 7px 0px;
 			}
 
 			.comment-box-text{
-				padding: 3px 7px;
-				font-size: 11pt;
+				/* padding: 3px 7px; */
+				/* font-size: 11pt; */
 				color:#444;
 			}
 
@@ -138,6 +164,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			.crh-row:nth-child(odd){
 				background-color: rgba(0,0,0,0.03);
 				border-bottom:1px solid rgba(0,0,0,0.035);
+			}
+			.w3-rest.comment--text {
+				display: inline-block !important;
+				padding: 2px 10px !important; 
 			}
 
 			.loader {
@@ -200,16 +230,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			.ldp-modal.modal-div{
 				margin: 0px;
 			}
-		</style> 
-		
+		</style>
+
 		<div class="comments-box">
 			<div class="comments-bar w3-row w3-darker w3-padding">
 				<div class="w3-left" style="display: inline-flex;
 				flex-direction: row;
 				align-items: center;
 				justify-content: center;">
-					<paper-fab data="{{item.likesData}}" icon="{{__computeFavIcon(item.likes)}}" on-tap="__toggleFavorite" class="w3-left" style="margin-right: 8px;"></paper-fab>
-					<span class="w3-new-badge w3-small w3-left w3-blue" style$="[[hideSpan(item.countLikes)]]" data="{{item.likesData}}" on-tap="_openWhoLiked">[[_getLikesCount(item.countLikes)]]</span>
+					<paper-fab data="{{item.likesData}}" icon="{{__computeFavIcon(item.likes)}}" on-tap="__toggleFavorite" class="w3-left"
+					 style="margin-right: 8px;"></paper-fab>
+					<span class="w3-new-badge w3-small w3-left w3-blue" style$="[[hideSpan(item.countLikes)]]" data="{{item.likesData}}"
+					 on-tap="_openWhoLiked">[[_getLikesCount(item.countLikes)]]</span>
 				</div>
 				<div class="w3-right">
 					<paper-button class="bar-item w3-left selected" on-tap="_toggleCRHItem" crhType="comments">
@@ -228,15 +260,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				</template>
 				<div class="crh-item w3-animate-left comments">
 					<div class="w3-row add-comment-form">
-						<div class="w3-right w3-padding-large w3-margin w3-relative w3-text-grey w3-hover-text-dark-grey">
+						<div class="w3-right w3-padding-small w3-margin w3-relative w3-text-grey w3-hover-text-dark-grey">
 							<paper-ripple></paper-ripple>
 							<iron-icon icon="app:send" on-tap="_saveComment"></iron-icon>
 						</div>
 						<div class="w3-left">
-							<div style$="[[_profilePhoto(user.photoURL)]]" class="commentor-photo" ></div>
+							<div style$="[[_profilePhoto(user.photoURL)]]" class="commentor-photo"></div>
 						</div>
 						<div class="w3-rest">
-							<paper-textarea rows="1" class="_myComment" multiple label="Leave a comment..." type="text" auto-validate> </paper-textarea> 
+							<paper-textarea rows="1" class="_myComment" multiple label="Leave a comment..." type="text" auto-validate>
+							</paper-textarea>
 						</div>
 					</div>
 					<template is="dom-if" if="[[_noComments(item.comments)]]">
@@ -253,79 +286,178 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 									<span class="w3-margin-left w3-text-grey">[[timeSince(comment.date)]]</span>
 								</div>
 								<div class="comment-box-text w3-row">
-									<table style="width:100%;"><tbody>
-										<tr><td class="w3-rest">[[comment.comment]]</td>
-										<td class="w3-right"><template is="dom-if" if="[[isEqual(comment.journalUserID, user.userID)]]"><paper-icon-button icon="delete" key="[[item.$key]]" on-tap="_deleteComment" data="[[comment.commentID]]"></paper-icon-button></template></td></tr>
-									</tbody></table>
-								</div>
-							</div>
-							
-						</div>
+									<table style="width:100%;">
+										<tbody>
+											<tr>
+												<td class="w3-rest comment--text">[[comment.comment]]</td>
+												<td class="w3-right">
+													<div class="comment-actions">
+														<template is="dom-if" if="[[isEqual(comment.journalUserID, user.userID)]]">
+															<paper-icon-button icon="delete" key="[[item.$key]]" on-tap="_deleteComment" data="[[comment.commentID]]"></paper-icon-button>
+														</template>
+														<paper-icon-button class="w3-text-blue" on-tap="_toggleReplyComment" data="[[comment.commentID]]" icon="reply"
+														 key="[[item.$key]]" title="reply"></paper-icon-button>
+
+														<template is="dom-if" if="[[comment.subComments]]">
+
+															<paper-icon-button on-tap="_toggleShowSubComments" data="[[comment.commentID]]" icon="image:filter-{{ _getCount(comment.subComments) }}"
+															 key="[[item.$key]]" title="more-comments">
+																<paper-ripple></paper-ripple>
+
+															</paper-icon-button>
+														</template>
+
+
+
+													</div>
+											<tr id="subCommentParent__{{comment.commentID}}" class="hidden sub-comments__parent{{comment.commentID}}">
+
+												<!-- TODO: Add Nested Comment Block -->
+												<template is="dom-if" if="[[comment.subComments]]">
+													<td>
+														<template is="dom-repeat" items="{{_sortComments(comment.subComments)}}" as="subcomment">
+											<tr>
+
+												<div class="w3-left">
+													<div style$="[[_profilePhoto(subcomment.photoURL)]]" class="commentor-photo" data="[[subcomment.commentID]]"
+													 on-tap="_previewSubProfile" parentid="[[comment.commentID]]"></div>
+												</div>
+												<div class="subcomment-box-author w3-app-text">
+													<b>[[subcomment.journalUserName]]</b>
+													<span class="w3-margin-left w3-text-grey comment__datetime">[[timeSince(subcomment.date)]]</span>
+												</div>
+												<style>
+													.comment--nested {
+																				display: inline-block;
+																			}
+																		</style>
+												<p class="comment--nested"> [[subcomment.comment]] </p>
+												<div class="w3-right">
+
+
+													<template is="dom-if" if="[[isEqual(subcomment.journalUserID, user.userID)]]">
+														<div>
+															<paper-icon-button icon="delete" key="[[item.$key]]" on-tap="_deleteSubComment" data="[[subcomment.commentID]]"
+															 parentid="[[subcomment.parentID]]"></paper-icon-button>
+														</div>
+
+													</template>
+
+												</div>
+
+
 					</template>
-				</div>
-				<div class="crh-item w3-animate-left w3-hide ratings">
-					<div class="w3-padding w3-text-dark-grey w3-small">Rate this [[thetype]]</div>
-					<div class="w3-row">
-						<div class="w3-left">
-							<div style$="[[_profilePhoto(user.photoURL)]]" class="commentor-photo"></div>
-						</div>	
-						<div class="w3-rest w3-padding-tiny">
-							<div class="comment-box-author w3-app-text">
-								<b>[[user.firstName]] [[user.firstName]]</b>
-								<span class="w3-margin-left w3-text-grey">[[timeSince(itemDate)]]</span>
-							</div>
-							<div class="comment-box-text w3-small">
-								<l2t-paper-rating rating="{{itemrating}}" class="rate-color-posted" total="5"></l2t-paper-rating>
-							</div>
-						</div>
-					</div>
-				</div>
+					</td>
+	</template>
+
+	</tr>
+
+
+	</td>
+
+	</tr>
+
+	</tbody>
+	</table>
+	<style>
+
+
+	</style>
+	<div class="comment--slot  hidden" id$="[[comment.commentID]]" data-comment-by$="[[comment.journalUserName]]"
+	 data-user-avatar$="[[user.photoURL]]" data-comment-id$="[[comment.commentID]]">
+
+		<div class="w3-row add-comment-form">
+			<div class="w3-right w3-padding-large w3-margin w3-relative w3-text-grey w3-hover-text-dark-grey">
+				<paper-ripple></paper-ripple>
+				<iron-icon icon="app:send" data-parent-comment-id$="[[comment.commentID]]" on-tap="_saveSubComment"></iron-icon>
 			</div>
-		</div>
-		<div id="who-liked" class="w3-modal w3-animate-zoom" style="z-index: 9999;">
-			<div class="w3-modal-content w3-round max-modal-width">
-				<div>
-					<span id="spanCloseItemModal" on-click="_closeItemsModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white">&times;</span>
-					<div class="w3-row">
-						<who-liked likesdata="{{likesdata}}" user="{{user}}"></who-liked>
-					</div>
-					<div id="item-holder" class="w3-row w3-border w3-round-small w3-margin-bottom"></div>
-				</div>
+			<div class="w3-left">
+				<div style$="[[_profilePhoto(user.photoURL)]]" class="commentor-photo"></div>
+			</div>
+			<div class="w3-rest">
+				<paper-textarea rows="1" id="parentID_{{comment.commentID}}" data-parent-id$="[[comment.commentID]]" class="_replySubComment"
+				 multiple label="@[[comment.journalUserName]]..." type="text" auto-validate>
+
+				</paper-textarea>
 			</div>
 		</div>
 
-		<paper-dialog id="pldpDialog">
-			<h4 class="w3-text-red"><paper-icon-button icon="myicons:delete"></paper-icon-button>Confirmation</h4>
-			<hr>
-				<p id="thoughtTitle" class="thought-rate-title">Are you sure you want to delete this comment?</p>
-			<hr>
-			<div class="buttons w3-text-white">
-				<paper-button class="w3-green" dialog-dismiss on-tap="_closeDeleteDialog">CANCEL</paper-button>
-				<paper-button class="w3-red" on-tap="deleteComment">DELETE</paper-button>
-			</div>
-		</paper-dialog>
+	</div>
 
-		<div id="preview-profile" class="ldp-modal w3-animate-zoom">
-			<div class="ldp-modal-content w3-round max-modal-width">
-				<div>
-					<span id="close-followers" data="preview-profile" on-click="_closeProfileModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white" style="z-index: 999;">&times;</span>
-					<div class="w3-row">
-						<preview-profile _userid="{{_userid}}" userobj="{{userobj}}" user="{{user}}"></preview-profile>
-					</div>
+	</div>
+	</div>
+
+	</div>
+	</template>
+	</div>
+	<div class="crh-item w3-animate-left w3-hide ratings">
+		<div class="w3-padding w3-text-dark-grey w3-small">Rate this [[thetype]]</div>
+		<div class="w3-row">
+			<div class="w3-left">
+				<div style$="[[_profilePhoto(user.photoURL)]]" class="commentor-photo"></div>
+			</div>
+			<div class="w3-rest w3-padding-tiny">
+				<div class="comment-box-author w3-app-text">
+					<b>[[user.firstName]] [[user.firstName]]</b>
+					<span class="w3-margin-left w3-text-grey">[[timeSince(itemDate)]]</span>
+				</div>
+				<div class="comment-box-text w3-small">
+					<l2t-paper-rating rating="{{itemrating}}" class="rate-color-posted" total="5"></l2t-paper-rating>
 				</div>
 			</div>
 		</div>
+	</div>
+	</div>
+	</div>
+	<div id="who-liked" class="w3-modal w3-animate-zoom" style="z-index: 9999;">
+		<div class="w3-modal-content w3-round max-modal-width">
+			<div>
+				<span id="spanCloseItemModal" on-click="_closeItemsModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white">&times;</span>
+				<div class="w3-row">
+					<who-liked likesdata="{{likesdata}}" user="{{user}}"></who-liked>
+				</div>
+				<div id="item-holder" class="w3-row w3-border w3-round-small w3-margin-bottom"></div>
+			</div>
+		</div>
+	</div>
+
+	<paper-dialog id="pldpDialog">
+		<h4 class="w3-text-red">
+			<paper-icon-button icon="myicons:delete"></paper-icon-button>Confirmation
+		</h4>
+		<hr>
+		<p id="thoughtTitle" class="thought-rate-title">Are you sure you want to delete this comment?</p>
+		<hr>
+		<div class="buttons w3-text-white">
+			<paper-button class="w3-green" dialog-dismiss on-tap="_closeDeleteDialog">CANCEL</paper-button>
+			<paper-button class="w3-red" on-tap="deleteComment">DELETE</paper-button>
+		</div>
+	</paper-dialog>
+
+	<div id="preview-profile" class="ldp-modal w3-animate-zoom">
+		<div class="ldp-modal-content w3-round max-modal-width">
+			<div>
+				<span id="close-followers" data="preview-profile" on-click="_closeProfileModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white"
+				 style="z-index: 999;">&times;</span>
+				<div class="w3-row">
+					<preview-profile _userid="{{_userid}}" userobj="{{userobj}}" user="{{user}}"></preview-profile>
+				</div>
+			</div>
+		</div>
+	</div>
 	</template>
 
 	<script>
 		class CommentsBox extends Polymer.Element {
-			static get is() { return 'comments-box'; }
-			ready(){
+			static get is() {
+				return 'comments-box';
+			}
+			ready() {
 				super.ready();
 				var modalContent = Polymer.dom(this).parentNode;
 				var modal = $(modalContent).parents('.modal-div');
 				var that = this;
-				modal.on('click', '.closer-for-modal', function(){
+				modal.on('click', '.closer-for-modal', function () {
 					that._closeModal();
 				});
 			}
@@ -334,26 +466,56 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					user: {
 						type: Object
 					},
-					firebaseref: {type: String},
-					itemDate:{
+					firebaseref: {
+						type: String
+					},
+					itemDate: {
 						type: String
 					},
 					itemrating: {
 						type: Number
 					},
-					videoChanged: {type:Boolean, value:true},
-					firstTime: {type:Boolean, value:true},
-					opened: {type: Boolean, value: false, notify: true, observer: '_showAllComments'},
-					entityid: {type: String}, // This is the ID an entity like a thought, video, podcast etc.
+					videoChanged: {
+						type: Boolean,
+						value: true
+					},
+					firstTime: {
+						type: Boolean,
+						value: true
+					},
+					opened: {
+						type: Boolean,
+						value: false,
+						notify: true,
+						observer: '_showAllComments'
+					},
+					entityid: {
+						type: String
+					}, // This is the ID an entity like a thought, video, podcast etc.
 					item: { //This is the entire entity comments and rating and all
 						type: Object,
 						observer: 'onCRHDataChanged'
 					},
-					thetype: { type: String }, //Can be thought, video, podcast etc.
+					thetype: {
+						type: String
+					}, //Can be thought, video, podcast etc.
 					__favorite: {
 						type: Boolean,
 						value: false
 					},
+					isReplying: {
+						type: Boolean,
+						value: false
+					},
+					showCommentTextArea: {
+						type: Boolean,
+						value: false,
+					},
+					showSubComments: {
+						type: Boolean,
+						value: false
+					},
+
 					likesdata: {
 						type: Object,
 						notify: true
@@ -361,23 +523,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				};
 			}
 
-			_previewProfile(e){
+			_previewProfile(e) {
 				var commentID = e.currentTarget.data;
 				var comments = this.item.comments;
 				var filteredArray = [];
 
-				for(var x in comments){
-					if(x == commentID){
+				for (var x in comments) {
+					if (x == commentID) {
 						filteredArray = comments[x];
 					}
 				}
 
 				// console.log("user in comment: ", this.user)
 
-				if(filteredArray){
+				if (filteredArray) {
 					var photoURL = filteredArray.photoURL;
 
-					if(photoURL == "" || photoURL == undefined) photoURL = "../images/default-user.png";
+					if (photoURL == "" || photoURL == undefined) photoURL = "../images/default-user.png";
 					var a = {
 						journalUserName: filteredArray.journalUserName,
 						journalUserID: filteredArray.journalUserID,
@@ -389,28 +551,213 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					this.userobj = a;
 					this._userid = filteredArray.journalUserID;
 
-					// var page = "preview-profile"
-					// var resolvedPageUrl = this.resolveUrl(page + '.html');
-					// Polymer.importHref(
-					// 	resolvedPageUrl,
-					// 	null,
-					// 	page + '.html',
-					// 	true);
-						
 					this._openProfileModal();
 				}
 			}
 
-			_openProfileModal(){
+			_previewSubProfile(e) {
+				var parentID = e.currentTarget.parentid;
+				var commentID = e.currentTarget.data;
+				var comments = this.item.comments["" + parentID].subComments;
+
+				var filteredArray = [];
+
+				for (var x in comments) {
+					if (x == commentID) {
+						filteredArray = comments[x];
+					}
+				}
+
+				if (filteredArray) {
+					var photoURL = filteredArray.photoURL;
+
+					if (photoURL == "" || photoURL == undefined) photoURL = "../images/default-user.png";
+					var a = {
+						journalUserName: filteredArray.journalUserName,
+						journalUserID: filteredArray.journalUserID,
+						companyName: filteredArray.companyName,
+						companyID: filteredArray.companyID,
+						photoURL: photoURL
+					}
+
+					this.userobj = a;
+					this._userid = filteredArray.journalUserID;
+
+					this._openProfileModal();
+				}
+			}
+
+			_openProfileModal() {
 				var modal = Polymer.dom(this.root).querySelector('#preview-profile');
 				modal.style.display = 'block';
 			}
-			_closeProfileModal(){
+			_closeProfileModal() {
 				var modal = Polymer.dom(this.root).querySelector('#preview-profile');
 				modal.style.display = 'none';
 			}
-			
-			isNotCurrentUser(user){
+			hasNestedComments(comment) {
+				return false;
+			}
+			/**
+			 * Saves the subcomment of a comment
+			 * @param TapEvent Object
+			 * @return Boolean
+			 * */
+			_saveSubComment(e) {
+
+				let dailyThought_ID = this.entityid;
+				// ._replySubComment
+				// var dailyThought_ID = this.entityid;
+				let subCommentField = Polymer.dom(this.root).querySelector('#parentID_' + e.currentTarget.dataset.parentCommentId);
+				let subComment = subCommentField.value;
+
+				// Validate thought
+				if ((subComment == undefined) || (subComment.trim() == "")) {
+					this._showCommentBoxMessage("<span class='w3-text-red'>Please enter a comment!</span>", 2000);
+					return;
+				}
+
+				// Get ParentID
+				let parentId = subCommentField.dataset.parentId
+				// Create new comment
+
+				// Add ParentId to ChildID
+
+				var journalUserID = this.user.userID;
+				var journalUserName = this.user.firstName + " " + this.user.lastName;
+
+				var companyID = this.user.companyID;
+				var companyName = this.user.companyName;
+
+				var photoURL = "";
+
+				if (this.user.photoURL != undefined || this.user.photoURL != "") {
+					photoURL = this.user.photoURL;
+				} else {
+					photoURL = "";
+				}
+
+				if (photoURL == undefined) {
+					photoURL = "";
+				}
+
+				let date = Date.now();
+				let stringDate = this.formatDate(date);
+				let stringCommentDate = this.formatRateTime(date);
+
+				// Get a reference to the database service
+				var database = firebase.database();
+
+				if (subComment == undefined) {
+					subComment = "";
+				}
+
+				// Write the new comments on thoughts data
+				this._showCommentBoxMessage('<span class="loader"></span> Saving the Comment');
+				var newTypeCommentKey = database.ref().child('/' + this.firebaseref + '/' + dailyThought_ID + '/comments/' +
+					parentId + '/subComments').push().key;
+
+				// fix data
+				// dailyThoughts
+				var data = {
+					companyID: companyID,
+					companyName: companyName,
+					journalUserID: journalUserID,
+					journalUserName: journalUserName,
+					photoURL: photoURL,
+					comment: subComment,
+					dailyThoughtID: dailyThought_ID,
+					date: date,
+					commentID: newTypeCommentKey,
+					stringDate: stringDate,
+					stringCommentDate: stringCommentDate,
+					postType: this.firebaseref,
+					parentID: parentId
+				}
+
+
+				var clickdata = {
+					userID: journalUserID,
+					userName: journalUserName,
+					myPhoto: photoURL,
+					myCompanyID: companyID,
+					myCompanyName: companyName,
+					dateRegistered: date,
+					postType: this.thetype,
+					journalID: dailyThought_ID,
+					clickType: "posts",
+					clickArea: "comment",
+					clickItem: "button",
+					commentID: newTypeCommentKey
+				}
+
+				var commentUpdates = {};
+				commentUpdates['/' + this.firebaseref + '/' + dailyThought_ID + '/comments/' + parentId + '/subComments/' +
+					newTypeCommentKey] = data;
+				commentUpdates['/comments/' + parentId + '/subComments/' + newTypeCommentKey] = data;
+				commentUpdates['user-clicks/' + newTypeCommentKey] = clickdata;
+				database.ref().update(commentUpdates);
+
+				this._showCommentBoxMessage('<span class="w3-text-green">Sub Comment Saved!</span>', 1000);
+				subCommentField.value = "";
+
+				// the comment box
+				// this._toggleReplyComment()
+
+			}
+
+			/**
+			 * Toggles the comment block when a user wants to reply
+			 * @param TapEvent Object
+			 * @return Boolean
+			 * */
+			_toggleReplyComment(e) {
+				this.showCommentTextArea = !this.showCommentTextArea;
+				console.log()
+				let commentTxtSlot = Polymer.dom(this.root).querySelector('#' + e.currentTarget.data);
+
+				// console.log("Reply Box open : ", commentTxtSlot);
+				if (this.showCommentTextArea && commentTxtSlot.classList.contains('hidden')) {
+					commentTxtSlot.classList.remove('hidden');
+					$(e.currentTarget).addClass('open-reply');
+				} else {
+					commentTxtSlot.classList.add('hidden')
+					$(e.currentTarget).removeClass('open-reply');
+				}
+
+			} // end func
+
+			_toggleShowSubComments(e) {
+				this.showSubComments = !this.showSubComments;
+				$(e.currentTarget).toggleClass('more-comments');
+				let subCommentBox = Polymer.dom(this.root).querySelector('#subCommentParent__' + e.currentTarget.data);
+				$(subCommentBox).toggleClass('hidden')
+			}
+			/**
+			 * Renders the comment box for sub-comments
+			 *
+			 **/
+			__renderCommentText__(commentorAvatar, commentBy) {
+
+				return `
+					<div class="w3-row add-comment-form">
+						<div class="w3-right w3-padding-small w3-margin w3-relative w3-text-grey w3-hover-text-dark-grey">
+							<paper-ripple></paper-ripple>
+							<iron-icon icon="app:send" on-tap="_saveComment"></iron-icon>
+						</div>
+						<div class="w3-left">
+							<div style="${this._profilePhoto(commentorAvatar)}" class="commentor-photo"></div>
+						</div>
+						<div class="w3-rest">
+							<paper-textarea rows="1" class="_myComment" multiple label="@${commentBy}..." type="text"
+								auto-validate>
+								${commentBy}
+							</paper-textarea>
+						</div>
+					</div>
+				`
+			}
+			isNotCurrentUser(user) {
 				return user != this.user.userID;
 			}
 
@@ -419,80 +766,97 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			}
 
 			hideSpan(itms) {
-				if(itms == 0) return "display: none";
+				if (itms == 0) return "display: none";
 
 				return itms == undefined ? "display: none" : "display: block;";
 			}
 
 			_getLikesCount(itms) {
-				if(itms == 1) return "1 Like";
+				if (itms == 1) return "1 Like";
 
 				return itms == undefined ? "" : itms + " Likes";
 			}
 
-			_showAllComments(nData, oData){
+			_showAllComments(nData, oData) {
 				var crh = Polymer.dom(this.root).querySelectorAll('.comments-ratings-holder');
-				if (nData == true){
+				if (nData == true) {
 					$(crh).addClass('opened');
-				}
-				else{
+				} else {
 					$(crh).removeClass('opened');
 				}
 			}
 
-			_openWhoLiked(e){
+			_openWhoLiked(e) {
 				this.likesdata = e.currentTarget.data;
 
-				if(this.likesdata != undefined){
+				if (this.likesdata != undefined) {
 					var modal = Polymer.dom(this.root).querySelector('#who-liked');
 					this.loadPage('who-liked');
 					modal.style.display = 'block';
 				}
 			}
 
-			_deleteComment(e){
+			_deleteComment(e) {
 				var commentID = e.currentTarget.data;
 				var key = e.currentTarget.key;
 
-				sessionStorage.setItem("commentID",commentID);
-        		sessionStorage.setItem("key",key);
-				
+				console.log("key: ", key);
+
+				sessionStorage.setItem("commentID", commentID);
+				sessionStorage.setItem("key", key);
+
+				this.$.pldpDialog.open();
+			}
+			/**
+			 * Deletes a sub comment using key
+			 * @param Event
+			 */
+			_deleteSubComment(e) {
+				var subCommentID = e.currentTarget.data;
+				var key = e.currentTarget.key;
+
+				var parentID = e.currentTarget.parentid;
+				var subcommentparent = parentID + "/subComments/" + subCommentID;
+
+				sessionStorage.setItem("commentID", subcommentparent);
+				sessionStorage.setItem("key", key);
+
 				this.$.pldpDialog.open();
 			}
 
-			_closeDeleteDialog(){
+			_closeDeleteDialog() {
 				sessionStorage.removeItem("commentID");
-        		sessionStorage.removeItem("key");
+				sessionStorage.removeItem("key");
 
 				this.$.pldpDialog.close();
 			}
 
-			deleteComment(){
+			deleteComment() {
 				var database = firebase.database();
 				var commentID = sessionStorage.getItem("commentID");
 				var key = sessionStorage.getItem("key");
 
-				var commentObjRef = database.ref(this.firebaseref+'/'+key+'/comments/'+commentID);
-				var commentRef = database.ref('comments/'+commentID);
+				var commentObjRef = database.ref(this.firebaseref + '/' + key + '/comments/' + commentID);
+				var commentRef = database.ref('comments/' + commentID);
 
 				commentObjRef.remove();
 				commentRef.remove();
 
 				sessionStorage.removeItem("commentID");
-        		sessionStorage.removeItem("key");
+				sessionStorage.removeItem("key");
 
 				this.$.pldpDialog.close();
 			}
 
-			_closeItemsModal(e){
+			_closeItemsModal(e) {
 				var modal = Polymer.dom(this.root).querySelector('#who-liked');
 				modal.style.display = 'none';
 			}
 
-			_openModal(e){
+			_openModal(e) {
 				var modalContent = Polymer.dom(this).parentNode;
 				var modal = $(modalContent).parents('.modal-div');
-				if($(modal).find('.closer-for-modal').hasClass('w3-hide')){
+				if ($(modal).find('.closer-for-modal').hasClass('w3-hide')) {
 					$(modal).find('.closer-for-modal').removeClass('w3-hide');
 					modal.addClass('ldp-modal');
 					$(modalContent).addClass('ldp-modal-content');
@@ -501,7 +865,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				}
 			}
 
-			_closeModal(e){
+			_closeModal(e) {
 				var modalContent = Polymer.dom(this).parentNode;
 				var modal = $(modalContent).parents('.modal-div');
 				this.opened = false;
@@ -512,27 +876,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				$(modal).find('.closer-for-modal').addClass('w3-hide');
 			}
 
-			_openAllComments(e){
+			_openAllComments(e) {
 				this.opened = true;
 			}
 
-			_showCommentBoxMessage(txt, temp=false){
+			_showCommentBoxMessage(txt, temp = false) {
 				var msgBox = Polymer.dom(this.root).querySelectorAll('.comment-message');
-				$(msgBox).animate({'opacity': 1});
-			
+				$(msgBox).animate({
+					'opacity': 1
+				});
+
 				$(msgBox).html(txt);
 				$(msgBox).removeClass('w3-hide');
-				
-				if(temp){
-					window.setTimeout(function(){
-						$(msgBox).animate({'opacity': 0}).addClass('w3-hide');
-					},temp);
+
+				if (temp) {
+					window.setTimeout(function () {
+						$(msgBox).animate({
+							'opacity': 0
+						}).addClass('w3-hide');
+					}, temp);
 				}
 			}
 
-			_closeCommentBoxMessage(){
+			_closeCommentBoxMessage() {
 				var msgBox = Polymer.dom(this.root).querySelectorAll('.comment-message');
-				$(msgBox).animate({'opacity': 0}).addClass('w3-hide');
+				$(msgBox).animate({
+					'opacity': 0
+				}).addClass('w3-hide');
 			}
 
 			_sortComments(obj) {
@@ -545,24 +915,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				}
 			}
 
-			_sort(a, b) {  
+			_sort(a, b) {
 				if (a.date > b.date) return -1;
 				if (a.date < b.date) return 1;
 				return 0;
 			}
 
-			_hasComments(comms, ratns){ //Check whether comments exist
+			_hasComments(comms, ratns) { //Check whether comments exist
 				var hasComments = comms == undefined ? false : (comms.length == 0 ? false : true);
+				window.comms = comms;
 				return hasComments ? true : (ratns == undefined ? false : (ratns.length == 0 ? false : true));
 			}
-
-			_noComments(arr){ //Check whether no comments exist
+			_hasSubComments(comms, ratns) {
+				return comms.filter(comm => comm.hasOwnProperty('parentID'))
+			}
+			_noComments(arr) { //Check whether no comments exist
 				return arr == undefined ? true : (arr.length == 0 ? true : false);
 			}
 
 			timeSince(date) {
 
-				if(date == 0){ //If the itemDate is 0 then no comment/rating has been done on the item
+				if (date == 0) { //If the itemDate is 0 then no comment/rating has been done on the item
 					return 'Not Rated';
 				}
 
@@ -605,53 +978,53 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					intervalType += 's';
 				}
 
-				return interval + ' ' + intervalType+' ago';
+				return interval + ' ' + intervalType + ' ago';
 			};
 
 			_toggleCRHItem(e) { //Handle switching between comments and ratings.
 				var elem = e.currentTarget;
 				var crhType = $(elem).attr('crhType');
 				$(elem).addClass('selected').siblings().removeClass('selected');
-				var crhItem = $(elem).parents('.comments-bar').siblings('.comments-ratings-holder').children('.crh-item.' + crhType);
+				var crhItem = $(elem).parents('.comments-bar').siblings('.comments-ratings-holder').children('.crh-item.' +
+					crhType);
 				crhItem.removeClass('w3-hide').siblings('.crh-item').addClass('w3-hide');
 				this.opened = !this.opened;
 			}
 
 			onCRHDataChanged(newData, oldData) {
-				if(this.thetype == 'Video'){
+				if (this.thetype == 'Video') {
 					this.videoChanged = true;
 					this.entityid = newData.videoID;
 				}
-				if(this.thetype != 'Video'){
-					if(newData.ratings){
-					}	
+				if (this.thetype != 'Video') {
+					if (newData.ratings) {}
 				}
 			}
 
-			_profilePhoto(photo){
+			_profilePhoto(photo) {
 				let photo_url = "background-image: url('../images/default-user.png');";
 
-				if(photo == undefined){
+				if (photo == undefined) {
 					photo_url = "background-image: url('../images/default-user.png');";
-				}else if(photo == ""){
+				} else if (photo == "") {
 					photo_url = "background-image: url('../images/default-user.png');";
-				}else{
-					photo_url = "background-image: url('"+photo+"');";
+				} else {
+					photo_url = "background-image: url('" + photo + "');";
 				}
 
 				return photo_url;
 			}
 
-			_saveLike(state){
+			_saveLike(state) {
 				let dailyThought_ID = this.entityid;
 				var journalUserID = this.user.userID;
-				
+
 				// Get a reference to the database service
 				var database = firebase.database();
 
-				if(state == false){
+				if (state == false) {
 
-					var journalUserName = this.user.firstName+" "+this.user.lastName;
+					var journalUserName = this.user.firstName + " " + this.user.lastName;
 					var companyID = this.user.companyID;
 					var companyName = this.user.companyName;
 					// get date and time
@@ -662,11 +1035,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 					photoURL = this.user.photoURL;
 
-					if(photoURL == undefined || photoURL == null){
+					if (photoURL == undefined || photoURL == null) {
 						photoURL = "";
 					}
 
-					var user_post = journalUserID+"_"+dailyThought_ID;
+					var user_post = journalUserID + "_" + dailyThought_ID;
 
 					var data = {
 						companyID: companyID,
@@ -677,8 +1050,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						likesStringDate: likesStringDate,
 						photoURL: photoURL,
 						postType: this.firebaseref,
-						itemID:dailyThought_ID,
-						userPost:user_post						
+						itemID: dailyThought_ID,
+						userPost: user_post
 					}
 
 					var clickdata = {
@@ -690,24 +1063,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						dateRegistered: timeInMs,
 						postType: this.thetype,
 						journalID: dailyThought_ID,
-						clickType:"posts",
-						clickArea:"like",
-						clickItem:"button"
+						clickType: "posts",
+						clickArea: "like",
+						clickItem: "button"
 					}
 
 					var updatedUserData = {};
-					updatedUserData[this.firebaseref+'/'+dailyThought_ID+'/likes/'+journalUserID] = true;
-					updatedUserData[this.firebaseref+'/'+dailyThought_ID+'/likesData/'+journalUserID] = data;
-					updatedUserData['user-liked/'+user_post] = data;
-					updatedUserData['user-clicks/'+user_post] = clickdata;
-					
+					updatedUserData[this.firebaseref + '/' + dailyThought_ID + '/likes/' + journalUserID] = true;
+					updatedUserData[this.firebaseref + '/' + dailyThought_ID + '/likesData/' + journalUserID] = data;
+					updatedUserData['user-liked/' + user_post] = data;
+					updatedUserData['user-clicks/' + user_post] = clickdata;
+
 					// Do a deep-path update
-					database.ref().update(updatedUserData, function(error) {
+					database.ref().update(updatedUserData, function (error) {
 						if (error) {
 							console.log("Error updating data:", error);
-						}else{
+						} else {
 							let countLikes = database.ref(that.firebaseref).child(dailyThought_ID).child('countLikes');
-							let currentCount = countLikes.transaction(function(current) {
+							let currentCount = countLikes.transaction(function (current) {
 								return (current || 0) + 1;
 							});
 						}
@@ -715,73 +1088,75 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 					this._showCommentBoxMessage("<span class='w3-text-red'>You liked the post!</span>", 2000);
 
-				}else{
+				} else {
 					let dailyThought_ID = this.entityid;
 					var journalUserID = this.user.userID;
 					var that = this;
 
-					var user_post = journalUserID+"_"+dailyThought_ID;
+					var user_post = journalUserID + "_" + dailyThought_ID;
 					var updatedUserData = {};
-					updatedUserData[this.firebaseref+'/'+dailyThought_ID+'/likes/'+journalUserID] = null;
-					updatedUserData[this.firebaseref+'/'+dailyThought_ID+'/likesData/'+journalUserID] = null;
-					updatedUserData['user-liked/'+user_post] = null;
-					
+					updatedUserData[this.firebaseref + '/' + dailyThought_ID + '/likes/' + journalUserID] = null;
+					updatedUserData[this.firebaseref + '/' + dailyThought_ID + '/likesData/' + journalUserID] = null;
+					updatedUserData['user-liked/' + user_post] = null;
+
 					// Do a deep-path update
-					database.ref().update(updatedUserData, function(error) {
+					database.ref().update(updatedUserData, function (error) {
 						if (error) {
 							console.log("Error updating data:", error);
-						}else{
+						} else {
 							let countLikes = database.ref(that.firebaseref).child(dailyThought_ID).child('countLikes');
 
-							let currentCount = countLikes.transaction(function(current) {
+							let currentCount = countLikes.transaction(function (current) {
 								return (current || 0) - 1;
 							});
 						}
 					});
-					
+
 				}
-				
+
 			}
 
-			_formate_date(dt){
+			_formate_date(dt) {
 				var date = new Date(dt);
-				var day = date.getDate() < 10 ? '0'+date.getDate() : date.getDate();
-				var hours = date.getHours() < 10 ? '0'+date.getHours() : date.getHours();
-				var minutes = date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes();
+				var day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate();
+				var hours = date.getHours() < 10 ? '0' + date.getHours() : date.getHours();
+				var minutes = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes();
 				var locale = 'en-us';
-				var month = date.toLocaleString(locale, { month: "long" });
+				var month = date.toLocaleString(locale, {
+					month: "long"
+				});
 				var year = date.getFullYear();
 				var am_pm = date.getHours() >= 12 ? "PM" : "AM"
 
-				return day+' '+month+' '+year+' '+hours+':'+minutes+" "+am_pm;
+				return day + ' ' + month + ' ' + year + ' ' + hours + ':' + minutes + " " + am_pm;
 			}
 
-			_saveComment(e){
+			_saveComment(e) {
 				var dailyThought_ID = this.entityid;
 				var commentField = Polymer.dom(this.root).querySelectorAll('._myComment')[0];
 				var comment = commentField.value;
-				
+
 				// Validate thought
-				if ((comment == undefined) || (comment.trim() == "")){
+				if ((comment == undefined) || (comment.trim() == "")) {
 					this._showCommentBoxMessage("<span class='w3-text-red'>Please enter a comment!</span>", 2000);
 					return;
 				}
 
 				var journalUserID = this.user.userID;
-				var journalUserName = this.user.firstName+" "+this.user.lastName;
+				var journalUserName = this.user.firstName + " " + this.user.lastName;
 
 				var companyID = this.user.companyID;
 				var companyName = this.user.companyName;
 
 				var photoURL = "";
 
-				if(this.user.photoURL != undefined || this.user.photoURL != ""){
+				if (this.user.photoURL != undefined || this.user.photoURL != "") {
 					photoURL = this.user.photoURL;
-				}else{
+				} else {
 					photoURL = "";
 				}
 
-				if(photoURL == undefined){
+				if (photoURL == undefined) {
 					photoURL = "";
 				}
 
@@ -792,13 +1167,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				// Get a reference to the database service
 				var database = firebase.database();
 
-				if(comment == undefined){
+				if (comment == undefined) {
 					comment = "";
 				}
 
 				// Write the new comments on thoughts data
 				this._showCommentBoxMessage('<span class="loader"></span> Saving the Comment');
-				var newTypeCommentKey = database.ref().child('/'+this.firebaseref+'/' + dailyThought_ID +'/comments').push().key;
+				var newTypeCommentKey = database.ref().child('/' + this.firebaseref + '/' + dailyThought_ID + '/comments').push()
+					.key;
 
 				// fix data
 				// dailyThoughts
@@ -826,34 +1202,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					dateRegistered: date,
 					postType: this.thetype,
 					journalID: dailyThought_ID,
-					clickType:"posts",
-					clickArea:"comment",
-					clickItem:"button",
+					clickType: "posts",
+					clickArea: "comment",
+					clickItem: "button",
 					commentID: newTypeCommentKey
 				}
-				
+
 				var commentUpdates = {};
-				commentUpdates['/'+this.firebaseref+'/'+dailyThought_ID+'/comments/'+newTypeCommentKey] = data;
-				commentUpdates['/comments/'+newTypeCommentKey] = data;
-				commentUpdates['user-clicks/'+newTypeCommentKey] = clickdata;
+				commentUpdates['/' + this.firebaseref + '/' + dailyThought_ID + '/comments/' + newTypeCommentKey] = data;
+				commentUpdates['/comments/' + newTypeCommentKey] = data;
+				commentUpdates['user-clicks/' + newTypeCommentKey] = clickdata;
 				database.ref().update(commentUpdates);
-				
+
 				this._showCommentBoxMessage('<span class="w3-text-green">Comment Saved!</span>', 1000);
 				commentField.value = "";
 			}
 
 			formatDate(date) {
 				var d = new Date(date),
-				month = '' + (d.getMonth() + 1),
-				day = '' + d.getDate(),
-				year = d.getFullYear(),
-				hours = '' + d.getHours(),
-				minutes = '' + d.getMinutes(),
-				seconds = '' + d.getSeconds(),
-				milliseconds = '' + d.getMilliseconds();
+					month = '' + (d.getMonth() + 1),
+					day = '' + d.getDate(),
+					year = d.getFullYear(),
+					hours = '' + d.getHours(),
+					minutes = '' + d.getMinutes(),
+					seconds = '' + d.getSeconds(),
+					milliseconds = '' + d.getMilliseconds();
 
 				var today = new Date(),
-				thisYear = today.getFullYear();
+					thisYear = today.getFullYear();
 
 				// get week day name Sunday - Saturday
 				var dayName = this.getDayMonthStr(d.getDay(), "day", true);
@@ -871,25 +1247,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				// format thoughts date
 				// Monday, 04 December 2017 14:21:56
-				var thoughtDate = dayName+", "+day+" "+monthName+" "+year+" "+hours+":"+minutes+":"+seconds;
+				var thoughtDate = dayName + ", " + day + " " + monthName + " " + year + " " + hours + ":" + minutes + ":" +
+					seconds;
 
 				return thoughtDate;
 				// return [year, month, day].join('-');
 			}
-			
+
 			formatRateTime(date) {
 				var d = new Date(date),
-				month = '' + (d.getMonth() + 1),
-				day = '' + d.getDate(),
-				year = d.getFullYear(),
-				hours = d.getHours() > 12 ? d.getHours() - 12 : d.getHours(),
-				am_pm = d.getHours() >= 12 ? "PM" : "AM",
-				minutes = '' + d.getMinutes(),
-				seconds = '' + d.getSeconds(),
-				milliseconds = '' + d.getMilliseconds();
+					month = '' + (d.getMonth() + 1),
+					day = '' + d.getDate(),
+					year = d.getFullYear(),
+					hours = d.getHours() > 12 ? d.getHours() - 12 : d.getHours(),
+					am_pm = d.getHours() >= 12 ? "PM" : "AM",
+					minutes = '' + d.getMinutes(),
+					seconds = '' + d.getSeconds(),
+					milliseconds = '' + d.getMilliseconds();
 
 				var today = new Date(),
-				thisYear = today.getFullYear();
+					thisYear = today.getFullYear();
 
 				// get week day name Sunday - Saturday
 				var dayName = this.getDayMonthStr(d.getDay(), "day", true);
@@ -908,37 +1285,37 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				// format thoughts date
 				// 04 Dec 02:21:PM
-				var thoughtDate = day+" "+monthName+" "+hours+":"+minutes+":"+am_pm;
+				var thoughtDate = day + " " + monthName + " " + hours + ":" + minutes + ":" + am_pm;
 
 				return thoughtDate;
 				// return [year, month, day].join('-');
 			}
-			getDayMonthStr(val, dateParam, long){
+			getDayMonthStr(val, dateParam, long) {
 				// days
-				var days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-				var daysShort = ["Sun","Mon","Tue","Wed","Thur","Fri","Sat"];
+				var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+				var daysShort = ["Sun", "Mon", "Tue", "Wed", "Thur", "Fri", "Sat"];
 
 				// Months
-				var monthNames = ["January", "February", "March", "April", "May", "June","July", "August", "September","October", "November", "December"];
-				var monthNamesShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun","Jul", "Aug", "Sep","Oct", "Nov", "Dec"];
+				var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September",
+					"October", "November", "December"
+				];
+				var monthNamesShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-				if(dateParam == "day" && long == true){
+				if (dateParam == "day" && long == true) {
 					// return day in long format
 					return days[val];
-				}
-				else if(dateParam == "day" && long == false){
+				} else if (dateParam == "day" && long == false) {
 					// return days in short
 					return daysShort[val];
 				}
-				if(dateParam == "month" && long == true){
+				if (dateParam == "month" && long == true) {
 					// return month in long format
 					return monthNames[val];
-				}
-				else if(dateParam == "month" && long == false){
+				} else if (dateParam == "month" && long == false) {
 					// return month in short
 					return monthNamesShort[val];
 				}
-				
+
 			}
 			__toggleFavorite(event, detail) {
 				this.__favorite = !this.__favorite;
@@ -947,35 +1324,39 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				var youLiked;
 
-				if(likes != undefined){
+				if (likes != undefined) {
 					youLiked = likes[journalUserID];
-					if(youLiked == undefined) youLiked = false;
-				}else { youLiked = false};
+					if (youLiked == undefined) youLiked = false;
+				} else {
+					youLiked = false
+				};
 				// return;
-				
+
 				this._saveLike(youLiked);
 			}
 			__computeFavIcon(favorite) {
-				if(favorite == undefined){
+				if (favorite == undefined) {
 					return 'app:favorite-border';
-				}else{
-					var journalUserID = this.user.userID;
-					let youLiked = favorite[journalUserID];
-					return youLiked ? 'app:favorite' : 'app:favorite-border';
+				} else {
+					if(this.user){
+						var journalUserID = this.user.userID;
+						let youLiked = favorite[journalUserID];
+						return youLiked ? 'app:favorite' : 'app:favorite-border';
+					}
 				}
 				// return favorite ? 'app:favorite' : 'app:favorite-border';
 			}
 			isEqual(a, b) {
 				return a === b;
 			}
-			loadPage(page){
-            var resolvedPageUrl = this.resolveUrl(page + '.html');
-            Polymer.importHref(
-                resolvedPageUrl,
-                null,
-                page + '.html',
-                true);
-        	}
+			loadPage(page) {
+				var resolvedPageUrl = this.resolveUrl(page + '.html');
+				Polymer.importHref(
+					resolvedPageUrl,
+					null,
+					page + '.html',
+					true);
+			}
 		}
 
 		window.customElements.define(CommentsBox.is, CommentsBox);

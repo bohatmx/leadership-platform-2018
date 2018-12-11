@@ -160,8 +160,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			}
 
 			.thought-img {
-				position: relative;
-				/* background-repeat: no-repeat;*/
+				position: relative; 
 				background-repeat: round;
 				background-size: cover;
 				height: 280px;
@@ -170,6 +169,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   				align-items: center;
 				border-radius: 1px;
 				text-align: center;
+				/* position: relative;
+				background-repeat: no-repeat;
+				background-position: center;
+				background-color: #00000096;
+				background-size: contain;
+				height: 100%;
+				min-height: 280px;
+				display: flex;
+				width: 100%;
+				align-items: center;
+				border-radius: 1px;
+				text-align: center; */
 			}
 
 			.comments-box{
@@ -220,13 +231,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				flex:1;
 				position: relative;
 				margin: 26px 10px;
-				min-width: 33.3333%;
-				/* min-width: 320px; */
+				/* min-width: 33.3333%; */
+				min-width: 320px;
+				/* max-width: 600px!important; */
 			}
 
 			.card-container{
 				border: 1px solid #e6e6e6;
 				background-color: #fff;
+				max-width: 600px;
 			}
 
 			.podcast-item{
@@ -278,9 +291,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			}
 
 			paper-button.thought-actions{
-				min-width:22px;
+				min-width:12px;
 				text-transform: none;
-				font-size:10px;
+				font-size:13px;
 			}
 
 			.vid-item{
@@ -312,7 +325,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 			.ldp-modal{
 				position: fixed;
-				z-index: 99999999;
+				z-index: 99999;
 				top:0px; right: 0px; left: 0px; bottom: 0px;
 				overflow: auto;
 				padding:50px 10px;
