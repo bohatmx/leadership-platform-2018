@@ -60,7 +60,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 		</style>
 		<!-- Corporate Leadership App Menus -->
 		<template is="dom-if" if="[[leadershipapp]]">
-				<iron-selector selected="{{page}}" attr-for-selected="name" class="drawer-list" role="navigation" fallback-selection="company-thoughts">
+			<iron-selector selected="{{page}}" attr-for-selected="name" class="drawer-list" role="navigation" fallback-selection="{{selectedpage}}">
 						<div class="w3-row w3-padding w3-small w3-sb-title w3-sb-title-text">Leadership Messages</div>
 						<a name="company-thoughts" href="company-thoughts#" class="w3-row">
 								<paper-ripple></paper-ripple>
@@ -221,7 +221,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 		<!-- Public App Menus -->
 		<template is="dom-if" if="[[publicapp]]">
-				<iron-selector selected="{{page}}" attr-for-selected="name" class="drawer-list" role="navigation" fallback-selection="i-lead">
+			<iron-selector selected="{{page}}" attr-for-selected="name" class="drawer-list" role="navigation" fallback-selection="{{selectedpage}}">
 						<div class="w3-row w3-padding w3-small w3-sb-title w3-sb-title-text">Leadership Messages</div>
 						<a name="i-lead" href="i-lead#" class="w3-row">
 								<paper-ripple></paper-ripple>
@@ -357,16 +357,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						notcompanyadmin: Boolean,
 						pendingstring: String,
 						userNotificationData: {
-								type: Object,
-								observer: "userNotificationDataChanged"
+							type: Object,
+							observer: "userNotificationDataChanged"
 						},
 						thoughtsCount: {
 								type: Object
 
 						},
 						articlesCount: {
-								type: Number,
-								value: 0
+							type: Number,
+							value: 0
 						},
 						thoughts: {
 								type: Object
@@ -410,7 +410,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						ileadpublic: {
 								type: Number,
 								value: 0
-						}
+						},
+						selectedpage: {
+							type: String,
+							notify: true
+						},
 
 				};
 			}

@@ -273,7 +273,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       checkUserDomain(usr){
         var url = window.location.origin
         
-        var corporates = ["edcon.co.za","edcon@","oneconnect.co.za","oneconnect@"]
+        var corporates = ["edcon.co.za","edcon@","oneconnect.co.za","oneconnect@","blsa.org.za","blsa@","businessleadership.org.za","businessleadership@"]
 
         for(var x = 0; x < corporates.length; x++){
           var y = corporates[x];
@@ -281,10 +281,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           
           if(patt.test(usr)){
             var corporateDomains = {
-              "oneconnect.co.za": "https://oneconnect.thinklead.co.za/",
-              "oneconnect@": "https://oneconnect.thinklead.co.za/",
-              "edcon.co.za":"https://edcon.thinklead.co.za/",
-              "edcon@":"https://edcon.thinklead.co.za/"
+              "oneconnect.co.za": "https://oneconnect.thinklead.co.za",
+              "oneconnect@": "https://oneconnect.thinklead.co.za",
+              "edcon.co.za":"https://edcon.thinklead.co.za",
+              "edcon@":"https://edcon.thinklead.co.za",
+              "blsa.org.za":"https://blsa.thinklead.co.za",
+              "blsa@":"https://blsa.thinklead.co.za",
+              "businessleadership.org.za":"https://blsa.thinklead.co.za",
+              "businessleadership@":"https://blsa.thinklead.co.za"
             }
 
             var companyurl = corporateDomains[y];

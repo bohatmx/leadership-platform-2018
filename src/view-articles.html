@@ -24,11 +24,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-styles/shadow.html">
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
 
+<!-- Iron pages -->
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+
 <link rel="import" href="thought-card-attachments.html">
 <link rel="import" href="comments-box.html">
 <link rel="import" href="app-icons.html">
 <link rel="import" href="shared-styles.html">
 <link rel="lazy-import" href="preview-profile.html">
+<link rel="lazy-import" href="read-articles.html">
 
 <dom-module id="view-articles">
 	<template>
@@ -69,17 +74,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					font-size: 12px;
 					margin-bottom: 4px;
 					color: #757575;
-				}
-
-				;
+				};
 
 				--paper-input-container-input-focus: {
 					font-size: 14px;
 					margin-bottom: 4px;
 					color: var(--app-primary-text);
-				}
+				};
+			}
 
-				;
+			.mediumicon {
+				--iron-icon-height: 18px;
+    			--iron-icon-width: 18px;
 			}
 
 			.rate-color-post {
@@ -158,10 +164,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				color: var(--app-primary-color);
 			}
 
+			.w3-glp-theme{
+				background-color: var(--app-theme-color);
+				color: #ffffff;
+			}
+
 			@media screen and (max-width: 900px) {
 				.main-card {
 					margin: 34px 0px !important;
 				}
+				.pages-card {
+					margin: 34px 0px !important;
+				}
+			}
+			@media screen and (max-width: 600px) {
+				.read-article-likes{font-size: 12px;line-height: 12px;}
+				.read-article-date{margin-bottom: 10px;margin-top: 0px;font-size: 16px;}
 			}
 
 			.pldp-link {
@@ -208,119 +226,177 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			</div>
 		</div>
 
-		<section class="thought-card" id="thoughts-Holder">
-			<div class="spinner" style="position: fixed;">
-				<paper-spinner active="{{isloading}}"></paper-spinner>
-				<div style="width: 100%; padding-top: 10px;" class="w3-row w3-center" id="spinnerMessage">
-					<template is="dom-if" if="{{ !isloading }}">
-						<img hidden="{{!noIdea}}" src="https://png.icons8.com/material/200/666666/no-idea.png">
-					</template>
-					<h4> {{loadingmessage}}</h4>
+		<iron-pages selected="{{nextpage}}" attr-for-selected="page-name">
+			<div page-name="view-articles">
+			  <section class="thought-card" id="thoughts-Holder">
+				<div class="spinner" style="position: fixed;">
+					<paper-spinner active="{{isloading}}"></paper-spinner>
+					<div style="width: 100%; padding-top: 10px;" class="w3-row w3-center" id="spinnerMessage">
+						<template is="dom-if" if="{{ !isloading }}">
+							<img hidden="{{!noIdea}}" src="https://png.icons8.com/material/200/666666/no-idea.png">
+						</template>
+						<h4> {{loadingmessage}}</h4>
 
+					</div>
 				</div>
-			</div>
-
-			<div class="main-card" style="width:100%;">
-				<template id="articlesList" is="dom-repeat" items="[[articlesData]]" as="item" sort="_sort" observe="dateScheduled">
-					<div class="modal-div w3-animate-zoom">
-						<div class="card-container fadeInUp">
-							<span class="w3-button w3-red w3-display-topright w3-medium w3-hide closer-for-modal" style="z-index:9999;right:0; width: 22px; height: 25px;">&times;</span>
-							<div class="container card-header w3-row">
-								<div class="card-avatar w3-left" style$="[[_profilePhoto(item.photoURL)]] cursor: pointer;" data$="[[_setProfileInfo(item.journalUserName, item.journalUserID, item.companyName, item.companyID, item.photoURL)]]"
-								 on-tap="_previewProfile"></div>
-								<div class="container card-company-container">
-									<div class="row card-postedby w3-medium">
-										<div>[[item.journalUserName]]</div>
-										<paper-button on-tap="followUser" data="[[item.newsID]]" class$="followBTN [[isFollowingStyle(item.journalUserID)]]">[[isFollowing(item.journalUserID)]]</paper-button>
-									</div>
-									<div class="row card-company">[[item.companyName]]</div>
-								</div>
-								<div class="thought-date">
-									[[_formate_date(item.dateScheduled)]]
-								</div>
-
-								<template is="dom-if" if="[[isEqual(item.journalUserID, user.userID)]]">
-									<div class="w3-dropdown-hover w3-display-topright" style="cursor:pointer;">
-										<iron-icon data="delSettings" on-tap="_openButtonModal" icon="myicons:settings" style="padding:8px!important;"></iron-icon>
-										<div id="delSettings" class="w3-dropdown-content w3-bar-block w3-card-4" style="z-index:999;right:0;">
-											<ul class="w3-ul w3-hoverable" style="cursor:pointer;">
-												<li indexed="add-article" caption="Edit Article" on-tap="_loadElement1" id="edit[[item.dateRegistered]]"
-												 data="[[item.newsID]]" class="w3-text-dark-grey">
-													<paper-icon-button icon="create"></paper-icon-button>
-													&nbsp;Edit
-												</li>
-												<li class="w3-text-red" on-tap="_deleteArticle" id="del[[item.dateRegistered]]" data="[[item.newsID]]">
-													<paper-icon-button icon="delete"></paper-icon-button>
-													&nbsp;Delete
-												</li>
-											</ul>
+				<div class="main-card" style="width:100%;">
+					<template id="articlesList" is="dom-repeat" items="[[articlesData]]" as="item" sort="_sort" observe="dateScheduled">
+						<div class="modal-div w3-animate-zoom">
+							<div class="card-container fadeInUp">
+								<span class="w3-button w3-red w3-display-topright w3-medium w3-hide closer-for-modal" style="z-index:9999;right:0; width: 22px; height: 25px;">&times;</span>
+								<div class="container card-header w3-row">
+									<div class="card-avatar w3-left" style$="[[_profilePhoto(item.photoURL)]] cursor: pointer;" data$="[[_setProfileInfo(item.journalUserName, item.journalUserID, item.companyName, item.companyID, item.photoURL)]]"
+									on-tap="_previewProfile"></div>
+									<div class="container card-company-container">
+										<div class="row card-postedby w3-medium">
+											<div>[[item.journalUserName]]</div>
+											<paper-button on-tap="followUser" data="[[item.newsID]]" class$="followBTN [[isFollowingStyle(item.journalUserID)]]">[[isFollowing(item.journalUserID)]]</paper-button>
 										</div>
+										<div class="row card-company">[[item.companyName]]</div>
 									</div>
-								</template>
-							</div>
+									<div class="thought-date">
+										[[_formate_date(item.dateScheduled)]]
+									</div>
 
-							<div class="container">
-								<div class="row">
-									<!-- No empty text node--><a href="[[articleLink(item.manualOrExternal, item.articleLink)]]" target="[[targetLink(item.manualOrExternal)]]"
-									 name="name" style="text-decoration: none;">
-										<div id="article[[item.dateRegistered]]" class="thought-img" style$="[[_photo(item.photos)]]" on-click="_openArticle"
-										 onmouseover="" data="[[_setArticleData(item.subtitle, item.title, item.body, item.photos)]]" itemid="[[item.newsID]]">
-											<div class="w3-row" hidden$="[[_imageNotFound(item.photos)]]">
-												<div id="title[[item.dailyThoughtID]]" on-tap="_openItemModal" data="[[item.dailyThoughtID]]" class="thought-title">
-													[[item.title]]
-												</div>
-												<div id="subtitle[[item.dailyThoughtID]]" data="[[item.dailyThoughtID]]" on-tap="_openItemModal" class="thought-author">
-													[[item.subtitle]]
-												</div>
+									<template is="dom-if" if="[[isEqual(item.journalUserID, user.userID)]]">
+										<div class="w3-dropdown-hover w3-display-topright" style="cursor:pointer;">
+											<iron-icon data="delSettings" on-tap="_openButtonModal" icon="myicons:settings" style="padding:8px!important;"></iron-icon>
+											<div id="delSettings" class="w3-dropdown-content w3-bar-block w3-card-4" style="z-index:999;right:0;">
+												<ul class="w3-ul w3-hoverable" style="cursor:pointer;">
+													<li indexed="add-article" caption="Edit Article" on-tap="_loadElement1" id="edit[[item.dateRegistered]]"
+													data="[[item.newsID]]" class="w3-text-dark-grey">
+														<paper-icon-button icon="create"></paper-icon-button>
+														&nbsp;Edit
+													</li>
+													<li class="w3-text-red" on-tap="_deleteArticle" id="del[[item.dateRegistered]]" data="[[item.newsID]]">
+														<paper-icon-button icon="delete"></paper-icon-button>
+														&nbsp;Delete
+													</li>
+												</ul>
 											</div>
 										</div>
-									</a><!-- No empty text node-->
+									</template>
 								</div>
+
+								<div class="container">
+									<div class="row">
+										<!-- No empty text node--><a href="[[articleLink(item.manualOrExternal, item.articleLink)]]" target="[[targetLink(item.manualOrExternal)]]"
+										name="name" style="text-decoration: none;">
+											<div id="article[[item.dateRegistered]]" class="thought-img" style$="[[_photo(item.photos)]]" on-click="_openArticle"
+											onmouseover="" data="[[_setArticleData(item.subtitle, item.title, item.body, item.photos)]]" itemid="[[item.newsID]]">
+												<div class="w3-row" hidden$="[[_imageNotFound(item.photos)]]">
+													<div id="title[[item.dailyThoughtID]]" data="[[item.dailyThoughtID]]" class="thought-title">
+														[[item.title]]
+													</div>
+													<div id="subtitle[[item.dailyThoughtID]]" data="[[item.dailyThoughtID]]" class="thought-author">
+														[[item.subtitle]]
+													</div>
+												</div>
+											</div>
+										</a><!-- No empty text node-->
+									</div>
+								</div>
+								<!-- hidden$="[[!_imageNotFound(item.photos)]]" -->
+								<div class="horizontal justified w3-padding-small">
+									<!-- No empty text node-->
+									<div class="w3-row"><a id="article1[[item.dateRegistered]]" href="[[articleLink(item.manualOrExternal, item.articleLink)]]"
+										target="[[targetLink(item.manualOrExternal)]]" name="name" style="text-decoration: none;" class="article-title"
+										on-click="_openArticle" data="[[_setArticleData(item.subtitle, item.title, item.body, item.photos)]]" itemid="[[item.newsID]]">[[item.title]]</a><!-- No empty text node-->
+									</div>
+									<div class="w3-row"><a id="article2[[item.dateRegistered]]" href="[[articleLink(item.manualOrExternal, item.articleLink)]]"
+										target="[[targetLink(item.manualOrExternal)]]" name="name" style="text-decoration: none;" class="article-author"
+										on-click="_openArticle" data="[[_setArticleData(item.subtitle, item.title, item.body, item.photos)]]" itemid="[[item.newsID]]">[[item.subtitle]]</a><!-- No empty text node-->
+									</div>
+								</div>
+								<thought-card-attachments itemid="[[item.newsID]]" item="[[item]]" user="[[user]]" thetype="news" thoughtype="[[thoughtype]]"></thought-card-attachments>
+								<comments-box user="[[user]]" firebaseref="news" item="[[item]]" thetype="Article" entityid="[[item.newsID]]"></comments-box>
 							</div>
-							<!-- hidden$="[[!_imageNotFound(item.photos)]]" -->
-							<div class="horizontal justified w3-padding-small">
-								<!-- No empty text node-->
-								<div class="w3-row"><a id="article1[[item.dateRegistered]]" href="[[articleLink(item.manualOrExternal, item.articleLink)]]"
-									 target="[[targetLink(item.manualOrExternal)]]" name="name" style="text-decoration: none;" class="article-title"
-									 on-click="_openArticle" data="[[_setArticleData(item.subtitle, item.title, item.body, item.photos)]]" itemid="[[item.newsID]]">[[item.title]]</a><!-- No empty text node-->
-								</div>
-								<div class="w3-row"><a id="article2[[item.dateRegistered]]" href="[[articleLink(item.manualOrExternal, item.articleLink)]]"
-									 target="[[targetLink(item.manualOrExternal)]]" name="name" style="text-decoration: none;" class="article-author"
-									 on-click="_openArticle" data="[[_setArticleData(item.subtitle, item.title, item.body, item.photos)]]" itemid="[[item.newsID]]">[[item.subtitle]]</a><!-- No empty text node-->
-								</div>
-							</div>
-							<thought-card-attachments itemid="[[item.newsID]]" item="[[item]]" user="[[user]]" thetype="news" thoughtype="[[thoughtype]]"></thought-card-attachments>
-							<comments-box user="[[user]]" firebaseref="news" item="[[item]]" thetype="Article" entityid="[[item.newsID]]"></comments-box>
+						</div>
+					</template>
+
+					<div class="w3-row w3-center" style="width: 100%" hidden="[[isEqual(thoughtype, 'filteredarticles')]]">
+						<div class="w3-row w3-text-green" style="width: 100%">
+							<paper-button hidden="{{loadmore}}" on-tap="_loadMorePosts">Read More Articles</paper-button>
+						</div>
+						<div class="w3-row" style="width: 100%">
+							<paper-spinner active="{{isloadingmore}}"></paper-spinner>
 						</div>
 					</div>
-				</template>
 
-				<div class="w3-row w3-center" style="width: 100%" hidden="[[isEqual(thoughtype, 'filteredarticles')]]">
-					<div class="w3-row w3-text-green" style="width: 100%">
-						<paper-button hidden="{{loadmore}}" on-tap="_loadMorePosts">Read More Articles</paper-button>
+						<paper-dialog id="deleteDialog" hidden="[[isloading]]">
+							<paper-icon-button icon="myicons:cancel" class="red"></paper-icon-button>
+							<h3 id="discardTitle">Discard Article?</h3>
+							<hr>
+							<p id="thoughtTitle" class="thought-rate-title"></p>
+							<p id="thoughtAuthor" class="thought-rate-title paper-font-caption"></p>
+							<hr>
+							<div class="buttons">
+								<paper-button dialog-dismiss>CANCEL</paper-button>
+								<paper-button on-tap="deleteArticle">DISCARD</paper-button>
+							</div>
+						</paper-dialog>
 					</div>
-					<div class="w3-row" style="width: 100%">
-						<paper-spinner active="{{isloadingmore}}"></paper-spinner>
+				</section>
+			</div>
+			<div page-name="read-articles" class="pages-card w3-card" >
+				<div class="w3-row w3-glp-theme" style="width: 100% !important;">
+					<div class="w3-col m9 l9">
+						<div class="w3-row" style="background-color: #20252b;color: #ffffff;">
+							<div><paper-icon-button icon="app:arrow-back" on-tap="backToArticles"></paper-icon-button></div>
+							<div class="w3-padding">
+								<div class="read-article-title w3-text-white" style="margin-bottom:0!important">{{title}}</div>
+								<div class="read-article-author w3-text-white">{{author}}</div>
+							</div>
+						</div>
+					</div>
+					<div class="w3-col m3 l3"> 
+						<!-- <div style="min-height:24px!important">&nbsp;</div>  -->
+						<div class="w3-padding" style$="{{menuTextColor}}">
+							<div class="read-article-date">{{articleDate}}</div>
+							<div class="read-article-likes">
+								<span class="w3-row"><iron-icon class="mediumicon" icon="app:forum"></iron-icon>&nbsp;&nbsp;{{commentsCount}}</span>
+								<span><iron-icon class="mediumicon" icon="app:favorite"></iron-icon>&nbsp;&nbsp;{{likesCount}}</span>
+							</div>
+						</div>
 					</div>
 				</div>
-
-				<paper-dialog id="deleteDialog" hidden="[[isloading]]">
-					<paper-icon-button icon="myicons:cancel" class="red"></paper-icon-button>
-					<h3 id="discardTitle">Discard Article?</h3>
-					<hr>
-					<p id="thoughtTitle" class="thought-rate-title"></p>
-					<p id="thoughtAuthor" class="thought-rate-title paper-font-caption"></p>
-					<hr>
-					<div class="buttons">
-						<paper-button dialog-dismiss>CANCEL</paper-button>
-						<paper-button on-tap="deleteArticle">DISCARD</paper-button>
+				<div class="w3-row" style="width: 100% !important;">
+					<div class="w3-col m9 l9 w3-white">
+						<read-articles name="read-articles" photo="{{photo}}" body="{{body}}" _companyid="[[_companyid]]"></read-articles>
+						<div class="w3-row w3-padding-small w3-margin">
+							<div class="w3-row w3-light-gray w3-padding-small">
+								<div class="w3-row w3-padding-small"><h5>Posted by</h5></div>
+								<div class="card-avatar w3-right" style$="[[_profilePhoto(journalphoto)]] width:64px;height:64px;cursor:pointer;" data="{{postedbydata}}" on-tap="_previewProfile"></div>
+								<div class="w3-row w3-rest">
+									<div class="w3-row w3-padding-small"><strong>{{postedby}}</strong></div>
+									<div class="w3-row read-article-author w3-padding-small">{{userbiography}}</div>
+								</div>
+							</div>
+						</div>
+						
 					</div>
-				</paper-dialog>
+					<div class="w3-col m3 l3">
+						<ul class="w3-ul w3-hoverable w3-margin-bottom w3-padding">
+							<div class="w3-row w3-large w3-margin-top w3-text-blue">Recent Articles</div>
+							<template id="articlesList1" is="dom-repeat" items="[[articlesData]]" as="item" sort="_sort" observe="dateScheduled">
+								<template is="dom-if" if="[[isLessThan(index, 6)]]">
+									<a href="[[articleLink(item.manualOrExternal, item.articleLink)]]" target="[[targetLink(item.manualOrExternal)]]"
+									name="name" style="text-decoration: none;">
+										<li id="list[[item.newsID]]" class="w3-bar w3-padding-small w3-relative" style="width: auto!important; cursor: pointer;" on-tap="_openArticle" itemid="[[item.newsID]]">
+											<paper-ripple></paper-ripple>
+											<div class="w3-row" style="margin: 6px 0;">
+												<span class="w3-small">[[item.title]]</span><br>
+												<span class="w3-tiny w3-text-grey">[[_formate_date(item.dateScheduled)]]</span>
+											</div><!-- No empty text node-->
+										</li>
+									</a>
+								</template>
+							</template>
+						</ul>
+					</div>
+				</div>
 			</div>
-		</section>
-
-
-
+		</iron-pages>
 		<div id="snackbar"></div>
 	</template>
 
@@ -349,6 +425,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					minData: {
 						type: Number,
 						value: 6
+					},
+					nextpage: {
+						type: String,
+						value:"view-articles",
+						notify: true
+					},
+					menuTextColor: {
+						type: String,
+						value: "color:#fff"
 					},
 					scrollPos: {
 						type: Number,
@@ -430,6 +515,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			connectedCallback() {
 				super.connectedCallback();
 
+			}
+			backToArticles(){
+				this.nextpage="view-articles"
 			}
 			isFollowing(journalUserID) {
 				if (this.user) {
@@ -631,10 +719,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			articleLink(manualOrExternal, articleLink) {
 				if ((manualOrExternal !== undefined) || (manualOrExternal !== "undefined")) {
 					if (manualOrExternal == "externalLink") return articleLink;
-					return "read-articles";
+					return "javascript:void(0)";
+					// return "read-articles";
 				}
 
-				return "read-articles";
+				return "javascript:void(0)";
 			}
 			targetLink(manualOrExternal) {
 				if (manualOrExternal == "externalLink") return "_blank";
@@ -710,7 +799,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 			}
 			_setArticleData(a, t, b, p) {
-				var photo = this._photoURL(p);
+				var photo = this._photoGLPURL(p);
 				var a = {
 					body: b,
 					photo: photo,
@@ -736,6 +825,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				}
 				return photo_url;
 			}
+			_photoGLPURL(photos) {
+				let photo_url = "display:none;";
+
+				for (var item in photos) {
+					photo_url = "background-image: url('" + photos[item].url + "');display:block;";
+				}
+				return photo_url;
+			}
 			_formate_date(dt) {
 				var date = new Date(dt);
 				var day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate();
@@ -749,19 +846,96 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				var am_pm = date.getHours() >= 12 ? "PM" : "AM"
 				return day + ' ' + month + ' ' + year + ' ' + hours + ':' + minutes + " " + am_pm;
 			}
+
+			_getCount(itms) {
+				var itmsNo = itms == undefined ? 0 : Object.keys(itms).length;
+				return itmsNo == 1 ? "1 Comment" : itmsNo+ " Comments";
+			}
+
+			_getLikesCount(itms) {
+				if (itms == 1) return "1 Like";
+				return itms == undefined ? "0 Likes" : itms + " Likes";
+			}
 			_openArticle(e) {
 				var a = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
 				var itemid = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).itemid;
-				sessionStorage.setItem("bookAuthor", a.author);
-				sessionStorage.setItem("bookTitle", a.title);
-				sessionStorage.setItem("bookBody", a.body);
-				sessionStorage.setItem("bookPhoto", a.photo);
+
+				let filteredArray = this.findObjectByKey(this.articlesData, "newsID", itemid);
+
+				var photo = this._photoGLPURL(filteredArray.photos);
+
+				var dt = filteredArray.dateScheduled;
+				var date = new Date(dt);
+				var day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate();
+				var locale = 'en-us';
+				var month = date.toLocaleString(locale, {month: "short"});
+				var year = date.getFullYear();
+
+				this.articleDate = day+" "+month+" "+year;
+				this.likesCount = this._getLikesCount(filteredArray.countLikes);
+				this.commentsCount = this._getCount(filteredArray.comments);
+
+				var manualOrExternal = filteredArray.manualOrExternal;
+
+				if (manualOrExternal != "externalLink"){
+					var page = "read-articles"
+					var resolvedPageUrl = this.resolveUrl(page + '.html');
+					Polymer.importHref(
+						resolvedPageUrl,
+						null,
+						page + '.html',
+						true);
+
+					var primaryColor = localStorage.getItem("primaryColor");
+					this.menuTextColor = this.getContrastYIQ(primaryColor);
+
+					this.title = filteredArray.title;
+					this.author = filteredArray.subtitle;
+					this.body = filteredArray.body;
+					this.photo = photo;
+
+					this.journalphoto = filteredArray.photoURL;
+					this.postedby = filteredArray.journalUserName;
+					this.nextpage = "read-articles";
+
+					var photoURL = "";
+					photoURL = filteredArray.photoURL;
+					if (photoURL == "" || photoURL == undefined) photoURL = "../images/default-user.png";
+					
+					var a = {
+						journalUserName: filteredArray.journalUserName,
+						journalUserID: filteredArray.journalUserID,
+						companyName: filteredArray.companyName,
+						companyID: filteredArray.companyID,
+						photoURL: photoURL
+					}
+
+					this.postedbydata = a;
+
+					var database = firebase.database();
+					var that = this;
+					database.ref('users').child(filteredArray.journalUserID).child('biography').on('value', (data)=>{
+						if(data.val() != null){
+							that.userbiography = data.val();
+						}
+					})
+
+					window.scrollTo({
+						top: 0,
+						behavior: "instant"
+					});
+
+				}
+
 				var obj = {
 					itemID: itemid,
-					title: a.title,
-					ref: a.author
+					title: filteredArray.title,
+					ref: filteredArray.subtitle
 				}
+
 				this._captureClicks(itemid, "readArticle", obj);
+
+				
 			}
 			_sortComments(obj) {
 				if (obj != undefined) {
@@ -965,9 +1139,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			}
 			_previewProfile(e) {
 				var data = e.currentTarget.getAttribute('data');
-				this.userobj = JSON.parse(data);
+				
+				if(data == null) {
+					data = e.currentTarget.data;
+					this.userobj = data;
+				}else{
+					this.userobj = JSON.parse(data);
+				}
+				
 				this._userid = this.userobj.journalUserID;
-
 				var page = "preview-profile"
 				var resolvedPageUrl = this.resolveUrl(page + '.html');
 				Polymer.importHref(
@@ -1319,6 +1499,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			}
 			isEqual(a, b) {
 				return a === b;
+			}
+			isLessThan(a, b) {
+				return a < b;
+			}
+			getContrastYIQ(hexcolor) {
+				hexcolor = hexcolor.split('#')[1];
+				var r = parseInt(hexcolor.substr(0, 2), 16);
+				var g = parseInt(hexcolor.substr(2, 2), 16);
+				var b = parseInt(hexcolor.substr(4, 2), 16);
+				var yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+				return (yiq >= 128) ? '#151515' : 'white';
 			}
 		}
 		window.customElements.define(ViewArticles.is, ViewArticles);

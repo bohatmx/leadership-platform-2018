@@ -12,7 +12,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 
-<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 
 <!-- iron elements  -->
@@ -26,26 +25,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="read-articles">
   <template>
     <style include="w3-styles"></style>
-      <style include="shared-styles">
-          paper-icon-button {
-          color: white;
-          --paper-icon-button-ink-color: white;
-        }
-        </style>
-    
+      <style include="shared-styles"></style>
         <div class="container">
           <div class="row">
-            <div class="article w3-animate-zoom">
-              <div class="row" style="background-color: #000;">
-                  <a href="leadership-articles" tabindex="-1">
-                    <paper-icon-button icon="app:arrow-back"></paper-icon-button>
-                  </a>
+            <div class="w3-animate-zoom">
+              <div class="read-article-photo" style$="[[photo]]">
               </div>
-              <div class="read-article-photo" style="background-image: url('[[photo]]');">
+              <div>
+                <div class="read-article-body article">{{body}}</div>
               </div>
-              <div class="read-article-title">[[title]]</div>
-              <div class="read-article-author">[[author]]</div>
-              <div class="read-article-body">[[body]]</div> 
             </div>
           </div>
         </div>
@@ -56,13 +44,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       static get is() { return 'read-articles'; }
       static get properties() {
         return {
-          user: {
-            type: Object
-          },
           _companyid: String,
           author: String,
           title: String,
-          body: String,
+          body: {
+            type: String,
+            notify: true
+          },
           photo: String
         };
       }

@@ -51,6 +51,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           margin: 10px auto;
           height: auto;
         }
+        .top-menu-margin{
+          margin-top: 35px!important;
+        }
       }
 
       paper-button{
@@ -60,8 +63,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
 
     <div>
-        <div class="w3-row w3-white w3-padding-small"><h4>MY POSTS</h4></div>
-        <div class="w3-center w3-black" style="background-color:#222d32!important;">
+        <!-- <div class="w3-row w3-white w3-padding-small"><h4>MY POSTS</h4></div> -->
+        <div class="w3-center w3-black top-menu-margin" style="background-color:#222d32!important;">
           <paper-button pagename="view-thoughts" tabname="messages" class="w3-bar-item w3-button tablink w3-red w3-small w3-hover-red " on-tap="openPosts"><iron-icon icon="smapp:person-pin"></iron-icon><br>Messages</paper-button>
           <paper-button pagename="view-articles" tabname="articles" class="w3-bar-item w3-button tablink w3-small w3-hover-red " on-tap="openPosts"><iron-icon icon="smapp:remove-red-eye"></iron-icon><br>Articles</paper-button>
           <paper-button pagename="view-podcasts" tabname="podcasts" class="w3-bar-item w3-button tablink w3-small w3-hover-red " on-tap="openPosts"><iron-icon icon="smapp:mic"></iron-icon><br>Podcasts</paper-button>
@@ -101,6 +104,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           company: {
             type: Object
+          },
+          noIdea: {
+            type: Boolean,
+            value: false
           },
           _companyid: String,
         };
