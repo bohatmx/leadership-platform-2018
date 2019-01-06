@@ -306,7 +306,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 								<span class="w3-button w3-display-topright w3-red w3-medium w3-hide closer-for-modal">&times;</span>
 								<div class="container card-header w3-row">
 									<div class="card-avatar w3-left" style$="[[_profilePhoto(item.photoURL)]] cursor: pointer;" data$="[[_setProfileInfo(item.userName, item.userID, item.companyName, item.companyID, item.photoURL)]]"
-									 on-tap="_previewProfile"></div>
+									 on-tap="_previewProfile" postitem="{{item.podcastID}}"></div>
 									<div class="container card-company-container">
 										<div class="row card-postedby w3-medium">
 											<div>[[item.userName]]</div>

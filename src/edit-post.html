@@ -38,6 +38,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="app-icons.html">
 <link rel="import" href="shared-styles.html">
+<link rel="lazy-import" href="post-activity.html" defer>
 
 <dom-module id="edit-post">
   <template>
@@ -92,8 +93,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <iron-icon icon="myicons:settings" class="w3-right"></iron-icon>        
       </div>
       <div class="drop-down">
-        <div class="item w3-center w3-dark-text-grey" on-tap="_editItem"> <iron-icon icon="myicons:create"></iron-icon> Edit</div>
-        <div class="item w3-center w3-text-red" on-tap="_deleteItem"> <iron-icon icon="myicons:delete"></iron-icon> Delete</div>
+        <ul class="w3-ul w3-hoverable" style="cursor:pointer;">
+          <li on-tap="_editItem"><iron-icon icon="myicons:create"></iron-icon>&nbsp;Edit</li>
+          <li on-tap="_viewActivity"><iron-icon icon="app:more"></iron-icon>&nbsp;Post activity</li>
+          <li class="w3-text-red" on-tap="_deleteItem"><iron-icon icon="myicons:delete"></iron-icon>&nbsp;Delete</li>
+        </ul>
       </div>
     </div>
 
@@ -125,6 +129,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </div>
                 <div class="w3-third"></div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="post-activity" class="ldp-modal w3-animate-zoom" style="z-index: 9999999999;">
+        <div class="ldp-modal-content w3-round max-modal-width">
+          <div>
+            <span id="close-followers" data="post-activity" on-click="_closeActivityModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white"
+              style="z-index: 2147483647;">&times;</span>
+            <div class="w3-large" style="padding:20px 15px">
+              <b class="w3-text-blue w3-center">
+                <iron-icon icon="app:more"></iron-icon>&nbsp;Post activity
+              </b>
+            </div>
+            <div id="post-activity-container" class="w3-row">
+              <!-- <post-activity journalid="{{journalid}}" likes="[[likesCount]]" comments="[[commentsCount]]" totalengagement="[[totalengagement]]" username="[[username]]" title="[[posttitle]]"></post-activity> -->
             </div>
           </div>
         </div>
@@ -206,6 +227,70 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
          
       }
+      _viewActivity(){
+				var journalid = this.itemid;
+
+				if(journalid != undefined){
+					this.journalid = journalid;
+
+					var page = "post-activity.html";
+					this._removeElement('post-activity-container');
+					var container = Polymer.dom(this.root).querySelector('#post-activity-container');
+					var likesCount = this._getLikesActivityCount(this.item.countLikes);
+					var commentsCount = this._getActivityCount(this.item.comments);
+					var totalengagement = likesCount + commentsCount;
+					var username = this.item.userName;
+					var posttitle = this.item.title;
+
+					// Now we load it on-the-fly
+					Polymer.importHref(this.resolveUrl(page), function (e) {
+						// Create a new instance
+						var postActivity = document.createElement('post-activity');
+						// And add it to the container
+						container.appendChild(postActivity);
+						// Lets set a dummy property just to show how to do it
+						postActivity.journalid = journalid;
+						postActivity.likes = likesCount;
+						postActivity.comments = commentsCount;
+						postActivity.totalengagement = totalengagement;
+						postActivity.username = username;
+						postActivity.title = posttitle;
+					});
+
+					this._openActivityModal();
+				}
+			}
+
+			_getActivityCount(itms) {
+				var res = 0
+				res = itms == undefined ? 0 : Object.keys(itms).length;
+				return res;
+			}
+
+			_getLikesActivityCount(itms) {
+				var res = 0
+				res = itms == undefined ? 0 : itms;
+				return res;
+			}
+			_openActivityModal() {
+				var modal = Polymer.dom(this.root).querySelector('#post-activity');
+				modal.style.display = 'block';
+			}
+			_closeActivityModal() {
+				var modal = Polymer.dom(this.root).querySelector('#post-activity');
+				modal.style.display = 'none';
+
+        this._removeElement('post-activity-container');
+			}
+      _removeElement(elemid) {
+				var container = Polymer.dom(this.root).querySelector('#'+elemid);
+				// element.removeChild(element.firstChild);
+
+				var element = container.querySelector("*");
+				if (element) {
+					element.parentNode.removeChild(element);
+				}
+			}
       showSnackBar(msg){
         var x = this.$.snackbar;
 

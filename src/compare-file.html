@@ -34,6 +34,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shared-styles.html">
 <link rel="lazy-import" href="preview-profile.html">
 <link rel="lazy-import" href="read-articles.html">
+<link rel="lazy-import" href="post-activity.html" defer>
 
 <dom-module id="view-articles">
 	<template>
@@ -226,6 +227,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			</div>
 		</div>
 
+		<div id="post-activity" class="ldp-modal w3-animate-zoom" style="z-index: 9999999999;">
+			<div class="ldp-modal-content w3-round max-modal-width">
+				<div>
+					<span id="close-followers" data="post-activity" on-click="_closeActivityModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white"
+						style="z-index: 9999999;">&times;</span>
+					<div class="w3-large" style="padding:20px 15px">
+						<b class="w3-text-blue w3-center">
+							<iron-icon icon="app:more"></iron-icon>&nbsp;Articles post activity
+						</b>
+					</div>
+					<div class="w3-row">
+						<post-activity journalid="{{journalid}}" likes="[[likesCount]]" comments="[[commentsCount]]" totalengagement="[[totalengagement]]" username="[[username]]" title="[[posttitle]]"></post-activity>
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<iron-pages selected="{{nextpage}}" attr-for-selected="page-name">
 			<div page-name="view-articles">
 			  <section class="thought-card" id="thoughts-Holder">
@@ -246,7 +264,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 								<span class="w3-button w3-red w3-display-topright w3-medium w3-hide closer-for-modal" style="z-index:9999;right:0; width: 22px; height: 25px;">&times;</span>
 								<div class="container card-header w3-row">
 									<div class="card-avatar w3-left" style$="[[_profilePhoto(item.photoURL)]] cursor: pointer;" data$="[[_setProfileInfo(item.journalUserName, item.journalUserID, item.companyName, item.companyID, item.photoURL)]]"
-									on-tap="_previewProfile"></div>
+									on-tap="_previewProfile" postitem="[[item.newsID]]"></div>
 									<div class="container card-company-container">
 										<div class="row card-postedby w3-medium">
 											<div>[[item.journalUserName]]</div>
@@ -261,12 +279,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 									<template is="dom-if" if="[[isEqual(item.journalUserID, user.userID)]]">
 										<div class="w3-dropdown-hover w3-display-topright" style="cursor:pointer;">
 											<iron-icon data="delSettings" on-tap="_openButtonModal" icon="myicons:settings" style="padding:8px!important;"></iron-icon>
-											<div id="delSettings" class="w3-dropdown-content w3-bar-block w3-card-4" style="z-index:999;right:0;">
+											<div id="delSettings" class="w3-dropdown-content w3-bar-block w3-card-4" style="z-index:999;right:0;width:max-content!important;">
 												<ul class="w3-ul w3-hoverable" style="cursor:pointer;">
 													<li indexed="add-article" caption="Edit Article" on-tap="_loadElement1" id="edit[[item.dateRegistered]]"
 													data="[[item.newsID]]" class="w3-text-dark-grey">
 														<paper-icon-button icon="create"></paper-icon-button>
 														&nbsp;Edit
+													</li>
+													<li class="w3-text-dark-grey" on-tap="_viewActivity" id="activity[[item.dateRegistered]]" data="[[item.newsID]]">
+														<paper-icon-button icon="app:more"></paper-icon-button>
+														&nbsp;Post activity
 													</li>
 													<li class="w3-text-red" on-tap="_deleteArticle" id="del[[item.dateRegistered]]" data="[[item.newsID]]">
 														<paper-icon-button icon="delete"></paper-icon-button>
@@ -366,7 +388,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						<div class="w3-row w3-padding-small w3-margin">
 							<div class="w3-row w3-light-gray w3-padding-small">
 								<div class="w3-row w3-padding-small"><h5>Posted by</h5></div>
-								<div class="card-avatar w3-right" style$="[[_profilePhoto(journalphoto)]] width:64px;height:64px;"></div>
+								<div class="card-avatar w3-right" style$="[[_profilePhoto(journalphoto)]] width:64px;height:64px;cursor:pointer;" data="{{postedbydata}}" on-tap="_previewProfile" postitem="{{postID}}"></div>
 								<div class="w3-row w3-rest">
 									<div class="w3-row w3-padding-small"><strong>{{postedby}}</strong></div>
 									<div class="w3-row read-article-author w3-padding-small">{{userbiography}}</div>
@@ -518,6 +540,53 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			}
 			backToArticles(){
 				this.nextpage="view-articles"
+			}
+			_viewActivity(e){
+				var journalid = e.currentTarget.data;
+
+				if(journalid != undefined){
+					this.journalid = journalid;
+
+					let filteredArray = this.findObjectByKey(this.articlesData, "newsID", journalid);
+					this.likesCount = this._getLikesActivityCount(filteredArray.countLikes);
+					this.commentsCount = this._getActivityCount(filteredArray.comments);
+					this.username = filteredArray.journalUserName;
+					this.posttitle = filteredArray.title;
+
+					this.totalengagement = this.likesCount + this.commentsCount;
+
+					var page = "post-activity"
+					var resolvedPageUrl = this.resolveUrl(page + '.html');
+					
+					Polymer.importHref(
+						resolvedPageUrl,
+						null,
+						page + '.html',
+						true);
+
+
+					this._openActivityModal();
+				}
+			}
+
+			_getActivityCount(itms) {
+				var res = 0
+				res = itms == undefined ? 0 : Object.keys(itms).length;
+				return res;
+			}
+
+			_getLikesActivityCount(itms) {
+				var res = 0
+				res = itms == undefined ? 0 : itms;
+				return res;
+			}
+			_openActivityModal() {
+				var modal = Polymer.dom(this.root).querySelector('#post-activity');
+				modal.style.display = 'block';
+			}
+			_closeActivityModal() {
+				var modal = Polymer.dom(this.root).querySelector('#post-activity');
+				modal.style.display = 'none';
 			}
 			isFollowing(journalUserID) {
 				if (this.user) {
@@ -874,6 +943,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				this.articleDate = day+" "+month+" "+year;
 				this.likesCount = this._getLikesCount(filteredArray.countLikes);
 				this.commentsCount = this._getCount(filteredArray.comments);
+				this.postID = itemid;
 
 				var manualOrExternal = filteredArray.manualOrExternal;
 
@@ -898,6 +968,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					this.postedby = filteredArray.journalUserName;
 					this.nextpage = "read-articles";
 
+					var photoURL = "";
+					photoURL = filteredArray.photoURL;
+					if (photoURL == "" || photoURL == undefined) photoURL = "../images/default-user.png";
+					
+					var a = {
+						journalUserName: filteredArray.journalUserName,
+						journalUserID: filteredArray.journalUserID,
+						companyName: filteredArray.companyName,
+						companyID: filteredArray.companyID,
+						photoURL: photoURL
+					}
+
+					this.postedbydata = a;
+
 					var database = firebase.database();
 					var that = this;
 					database.ref('users').child(filteredArray.journalUserID).child('biography').on('value', (data)=>{
@@ -905,6 +989,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 							that.userbiography = data.val();
 						}
 					})
+
+					window.scrollTo({
+						top: 0,
+						behavior: "instant"
+					});
 
 				}
 
@@ -1118,9 +1207,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			}
 			_previewProfile(e) {
 				var data = e.currentTarget.getAttribute('data');
-				this.userobj = JSON.parse(data);
+				
+				if(data == null) {
+					data = e.currentTarget.data;
+					this.userobj = data;
+				}else{
+					this.userobj = JSON.parse(data);
+				}
+				
 				this._userid = this.userobj.journalUserID;
-
 				var page = "preview-profile"
 				var resolvedPageUrl = this.resolveUrl(page + '.html');
 				Polymer.importHref(
@@ -1130,6 +1225,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					true);
 
 				this._openProfileModal();
+
+				this._captureClicks(e.currentTarget.postitem, "viewedUserProfile", this.userobj);
 			}
 			_openProfileModal() {
 				var modal = Polymer.dom(this.root).querySelector('#preview-profile');

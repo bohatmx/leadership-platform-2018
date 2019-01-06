@@ -473,7 +473,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var url = e.currentTarget.data;
         this.videoname = name;
         var itemID = e.currentTarget.id;
-
         var uploadtype = e.currentTarget.uploadtype;
 
         if(uploadtype == "videxternal"){
@@ -493,13 +492,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           videoPlayer.src = this.videourl;
 
-          var obj = {
-            itemID: itemID,
-            title: this.videoname,
-            ref: this.videourl
+          if(this.videoname != undefined){
+            var obj = {
+              itemID: itemID,
+              title: this.videoname,
+              ref: this.videourl
+            }
+
+            this._captureClicks("viewed", obj);
           }
 
-          this._captureClicks("viewed", obj);
         }else{
           this.videourl = this.getMediaURL(url);
 
@@ -518,13 +520,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           videoPlayerUpload1.src = this.videourl;
           videoPlayerUpload2.src = this.videourl;
 
-          var obj = {
-            itemID: itemID,
-            title: this.videoname,
-            ref: this.videourl
-          }
+          if(this.videoname != undefined){
+            var obj = {
+              itemID: itemID,
+              title: this.videoname,
+              ref: this.videourl
+            }
 
-          this._captureClicks("viewed", obj);
+            this._captureClicks("viewed", obj);
+          }
         }
 
         var modal = Polymer.dom(this.root).querySelectorAll('.ldp-modal');

@@ -27,6 +27,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/l2t-paper-color/l2t-paper-color.html">
 
 <!-- Paper items -->
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
@@ -220,23 +221,70 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                           </div>
                         </div>
                         <div page-name="page-uploadvid" id="uploadvid" style="border: 2px solid rgb(20, 148, 99); padding: 8px 8px; margin-bottom: 10px;">
-                          <div style="width:100%;" id="hideRemoveVideo" hidden>
-                            <paper-button class="app-primary-text-color" raised on-tap="removeVideo">Remove Video</paper-button>
-                          </div>
-                          <label for="video_input" class="paper-font-body2" style="cursor: pointer; margin-top: 10px;">
+                          <label id="uploadVideoLabel" for="video_input" class="paper-font-body2" style="cursor: pointer; margin-top: 10px;">
                             <paper-icon-button class="blue" icon="app:ondemand-video"></paper-icon-button>
                             Select Video from Gallery
                           </label>
                           <form id="selectVideoForm">
                             <input type="file" accept="video/*,video/mp4" id="video_input" on-change="handleVideo">
                           </form>
-                          <div class="videos-list">
-                            <video id="videoPlayer" style="width:100%; max-height:250px;" controls controlslist="nodownload">
-                              <source id="videoPlayer1" src="" type="video/mp4">
-                              <source id="videoPlayer2" src="" type="video/ogg">
-                              <source id="videoPlayer3" src="" type="video/webm">
-                              Your browser does not support video.
-                              </video>
+                          <div class="video-progress">
+                            <firebase-storage-multiupload
+                              id="fs"
+                              path="/videos"
+                              upload-tasks="{{uploadedFiles}}"
+                              on-error="catchError"
+                              force-unique>
+                            </firebase-storage-multiupload>
+                            <template is="dom-repeat" items="[[uploadedFiles]]">
+                              <div id="div-[[index]]" class="w3-padding-small">
+                                <firebase-storage-upload-task
+                                  task="[[item]]"
+                                  id="task-[[index]]"
+                                  bytes-transferred="{{item.bytesTransferred}}"
+                                  total-bytes="{{item.totalBytes}}"
+                                  state="{{item.state}}"
+                                  download-url="{{item.downloadUrl}}"
+                                  metadata="{{item.metadata}}"
+                                  path="{{item.path}}">
+                                </firebase-storage-upload-task>
+                                <p><em>Video upload state: [[item.state]]</em></p>
+                                <template is="dom-if" if="[[!isEqual(item.state, 'success')]]">
+                                  <paper-progress
+                                    value="{{item.bytesTransferred}}"
+                                    min="0"
+                                    max="{{item.totalBytes}}" style="width: 100%;">
+                                  </paper-progress>
+                                  <br>
+                                </template>
+                                <template is="dom-if" if="{{isEqual(item.state, 'success')}}">
+                                  <firebase-storage-ref
+                                    path="{{item.path}}"
+                                    storage-uri="{{gsUri}}"
+                                    id="ref-[[index]]"
+                                    metadata="{{item.refMetadata}}"
+                                    download-url="{{item.refDownloadUrl}}">
+                                  </firebase-storage-ref>
+                                  <div class="videos-list">
+                                    <video id="videoPlayer" style="width:100%; max-height:250px;" controls controlslist="nodownload" src="{{item.refDownloadUrl}}">
+                                      Your browser does not support video.
+                                      </video>
+                                  </div>
+                                  <p>[[_uploadComplete(item.refDownloadUrl, index, item.totalBytes)]]</p>
+                                  <button on-tap="deleteFile" value="{{index}}">Delete video</button>
+                                </template>
+                                <template is="dom-if" if="[[!isEqual(item.state, 'success')]]">
+                                  <template is="dom-if" if="[[isEqual(item.state, 'running')]]">
+                                    <button on-tap="cancel" value="{{index}}">Cancel</button>
+                                    <button on-tap="pause" value="{{index}}">Pause</button>
+                                  </template>
+                                  <template is="dom-if" if="[[isEqual(item.state, 'paused')]]">
+                                    <button on-tap="resume" value="{{index}}">Resume</button>
+                                  </template>
+                                </template>
+                                <br>
+                              </div>
+                            </template>
                           </div>
                         </div>
                       </iron-pages>
@@ -246,61 +294,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 </iron-pages> 
               </iron-collapse>
             </div>
-            <div class="video-progress">
-                <firebase-storage-multiupload
-                  id="fs"
-                  path="/videos"
-                  upload-tasks="{{uploadedFiles}}"
-                  on-error="catchError"
-                  force-unique>
-                </firebase-storage-multiupload>
-                <hr>
-                <template is="dom-repeat" items="[[uploadedFiles]]">
-                  <div style="padding: 20px">
-                    <firebase-storage-upload-task
-                      task="[[item]]"
-                      id="task-[[index]]"
-                      bytes-transferred="{{item.bytesTransferred}}"
-                      total-bytes="{{item.totalBytes}}"
-                      state="{{item.state}}"
-                      download-url="{{item.downloadUrl}}"
-                      metadata="{{item.metadata}}"
-                      path="{{item.path}}">
-                    </firebase-storage-upload-task>
-                    <p><em>Video Upload State: [[item.state]]</em></p>
-                    <template is="dom-if" if="[[!isEqual(item.state, 'success')]]">
-                      <paper-progress
-                        value="{{item.bytesTransferred}}"
-                        min="0"
-                        max="{{item.totalBytes}}" style="width: 100%;">
-                      </paper-progress>
-                      <br>
-                    </template>
-                    <template is="dom-if" if="{{isEqual(item.state, 'success')}}">
-                      <firebase-storage-ref
-                        path="{{item.path}}"
-                        storage-uri="{{gsUri}}"
-                        id="ref-[[index]]"
-                        metadata="{{item.refMetadata}}"
-                        download-url="{{item.refDownloadUrl}}">
-                      </firebase-storage-ref>
-                      <p>[[_uploadComplete(item.refDownloadUrl)]]</p>
-                    </template>
-                    <template is="dom-if" if="[[!isEqual(item.state, 'success')]]">
-                      <template is="dom-if" if="[[isEqual(item.state, 'running')]]">
-                        <button on-tap="cancel" value="{{index}}">Cancel</button>
-                        <button on-tap="pause" value="{{index}}">Pause</button>
-                      </template>
-                      <template is="dom-if" if="[[isEqual(item.state, 'paused')]]">
-                        <button on-tap="resume" value="{{index}}">Resume</button>
-                      </template>
-                    </template>
-                    <br>
-                  </div>
-                </template>
-              </div>
-            <hr>
-            <br>
+          <br>
           <iron-autogrow-textarea style="width: 100%;" id="articleContent" rows="10" placeholder="Enter article content"></iron-autogrow-textarea>
           <br>
           <div class="buttons">
@@ -311,6 +305,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </div>
       </div>
       <div id="snackbar"></div>
+      <paper-toast id="toaster"></paper-toast>
   </template>
 
   <script>
@@ -383,6 +378,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           uploadedFiles: {
             type: Array,
+          },
+          videoDownloadURL: {
+            type: String,
+            value: ""
+          },
+          videoUploadIndex: Number,
+          videoUploadSize: {
+            type:Number,
+            value: 0
           },
         };
       }
@@ -802,24 +806,59 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           console.log(e.detail.message);
       }
       cancel(e) {
+        e.preventDefault();
         Polymer.dom(this.root).querySelector('#task-' + e.target.value).cancel();
+        this.removeVideoUpload(e.target.value, false);
       }
       resume(e) {
+        e.preventDefault();
         Polymer.dom(this.root).querySelector('#task-' + e.target.value).resume();
       }
       pause(e) {
+        e.preventDefault();
         Polymer.dom(this.root).querySelector('#task-' + e.target.value).pause();
       }
       download(e) {
+        e.preventDefault();
         Polymer.dom(this.root).querySelector('#ref-' + e.target.value).getDownloadURL().then(function(d) {
           console.log(d)
           window.open(d, '_blank')
         })
       }
+      removeVideoUpload(index, del = false){
+        this.videoDownloadURL = "";
+
+        if(this.uploadedFiles.length > 0){
+          this.uploadedFiles.length = 0;
+        }
+        var selectVideoForm = Polymer.dom(this.root).querySelector('#selectVideoForm');
+        selectVideoForm.reset();
+        this.$.uploadVideoLabel.style = 'display: block;';
+        this.$.selectVideoForm.style = 'display: block;';
+
+        Polymer.dom(this.root).querySelector('#fs').clearTasks();
+
+        // If delete true
+        if(del){
+          var uploadedref = Polymer.dom(this.root).querySelector('#ref-' + index);
+          if(uploadedref){
+            uploadedref.delete().then(function(d) {
+              console.log(d)
+            })
+          }
+        }
+
+        var elem = Polymer.dom(this.root).querySelector('#div-' + index);
+        if(elem){
+          elem.parentNode.removeChild(elem);
+        }
+      }
       deleteFile(e) {
-        Polymer.dom(this.root).querySelector('#ref-' + e.target.value).delete().then(function(d) {
-          console.log(d)
-        })
+        e.preventDefault();
+        if (confirm('Are you sure you want to delete this video?')) {
+          // Delete uploaded video
+          this.removeVideoUpload(e.target.value, true);
+        }
       }
       _uploadTasksChanged(uploadTasks) {
         console.log(uploadTasks);
@@ -831,80 +870,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         return a === b;
       }
       uploadVideo() {
+        this.$.uploadVideoLabel.style = 'display: none;';
+        this.$.selectVideoForm.style = 'display: none;';
+
         Polymer.dom(this.root).querySelector('#fs').upload(Polymer.dom(this.root).querySelector('#video_input').files)
       }
-      _uploadComplete(url){
+      _uploadComplete(url, index, size){
         if(url != undefined){
-          var downloadURL = url;
-          var videoID = sessionStorage.getItem("newVideoKey");
-          var newArticleKey = sessionStorage.getItem("newArticleKey");
-          var refThoughtVideo = sessionStorage.getItem("refThoughtVideo");
+          this.videoDownloadURL = url;
+          this.videoUploadIndex = index;
+          this.videoUploadSize = size;
 
-          var database = firebase.database();
-          var videoupdates = {};
-          var thoughtupdates = {};
-
-          videoupdates['/videos/'+videoID+'/url'] = downloadURL;
-          database.ref().update(videoupdates);
-
-          thoughtupdates['/news/'+newArticleKey+'/videos/'+refThoughtVideo+'/url'] = downloadURL;
-          database.ref().update(thoughtupdates);
-
-          sessionStorage.removeItem("newVideoKey");
-          sessionStorage.removeItem("refThoughtVideo");
-
-          // reset video
-          var videoPlayer = Polymer.dom(this.root).querySelector('#videoPlayer');
-          var videoPlayer1 = Polymer.dom(this.root).querySelector('#videoPlayer1');
-          var videoPlayer2 = Polymer.dom(this.root).querySelector('#videoPlayer2');
-          var videoPlayer3 = Polymer.dom(this.root).querySelector('#videoPlayer3');
-
-          videoPlayer1.src = "";
-          videoPlayer2.src = "";
-          videoPlayer3.src = "";
-          videoPlayer.src = "";
-
-          Polymer.dom(this.root).querySelector('#fs').clearTasks();
-
-          return "Upload Completed Successfully!"
+          this.$.uploadVideoLabel.style = 'display: none;';
+          this.$.selectVideoForm.style = 'display: none;';
         }
+        
       }
-      removeVideo(){
-        var selectVideoForm = Polymer.dom(this.root).querySelector('#selectVideoForm');
-        var videoPlayer = Polymer.dom(this.root).querySelector('#videoPlayer');
-        var videoPlayer1 = Polymer.dom(this.root).querySelector('#videoPlayer1');
-        var videoPlayer2 = Polymer.dom(this.root).querySelector('#videoPlayer2');
-        var videoPlayer3 = Polymer.dom(this.root).querySelector('#videoPlayer3');
-
-        videoPlayer1.src = "";
-        videoPlayer2.src = "";
-        videoPlayer3.src = "";
-
-        videoPlayer.load();
-
-        selectVideoForm.reset();
-
-        this.$.hideRemoveVideo.style = 'display: none;';
-      }
+      
       handleVideo(e){
-        // console.log('video'+e.target.files[0].name);
-
-        var videoSelected = e.target.files[0];
-
-        var vidURL = URL.createObjectURL(videoSelected);
-
-        var videoPlayer = Polymer.dom(this.root).querySelector('#videoPlayer');
-        var videoPlayer1 = Polymer.dom(this.root).querySelector('#videoPlayer1');
-        var videoPlayer2 = Polymer.dom(this.root).querySelector('#videoPlayer2');
-        var videoPlayer3 = Polymer.dom(this.root).querySelector('#videoPlayer3');
-
-        videoPlayer1.src = vidURL;
-        videoPlayer2.src = vidURL;
-        videoPlayer3.src = vidURL;
-
-        videoPlayer.load();
-
-        this.$.hideRemoveVideo.style = 'display: block;';
+        this.uploadVideo();
       }
       handleVideoURL(){
         let videoDesc = this.$.videoDesc.value;
@@ -992,12 +976,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.videourlInput.value = "";
       }
       showSnackBar(msg){
-        var x = this.$.snackbar;
+        Polymer.dom(this.root).querySelector('#toaster').show({
+          text: msg
+        });
+        // var x = this.$.snackbar;
 
-        x.innerHTML = msg;
+        // x.innerHTML = msg;
 
-        x.className = "show";
-        setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+        // x.className = "show";
+        // setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
       }
       _saveNewArticle(){
         let author = this.$.articleAuthor.value;
@@ -1166,6 +1153,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           if (vidfile == undefined){
             this.showSnackBar("Please upload video file !");
             return;
+          }else{
+            if(this.videoDownloadURL.length == 0){
+              this.showSnackBar("Please wait for video upload to complete...");
+              return;
+            }
           }
         }
 
@@ -1361,8 +1353,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             // create video object
             var vidObj = {
-              active: active,
-              company_status: companyID+"_"+active,
+              active: true,
+              company_status: companyID+"_true",
               caption: video.name,
               companyID: companyID,
               companyName: companyName,
@@ -1378,7 +1370,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               stringDate: datetime,
               stringDateUploaded: datetime,
               stringDateRegistered: datetime,
-              url: "",
+              url: this.videoDownloadURL,
               userID: journalUserID,
               userName: journalUserName,
               photoURL: photoURL,
@@ -1386,11 +1378,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               lengthInSeconds: 0
             }
 
-            this.uploadVideo();
-
             // write video data to new thoughts collection
             var refThoughtVideo = database.ref().child('news/' + newArticleKey +'/videos').push().key;
-            sessionStorage.setItem("refThoughtVideo", refThoughtVideo);
 
             var videoThoughtUpd = {};
             videoThoughtUpd['news/' + newArticleKey +'/videos/' + refThoughtVideo] = vidObj;
@@ -1400,6 +1389,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             var videoupdates = {};
             videoupdates['/videos/' + newVideoKey] = vidObj;
             database.ref().update(videoupdates);
+
+            this.removeVideoUpload(this.videoUploadIndex, false);
           }
         } //Post External
         else if(VidUploadExternal == 'videxternal'){

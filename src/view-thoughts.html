@@ -29,6 +29,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="thought-card-attachments.html">
 <link rel="import" href="comments-box.html">
 <link rel="lazy-import" href="preview-profile.html" defer>
+<link rel="lazy-import" href="post-activity.html" defer>
 
 <dom-module id="view-thoughts">
 	<template>
@@ -121,6 +122,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			</div>
 		</div>
 
+		<div id="post-activity" class="ldp-modal w3-animate-zoom" style="z-index: 9999999999;">
+			<div class="ldp-modal-content w3-round max-modal-width">
+				<div>
+					<span id="close-followers" data="post-activity" on-click="_closeActivityModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white"
+					 style="z-index: 9999999;">&times;</span>
+					<div class="w3-large" style="padding:20px 15px">
+						<b class="w3-text-blue w3-center">
+							<iron-icon icon="app:more"></iron-icon>&nbsp;Messages post activity
+						</b>
+					</div>
+					<div id="post-activity-container" class="w3-row">
+						<!-- <post-activity id="post-activity-obj" journalid="{{journalid}}" likes="[[likesCount]]" comments="[[commentsCount]]" totalengagement="[[totalengagement]]" username="[[username]]" title="[[posttitle]]"></post-activity> -->
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<section class="thought-card" id="thoughts-Holder">
 			<div class="main-card" style="width:100%;">
 				<div class="spinner">
@@ -159,12 +177,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 									<div class$="[[jsFormatStatus(item.status)]]">[[jsUcfirst(item.status)]]</div>
 									<div class="w3-dropdown-click w3-display-topright" style="cursor:pointer;">
 										<iron-icon data="delSettings[[item.dailyThoughtID]]" on-tap="_openButtonModal" icon="myicons:settings" style="padding:8px!important;"></iron-icon>
-										<div id="delSettings[[item.dailyThoughtID]]" class="w3-dropdown-content w3-bar-block w3-card-4" style="z-index:99999999;right:0;">
+										<div id="delSettings[[item.dailyThoughtID]]" class="w3-dropdown-content w3-bar-block w3-card-4" style="z-index:99999999;right:0;width:max-content!important;">
 											<ul class="w3-ul w3-hoverable" style="cursor:pointer;" on-tap="_closeButtonModal" data="delSettings[[item.dailyThoughtID]]">
 												<li indexed="add-thoughts" caption="Edit Thoughts" on-tap="_loadElement1" id="edit[[item.dateRegistered]]"
 												 data="[[item.dailyThoughtID]]" class="w3-text-dark-grey">
 													<paper-icon-button icon="create"></paper-icon-button>
 													&nbsp;Edit
+												</li>
+												<li class="w3-text-dark-grey" on-tap="_viewActivity" id="activity[[item.dateRegistered]]" data="[[item.dailyThoughtID]]">
+													<paper-icon-button icon="app:more"></paper-icon-button>
+													&nbsp;Post activity
 												</li>
 												<li class="w3-text-red" on-tap="_deleteThought" id="del[[item.dateRegistered]]" data="[[item.dailyThoughtID]]">
 													<paper-icon-button icon="delete"></paper-icon-button>
@@ -174,6 +196,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 										</div>
 									</div>
 								</template>
+
 							</div>
 
 							<div class="container">
@@ -290,7 +313,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			static get properties() {
 				return {
 					user: {
-						type: Object
+						type: Object,
+						notify: true,
+						observer: 'userDataReceived'
 					},
 					minData: {
 						type: Number,
@@ -389,6 +414,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				};
 			}
 
+			userDataReceived(newData, oldData){
+				if(this.thoughtype == "mythoughts"){
+					if(this.user){
+						this.equalto=this.user.userID+"";
+						this.orderchild="journalUserID";
+					}
+				}
+			}
+
 			_companyIdReceived(){
 				if(this.thoughtype == "companythoughts"){
 					this.equalto=this._companyid+"_approved";
@@ -397,8 +431,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					this.equalto="daily_approved";
 					this.orderchild="publish_status";
 				}else if(this.thoughtype == "mythoughts"){
-					this.equalto=this.user.userID+"";
-					this.orderchild="journalUserID";
+					if(this.user){
+						this.equalto=this.user.userID+"";
+						this.orderchild="journalUserID";
+					}
 				}else if(this.thoughtype == "topleaderthoughts"){
 					this.equalto="hc_approved";
 					this.orderchild="publish_status";
@@ -419,6 +455,54 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 			_thoughtypeReceived(){
 				var that = this;
+			}
+
+			_viewActivity(e){
+				var journalid = e.currentTarget.data;
+
+				if(journalid != undefined){
+					this.journalid = journalid;
+
+					let filteredArray = this.findObjectByKey(this.thoughtsData, "dailyThoughtID", journalid);
+
+					var page = "post-activity.html";
+					this._removeElement('post-activity-container');
+					var container = Polymer.dom(this.root).querySelector('#post-activity-container');
+					var likesCount = this._getLikesCount(filteredArray.countLikes)
+					var commentsCount = this._getCount(filteredArray.comments);
+					var totalengagement = likesCount + commentsCount;
+					var username = filteredArray.journalUserName;
+					var posttitle = filteredArray.title;
+
+					// Now we load it on-the-fly
+					Polymer.importHref(this.resolveUrl(page), function (e) {
+						// Create a new instance
+						var postActivity = document.createElement('post-activity');
+						// And add it to the container
+						container.appendChild(postActivity);
+						// Lets set a dummy property just to show how to do it
+						postActivity.journalid = journalid;
+						postActivity.likes = likesCount;
+						postActivity.comments = commentsCount;
+						postActivity.totalengagement = totalengagement;
+						postActivity.username = username;
+						postActivity.title = posttitle;
+					});
+
+					this._openActivityModal();
+				}
+			}
+
+			_getCount(itms) {
+				var res = 0
+				res = itms == undefined ? 0 : Object.keys(itms).length;
+				return res;
+			}
+
+			_getLikesCount(itms) {
+				var res = 0
+				res = itms == undefined ? 0 : itms;
+				return res;
 			}
 
 			_openItemModal(e){
@@ -471,16 +555,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						}
 					}
 				});
-			}
-
-			_setNextComRatePage(id, typ) {
-				return typ === 'default' ? 'page-comment' + id : id;
-			}
-
-			_countItems(itms) {
-				var keys = itms == undefined ? [] : Object.keys(itms);
-				var val = keys.length == 0 ? true : false;
-				return val;
 			}
 
 			isFollowing(journalUserID) {	
@@ -747,6 +821,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				var modal = Polymer.dom(this.root).querySelector('#preview-profile');
 				modal.style.display = 'none';
 			}
+			_openActivityModal() {
+				var modal = Polymer.dom(this.root).querySelector('#post-activity');
+				modal.style.display = 'block';
+			}
+			_closeActivityModal() {
+				var modal = Polymer.dom(this.root).querySelector('#post-activity');
+				modal.style.display = 'none';
+
+				this._removeElement('post-activity-container');
+			}
 
 			_sort(a, b) {
 				if (a.dateScheduled > b.dateScheduled) return -1;
@@ -789,24 +873,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				}, 25000)
 
 			}
-			_sortComments(obj) {
-
-				if (obj != undefined) {
-					// var modObj = obj;
-					// modObj.sort();
-					return Object.keys(obj).map(function (key) {
-						return obj[key];
-					});
-				}
-			}
-			toggleComRate(e) {
-				var selectedElem = e.currentTarget.id;
-				let dailyThought_ID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
-
-				// var pages = Polymer.dom(this.root).querySelector('#page'+dailyThought_ID);
-
-				this._setNextComRatePage(dailyThought_ID, false)
-			}
 			toggle(e) {
 				var a = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
 
@@ -841,20 +907,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				this.lastSelected = this._selected;
 
 			}
-			_editThought(e) {
-				// Edit Thought
-				this.addedit = 1;
-				let editThoughtID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
-
-				let filteredArray = this.findObjectByKey(this.thoughtsData, "dailyThoughtID", editThoughtID);
-
-				let editThoughtStr = JSON.stringify(filteredArray);
-
-				sessionStorage.setItem("addedit", this.addedit);
-				sessionStorage.setItem("editThoughtID", editThoughtID);
-				sessionStorage.setItem("editThoughtStr", editThoughtStr);
-
-			}
 
 			_loadElement1(e) {
 				var elem = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id);
@@ -878,7 +930,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			}
 			_myLoadElement(elementName, htmlImport) {
 				// Let's remove last loaded element if exists
-				this._removeElement();
+				this._removeElement('item-holder');
 
 				var container = Polymer.dom(this.root).querySelector('#item-holder');
 				var __companyid = this._companyid;
@@ -918,130 +970,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 					this.removeIOSBugfix();
 				}
 				var modal = Polymer.dom(this.root).querySelector('#add-items');
-				this._removeElement();
+				this._removeElement('item-holder');
 				modal.style.display = 'none';
 			}
 
-			_removeElement() {
-				var container = Polymer.dom(this.root).querySelector('#item-holder');
+			_removeElement(elemid) {
+				var container = Polymer.dom(this.root).querySelector('#'+elemid);
 				// element.removeChild(element.firstChild);
 
 				var element = container.querySelector("*");
 				if (element) {
 					element.parentNode.removeChild(element);
 				}
-			}
-
-			_getVideoName(storageName) {
-				let strName = '';
-				strName = storageName.slice(storageName.lastIndexOf('/') + 1);
-				strName = strName.replace(new RegExp('_', 'g'), ' ');
-				return strName;
-			}
-			_videoClick(e) {
-				var videoClicked = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
-
-				var src = this.getMediaURL(videoClicked);
-
-				this.loadsrc = src;
-				this._loadElement();
-			}
-			_getPodcastName(storageName) {
-				let strName = '';
-				strName = storageName.slice(storageName.lastIndexOf('/') + 1);
-				strName = strName.replace(new RegExp('_', 'g'), ' ');
-				return strName;
-			}
-			_saveRateValue(e) {
-				let dailyThought_ID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
-				let rating = Polymer.dom(this.root).querySelector('#rateThought' + dailyThought_ID).rating;
-				// let rating = this.$.rateThought.rating;
-				// let comment = this.$.rateComment.value;
-				let comment = "";
-
-				var journalUserID = this.user.userID;
-				var journalUserName = this.user.firstName + " " + this.user.lastName;
-
-				var companyID = this.user.companyID;
-				var companyName = this.user.companyName;
-
-				var photoURL = "";
-
-				if (this.user.photoURL != undefined || this.user.photoURL != "") {
-					photoURL = this.user.photoURL;
-				} else {
-					photoURL = "";
-				}
-
-				if (photoURL == undefined) {
-					photoURL = "";
-				}
-
-				let date = Date.now();
-				let stringDate = this.formatDate(date);
-				let stringRateDate = this.formatRateTime(date);
-				// let stringDate = new Date(date).toUTCString();
-
-				// Get a reference to the database service
-				var database = firebase.database();
-
-				var newRateKey = database.ref().child('ratings').push().key;
-
-				if (comment == undefined) {
-					comment = "";
-				}
-
-				// fix data
-				// dailyThoughts
-				var data = {
-					companyID: companyID,
-					companyName: companyName,
-					journalUserID: journalUserID,
-					journalUserName: journalUserName,
-					photoURL: photoURL,
-					comment: comment,
-					dailyThoughtID: dailyThought_ID,
-					date: date,
-					rating: rating,
-					ratingID: newRateKey,
-					stringDate: stringDate,
-					stringRateDate: stringRateDate
-				}
-
-				// Write the new rating data
-				var updates = {};
-				updates['/ratings/' + newRateKey] = data;
-				database.ref().update(updates);
-
-				// Write the new rating on thoughts data
-				var newTypeRateKey = database.ref().child('/dailyThoughts/' + dailyThought_ID + '/ratings').push().key;
-				var rateUpdates = {};
-				rateUpdates['/dailyThoughts/' + dailyThought_ID + '/ratings/' + newTypeRateKey] = data;
-				database.ref().update(rateUpdates);
-
-				Polymer.dom(this.root).querySelector('#rateThought' + dailyThought_ID).rating = 2;
-				// this.$.rateComment.value = "";
-
-				this.showSnackBar("Rating posted successfully!");
-			}
-			_toArray(obj) {
-				if (obj != undefined) {
-					return Object.keys(obj).map(function (key) {
-						var retObj = {};
-						retObj = obj[key];
-						// assign object id to lpUID
-						// retObj['lpUID'] = key;
-						return retObj;
-						// return obj[key];
-					});
-				}
-			}
-			_objLen(obj) {
-				let len = 0;
-				if (obj != undefined) {
-					len = Object.keys(obj).length;
-				}
-				return len;
 			}
 			_photo(photos, textColor) {
 				if (textColor == undefined) {
@@ -1075,119 +1015,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 				return photo_url;
 			}
-			formatDate(date) {
-				var d = new Date(date),
-					month = '' + (d.getMonth() + 1),
-					day = '' + d.getDate(),
-					year = d.getFullYear(),
-					hours = '' + d.getHours(),
-					minutes = '' + d.getMinutes(),
-					seconds = '' + d.getSeconds(),
-					milliseconds = '' + d.getMilliseconds();
-
-				var today = new Date(),
-					thisYear = today.getFullYear();
-
-				// get week day name Sunday - Saturday
-				var dayName = this.getDayMonthStr(d.getDay(), "day", true);
-
-				// get month name
-				var monthName = this.getDayMonthStr(d.getMonth(), "month", true);
-
-				// add preceding zeros where needed
-				if (month.length < 2) month = '0' + month;
-				if (day.length < 2) day = '0' + day;
-				if (hours.length < 2) hours = '0' + hours;
-				if (minutes.length < 2) minutes = '0' + minutes;
-				if (seconds.length < 2) seconds = '0' + seconds;
-				if (milliseconds.length < 2) milliseconds = '0' + milliseconds;
-
-				// format thoughts date
-				// Monday, 04 December 2017 14:21:56
-				var thoughtDate = dayName + ", " + day + " " + monthName + " " + year + " " + hours + ":" + minutes + ":" +
-					seconds;
-
-				return thoughtDate;
-				// return [year, month, day].join('-');
-			}
-			formatRateTime(date) {
-				var d = new Date(date),
-					month = '' + (d.getMonth() + 1),
-					day = '' + d.getDate(),
-					year = d.getFullYear(),
-					hours = d.getHours() > 12 ? d.getHours() - 12 : d.getHours(),
-					am_pm = d.getHours() >= 12 ? "PM" : "AM",
-					minutes = '' + d.getMinutes(),
-					seconds = '' + d.getSeconds(),
-					milliseconds = '' + d.getMilliseconds();
-
-				var today = new Date(),
-					thisYear = today.getFullYear();
-
-				// get week day name Sunday - Saturday
-				var dayName = this.getDayMonthStr(d.getDay(), "day", true);
-
-				// get month name
-				var monthName = this.getDayMonthStr(d.getMonth(), "month", false);
-
-				// add preceding zeros where needed
-				if (month.length < 2) month = '0' + month;
-				if (day.length < 2) day = '0' + day;
-				// if (hours.length < 2) hours = '0' + hours;
-				hours = hours < 10 ? "0" + hours : hours;
-				if (minutes.length < 2) minutes = '0' + minutes;
-				if (seconds.length < 2) seconds = '0' + seconds;
-				if (milliseconds.length < 2) milliseconds = '0' + milliseconds;
-
-				// format thoughts date
-				// 04 Dec 02:21:PM
-				var thoughtDate = day + " " + monthName + " " + hours + ":" + minutes + ":" + am_pm;
-
-				return thoughtDate;
-				// return [year, month, day].join('-');
-			}
-			timeSince(date) {
-				if (typeof date !== 'object') {
-					date = new Date(date);
-				}
-
-				var seconds = Math.floor((new Date() - date) / 1000);
-				var intervalType;
-
-				var interval = Math.floor(seconds / 31536000);
-				if (interval >= 1) {
-					intervalType = 'year';
-				} else {
-					interval = Math.floor(seconds / 2592000);
-					if (interval >= 1) {
-						intervalType = 'month';
-					} else {
-						interval = Math.floor(seconds / 86400);
-						if (interval >= 1) {
-							intervalType = 'day';
-						} else {
-							interval = Math.floor(seconds / 3600);
-							if (interval >= 1) {
-								intervalType = "hour";
-							} else {
-								interval = Math.floor(seconds / 60);
-								if (interval >= 1) {
-									intervalType = "minute";
-								} else {
-									interval = seconds;
-									intervalType = "second";
-								}
-							}
-						}
-					}
-				}
-
-				if (interval > 1 || interval === 0) {
-					intervalType += 's';
-				}
-
-				return interval + ' ' + intervalType + ' ago';
-			};
 
 
 			isElementInViewport(el) {
@@ -1229,47 +1056,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				}
 
 			}
-			_openPLDP(e) {
-				var thoughtID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
-				sessionStorage.setItem("PLDP_ThoughtAdd", thoughtID);
-				this.$.pldpDialog.open();
-			}
-			getMediaURL(url) {
-				var res = "";
-				var checkHTTP;
-
-				if (url.includes("youtu")) {
-					var youtubeID = this.getYoutubeID(url);
-					res = "https://www.youtube.com/embed/" + youtubeID;
-				} else {
-					checkHTTP = url.indexOf("http:");
-					if (checkHTTP == -1) res = url;
-					else res = url.replace("http:", "https:");
-				}
-
-				return res;
-			}
-			getYoutubeID(youtubeURL) {
-				var str = youtubeURL;
-				var n = str.indexOf("=");
-				var x = str.indexOf("&");
-				var res = "";
-
-				if (n == -1) {
-					n = str.indexOf("youtu.be");
-					if (x == -1) res = str.substring(n + 9);
-					else res = str.substring(n + 9, x);
-				} else {
-					if (x == -1) res = str.substring(n + 1);
-					else res = str.substring(n + 1, x);
-				}
-
-				return res;
-			}
-			getYoutubeThumbnail(youtubeURL) {
-				var res = this.getYoutubeID(youtubeURL);
-				return "https://img.youtube.com/vi/" + res + "/0.jpg";
-			}
 			findObjectByKey(array, key, value) {
 				for (var i = 0; i < array.length; i++) {
 					if (array[i][key] === value) {
@@ -1278,109 +1064,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				}
 				return null;
 			}
-			closePLDPDialog() {
-				this._addToPLDP();
-				sessionStorage.removeItem("PLDP_ThoughtAdd");
-				this.$.pldpDialog.close();
-			}
-			_addToPLDP() {
-				let PLDP_ThoughtAdd = sessionStorage.getItem("PLDP_ThoughtAdd");
-
-				let filteredArray = this.findObjectByKey(this.thoughtsData, "dailyThoughtID", PLDP_ThoughtAdd);
-
-				// remove the key
-				delete filteredArray['$key'];
-
-				// add PLDP user to the thought object
-				filteredArray.PLDPUserID = this.user.userID;
-				filteredArray.PLDPUserName = this.user.firstName + " " + this.user.lastName;
-
-				// instantiate db
-				let database = firebase.database();
-
-				// create new record
-				let newThought = database.ref().child('/myPLDP/dailyThoughts').push().key;
-
-				// delete the thought if already exists
-				let ref = database.ref('myPLDP/dailyThoughts');
-				ref.orderByChild('dailyThoughtID').equalTo(PLDP_ThoughtAdd)
-					.once('value').then(function (snapshot) {
-						snapshot.forEach(function (childSnapshot) {
-							if (newThought === childSnapshot.key) {
-								console.log("Got the new ID");
-							} else {
-								// remove each old child
-								ref.child(childSnapshot.key).remove();
-							}
-						});
-					});
-
-				let updates = {};
-				updates['/myPLDP/dailyThoughts/' + newThought] = filteredArray;
-				database.ref().update(updates);
-			}
 			isEqual(a, b) {
 				return a === b;
-			}
-			_deleteThoughtImg(e) {
-				var thoughtPhotoID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
-				var deldailyThoughtID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).dataval;
-
-				sessionStorage.setItem("thoughtPhotoID", thoughtPhotoID);
-				sessionStorage.setItem("deldailyThoughtID", deldailyThoughtID);
-				sessionStorage.setItem("deleteType", "photo");
-
-				this.$.discardTitle.innerHTML = "Discard Photo";
-				this.$.thoughtTitle.innerHTML = 'Delete selected photo?';
-				this.$.thoughtAuthor.innerHTML = '';
-
-				this.$.deleteDialog.open();
-			}
-			_deleteThoughtURL(e) {
-				var thoughtURLID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
-				var deldailyThoughtID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).dataval;
-
-				sessionStorage.setItem("thoughtURLID", thoughtURLID);
-				sessionStorage.setItem("deldailyThoughtID", deldailyThoughtID);
-				sessionStorage.setItem("deleteType", "url");
-
-				this.$.discardTitle.innerHTML = "Discard Article Link";
-				this.$.thoughtTitle.innerHTML = 'Delete selected article link?';
-				this.$.thoughtAuthor.innerHTML = '';
-
-				this.$.deleteDialog.open();
-			}
-			_deleteThoughtPodcast(e) {
-				var thoughtPodcastID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
-				var deldailyThoughtID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).dataval;
-				var podcastID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).datapod;
-
-				sessionStorage.setItem("thoughtPodcastID", thoughtPodcastID);
-				sessionStorage.setItem("podcastID", podcastID);
-				sessionStorage.setItem("deldailyThoughtID", deldailyThoughtID);
-				sessionStorage.setItem("deleteType", "podcast");
-
-				this.$.discardTitle.innerHTML = "Discard Podcast Link";
-				this.$.thoughtTitle.innerHTML = 'Delete selected podcast link?';
-				this.$.thoughtAuthor.innerHTML = '';
-
-				this.$.deleteDialog.open();
-			}
-			_deleteThoughtVideo(e) {
-				var thoughtVideoID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;
-				var deldailyThoughtID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).dataval;
-				var videoID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).datavid;
-
-				sessionStorage.setItem("thoughtVideoID", thoughtVideoID);
-				sessionStorage.setItem("videoID", videoID);
-				sessionStorage.setItem("deldailyThoughtID", deldailyThoughtID);
-				sessionStorage.setItem("deleteType", "video");
-
-				this.$.discardTitle.innerHTML = "Discard Video Link";
-				this.$.thoughtTitle.innerHTML = 'Delete selected video link?';
-				this.$.thoughtAuthor.innerHTML = '';
-
-				this.$.deleteDialog.open();
 			}
 			_deleteThought(e) {
 				var dailyThoughtID = Polymer.dom(this.root).querySelector('#' + e.currentTarget.id).data;

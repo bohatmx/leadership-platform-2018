@@ -11,7 +11,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="manifest" href="/manifest.json">
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
-<!-- <link rel="import" href="../bower_components/google-chart/google-chart.html"> -->
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 
@@ -57,16 +56,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <!-- </template> -->
 
     <style include="w3-styles">
-        /* Phone and tablet */
-        #overall-chart {
-            height: 300px;
-            width: 400px;
-        }
-
-        /* Desktop */
-        @media screen and (min-width: 1024px) {
-            #overall-chart {
-                width: 700px;
+        @media screen and (max-width: 780px) {
+            #dashboard {
+                margin-top: 40px;
             }
         }
 
@@ -798,7 +790,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       _noOfUsersDataReceived(newData, oldData){
           var that = this;
-        //   var chart = Polymer.dom(that.root).querySelector("#overall-chart");
 
         if(newData.length > 0){
             for(var x in newData){

@@ -1231,7 +1231,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						case 'thought':
 							if ((nt.thoughtType == 'dailythoughts') && (page == 'daily-thoughts')) {
 								myNotifications['/users/' + _userID + '/notifications/' + n + '/seen'] = true
-							} else if ((nt.thoughtType == 'companythoughts') && (page == 'company-thoughts')){
+							} else if ((nt.thoughtType == 'companythoughts') && (page == 'company-thoughts') && (nt.companyID != "-LEiZPT-C2PyLu_YLKNU") ){
 								myNotifications['/users/' + _userID + '/notifications/' + n + '/seen'] = true
 							} else if ((nt.thoughtType == 'topleaderthoughts') && (page == 'topleader-thoughts')) {
 								myNotifications['/users/' + _userID + '/notifications/' + n + '/seen'] = true
@@ -1239,7 +1239,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 								myNotifications['/users/' + _userID + '/notifications/' + n + '/seen'] = true
 							} else if ((nt.thoughtType == 'ileadcorporate') && (page == 'i-lead')) {
 								myNotifications['/users/' + _userID + '/notifications/' + n + '/seen'] = true
-							} else if ((nt.thoughtType == 'ileadpublic') && (page == 'i-lead')) {
+							} else if ((nt.thoughtType == 'ileadpublic') && (page == 'i-lead') ) {
+								myNotifications['/users/' + _userID + '/notifications/' + n + '/seen'] = true
+							} else if ((nt.thoughtType == 'companythoughts') && (page == 'i-lead') && (nt.companyID == "-LEiZPT-C2PyLu_YLKNU") ) {
 								myNotifications['/users/' + _userID + '/notifications/' + n + '/seen'] = true
 							} else if((nt.thoughtType == undefined) || (!nt.thoughtType) ){
 								myNotifications['/users/' + _userID + '/notifications/' + n + '/seen'] = true

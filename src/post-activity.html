@@ -1,0 +1,207 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="manifest" href="/manifest.json">
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<!-- Firebase Auth -->
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+
+<!-- Firebase Query -->
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-database-behavior.html">
+
+<dom-module id="post-activity">
+	<template>
+	<style include="w3-styles"></style>
+	<style include="shared-styles">
+		:host {
+			position: relative;
+			display: block;
+			overflow: hidden;
+		}
+		.modal-list{
+            max-height: 80vh; 
+            overflow-y: auto;
+        }
+		/* width */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            border-radius: 10px;
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+        }
+		
+	</style>
+	<template is="dom-if" if="[[journalid]]">
+		<firebase-query
+			id="qrypostactivity"
+			path="/posts-analytics/{{journalid}}"
+			data="{{postAnalytics}}">
+		</firebase-query>
+	</template>
+	
+
+	<div class="w3-row">
+		<div class="w3-row modal-list">
+			<div class="w3-padding w3-light-gray">
+				<div class="w3-row w3-padding-small"><strong>@[[username]]</strong></div>
+				<div class="w3-row w3-small w3-padding-small">[[title]]</div>
+			</div>
+			<ul class="w3-ul w3-hoverable w3-margin-bottom">
+				<li class="w3-padding">
+					<div class="w3-row w3-padding-small">
+						<div class="w3-left">Total engagements</div>
+						<div class="w3-right">[[totalengagement]]</div>
+					</div>
+					<div class="w3-row w3-text-blue-grey w3-padding-small">
+						times people interacted with this post
+					</div>
+				</li>
+				<li class="w3-padding">
+					<div class="w3-row w3-padding-small">
+						<div class="w3-left">Likes</div>
+						<div class="w3-right">[[likes]]</div>
+					</div>
+					<div class="w3-row w3-text-blue-grey w3-padding-small">
+						times people liked this post
+					</div>
+				</li>
+				<li class="w3-padding">
+					<div class="w3-row w3-padding-small">
+						<div class="w3-left">Comments</div>
+						<div class="w3-right">[[comments]]</div>
+					</div>
+					<div class="w3-row w3-text-blue-grey w3-padding-small">
+						times people commented on this post
+					</div>
+				</li>
+				<template id="resultList" is="dom-repeat" items="{{postAnalytics}}" as="item">
+					<li class="w3-padding">
+						<div class="w3-row w3-padding-small">
+							<div class="w3-left">[[_setTitles(item.$key)]]</div>
+							<div class="w3-right">[[_setTotals(item.$val)]]</div>
+						</div>
+						<div class="w3-row w3-text-blue-grey w3-padding-small">
+							[[_setNaration(item.$key)]]
+						</div>
+					</li>
+				</template>
+			</ul>
+		</div>
+	</div>
+
+	</template>
+	<script>
+	class PostActivity extends Polymer.Element {
+		static get is() { return 'post-activity'; }
+		ready(){
+			super.ready();
+
+	  	}
+	  static get properties() {
+		return {
+			journalid: {
+				type: String,
+				notify: true
+			},
+			username: {
+				type: String,
+				notify: true
+			},
+			title: {
+				type: String,
+				notify: true
+			},
+			totalengagement: {
+				type: Number,
+				notify: true,
+				value: 0
+			},
+			comments: {
+				type: Number,
+				notify: true,
+				value: 0
+			},
+			likes: {
+				type: Number,
+				notify: true,
+				value: 0
+			},
+			postAnalytics: {
+				type: Object,
+				observer: 'postAnalyticsReceived'
+			},
+			posttitles: {
+				type: Object,
+				value: {
+					"otherclicks":"Post clicks",
+					"attachmentsclicks":"Attachment clicks",
+					"listenedto":"Listened to",
+					"profileclicks":"Profile clicks",
+					"viewed":"Views",
+					"readarticle":"Read article"
+				}
+			},
+			postnaration: {
+				type: Object,
+				value: {
+					"otherclicks":"number of times people clicked the around the post",
+					"attachmentsclicks":"number of times people clicked on post attachments",
+					"listenedto":"number of times people listened to this podcast",
+					"profileclicks":"number of times people clicked on your profile photo",
+					"viewed":"number of times people viewed this video",
+					"readarticle":"number of times people read this article"
+				}
+			}
+		};
+	  }
+
+		postAnalyticsReceived(newData, oldData){
+			// console.log("newData:",newData)
+		}
+
+		_setTitles(item){
+			return this.posttitles[item]
+		}
+
+		_setNaration(item){
+			return this.postnaration[item]
+		}
+
+		_setTotals(item){
+			this.totalengagement += item;
+			return item;
+		}
+
+		isEqual(a, b) {
+			return a === b;
+		}
+
+		_objLen(obj) {
+			let len = 0;
+			if(obj != undefined){
+			len = Object.keys(obj).length;
+			}
+			return len;
+		}
+
+	}
+	window.customElements.define(PostActivity.is, PostActivity);
+	</script>
+</dom-module>

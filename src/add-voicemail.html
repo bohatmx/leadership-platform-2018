@@ -160,6 +160,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </div>   
     </div>
     <div id="snackbar"></div>
+    <paper-toast id="toaster"></paper-toast>
     </template>
     <script>
     var AudioContex;
@@ -210,7 +211,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         catchError(e) {
             Polymer.dom(this.root).querySelector('#toaster').show({
-            text: e.detail.message
+                text: e.detail.message
             });
         }
         cancel(e) {
@@ -477,14 +478,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
         }
         showSnackBar(msg){
-            var x = this.$.snackbar;
+            Polymer.dom(this.root).querySelector('#toaster').show({
+                text: msg
+            });
+            // var x = this.$.snackbar;
 
-            x.innerHTML = msg;
+            // x.innerHTML = msg;
 
-            x.className = "show";
-            setTimeout(function(){
-            x.className = x.className.replace("show", "");
-            }, 3000);
+            // x.className = "show";
+            // setTimeout(function(){
+            // x.className = x.className.replace("show", "");
+            // }, 3000);
         }
         formatDate(date) {
             var d = new Date(date),

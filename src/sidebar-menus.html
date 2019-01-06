@@ -436,19 +436,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 // 3. 
 
 // Iterate through the notification data
-
 switch (userNotificationData.notificationType) {
 		case 'thought':
 
 				if (userNotificationData.thoughtType == 'dailythoughts') {
 						this.dailythoughts++
-				} else if (userNotificationData.thoughtType == 'companythoughts') {
+				} else if ((userNotificationData.thoughtType == 'companythoughts') && (userNotificationData.companyID != "-LEiZPT-C2PyLu_YLKNU") ) {
 						this.companythoughts++
 				} else if (userNotificationData.thoughtType == 'topleaderthoughts') {
 						this.topleaderthoughts++
 				} else if (userNotificationData.thoughtType == 'ileadcorporate') {
 						this.ileadcorporate++
 				} else if (userNotificationData.thoughtType == 'ileadpublic') {
+						this.ileadpublic++
+				} else if ((userNotificationData.thoughtType == 'companythoughts') && (userNotificationData.companyID == "-LEiZPT-C2PyLu_YLKNU") ) {
 						this.ileadpublic++
 				} else {
 						this.default++
@@ -491,10 +492,9 @@ userNotificationRef.on('child_removed', (snapshot) => {
 
 		switch (userNotificationData.notificationType) {
 				case 'thought':
-
 						if (userNotificationData.thoughtType == 'dailythoughts') {
 								this.dailythoughts = 0
-						} else if (userNotificationData.thoughtType == 'companythoughts') {
+						} else if ((userNotificationData.thoughtType == 'companythoughts') && (userNotificationData.companyID != "-LEiZPT-C2PyLu_YLKNU") ) {
 								this.companythoughts = 0
 						} else if (userNotificationData.thoughtType == 'topleaderthoughts') {
 								this.topleaderthoughts = 0
@@ -502,8 +502,10 @@ userNotificationRef.on('child_removed', (snapshot) => {
 								this.ileadcorporate = 0
 						} else if (userNotificationData.thoughtType == 'ileadpublic') {
 								this.ileadpublic = 0
+						} else if ((userNotificationData.thoughtType == 'companythoughts') && (userNotificationData.companyID == "-LEiZPT-C2PyLu_YLKNU") ) {
+								this.ileadpublic = 0
 						} else {
-								this.default = 0
+							this.default = 0
 						}
 
 						break;
