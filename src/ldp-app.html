@@ -115,7 +115,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 data="{{userdata}}">
             </firebase-query>
 
-            <my-app notcompanyadmin="{{notcompanyadmin}}" approvethoughts="[[approveThoughts]]" addthoughts = "[[addThoughts]]" addarticle = "[[addArticle]]" hidecompany = "[[hidecompany]]" mythoughts = "[[myThoughts]]" _user="[[_user]]" _companyid="[[_user.companyID]]" hidemenu="[[hidemenu]]" hidesubmenu="[[hidesubmenu]]" _publicid="[[_publicid]]"></my-app>
+            <my-app notcompanyadmin="{{notcompanyadmin}}" approvethoughts="[[approveThoughts]]" addthoughts = "[[addThoughts]]" addarticle = "[[addArticle]]" hidecompany = "[[hidecompany]]" mythoughts = "[[myThoughts]]" _user="[[_user]]" _companyid="[[_user.companyID]]" hidemenu="[[hidemenu]]" hidesubmenu="[[hidesubmenu]]" _publicid="[[_publicid]]" unresolved>
+                <div id="apploader"></div></my-app>
             
         </template>
         <template is="dom-if" if="[[!signedIn]]">

@@ -57,7 +57,10 @@
     "paper-badge": "PolymerElements/paper-badge#^2.1.0",
     "google-chart": "GoogleWebComponents/google-chart#^2.0.0",
     "web-component-tester": "Polymer/web-component-tester#^6.5.0",
-    "firebase": "^5.5.3"
+    "firebase": "^5.5.3",
+    "firebase-paginator": "^1.1.2",
+    "paper-datatable": "^0.9.8",
+    "bwt-datatable": "^2.2.0"
   },
   "resolutions": {
     "polymer": "^2.0.0"

@@ -126,6 +126,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <paper-item data="Dec"  value="Dec" on-tap="_monthSelect">Dec</paper-item>
                 </paper-listbox>
             </paper-dropdown-menu>
+            <paper-dropdown-menu autofocus id="dropdown_year" label="Year" value="{{_currentYear}}" style="width: -webkit-fit-content;" tabindex="0" class="w3-mobile" vertical-offset="60">
+                <paper-listbox id="yearList" slot="dropdown-content" attr-for-selected="value" selected="{{_currentYear}}" no-animations="true" style="min-width: 100px;">
+                    <paper-item data="2019"  value="2019">2019</paper-item>
+                    <paper-item data="2018"  value="2018">2018</paper-item>
+                </paper-listbox>
+            </paper-dropdown-menu>
             <template is="dom-if" if="[[user.reportadmin]]">
                 <paper-button raised class="w3-green" on-tap="_createPDF">DOWNLOAD REPORT</paper-button>
             </template>
@@ -326,7 +332,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           _currentYear: {
             type: Number,
-             value: 2018
+            value: 2019,
+            observer: "_currentYearChange"
           },
           iscompaniesloaded: {
               type: Boolean,
@@ -334,11 +341,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           currPeriod:{
             type: String,
-            value: "2018"
+            value: "2019"
           },
           activeUsersPeriod:{
             type: String,
-            value: "2018"
+            value: "2019"
           },
           _currentActiveUsers:{
               type: Number,
@@ -425,6 +432,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         Polymer.RenderStatus.afterNextRender(this, () => {
             var that = this;
+            var today = new Date();
+            var year = today.getFullYear();
+
+            this._currentYear = year;
+            this.currPeriod = ""+year;
+            this.activeUsersPeriod = ""+year;
 
             setTimeout(function(){
                 that.$.qry_overallanalytics.disabled=false;
@@ -435,6 +448,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             
         });
       }
+
+        _currentYearChange(){
+            if(this._currentYear.length > 0){
+                this.currPeriod = ""+this._currentYear;
+                this.activeUsersPeriod = ""+this._currentYear;
+            }
+        }
     
       _getNos(nos){
           var res = "_"
@@ -596,9 +616,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.activeUsersData.sort(that.dynamicSort("total"));
         
         if((this.selectedMonth == "All") || (this.selectedMonth == undefined) ){
-            reportPeriod = "2018";
+            reportPeriod = ""+this._currentYear;
         }else{
-            reportPeriod = this.selectedMonth+" 2018";
+            reportPeriod = this.selectedMonth+" "+this._currentYear;
         }
 
         if(this.user.companyanalytics == true){

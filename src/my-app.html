@@ -128,7 +128,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 			} 
 
 			paper-fab-speed-dial{
-				bottom: 0px;
+				bottom: 36px;
 				right: 12px;
 				position: fixed;
 			}
@@ -532,7 +532,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 							<leadership-videos name="leadership-videos" _companyid="[[_companyid]]" user="[[_user]]"></leadership-videos>
 							<leadership-ebooks name="leadership-ebooks" _companyid="[[_companyid]]" user="[[_user]]"></leadership-ebooks>
 							<company-profile name="company-profile" _companyid="[[_companyid]]" user="[[_user]]"></company-profile>
-							<company-staff name="company-staff" _companyid="[[_companyid]]" user="[[_user]]"></company-staff>
+							<company-staff name="company-staff" _companyid="[[_companyid]]" user="[[_user]]" unresolved>
+								<div id="apploader"></div></company-staff>
 							<thoughts-management name="thoughts-management" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]"></thoughts-management>
 							<my-pldp name="my-pldp" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]"></my-pldp>
 							<about-pldp name="about-pldp" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]"></about-pldp>
@@ -949,6 +950,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				this.routeMap.set("daily-thoughts", "Daily Thoughts")
 				this.routeMap.set("leadership-thoughts", "My Posts")
 				this.routeMap.set("my-pldp", "Personal PLDP")
+				this.routeMap.set("company-staff", "Company Staff")
 				this.routeMap.set("leadership-videos", "Videos")
 				this.routeMap.set("leadership-podcasts", "Podcasts & Audios")
 				this.routeMap.set("topleader-thoughts", "Global Contributors") // leadership-articles

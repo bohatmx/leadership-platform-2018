@@ -140,10 +140,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       .spinner{width: 60%; height: 100vh; display: flex; position: absolute; align-items: center; justify-content: center;}
 
+      @media screen and (max-width: 500px){
+        .header-container{
+          margin-top: 35px!important;
+        }
+      }
+      
     </style>
 
     <header class="header-container">
-      <h2>Personal Leadership Development Plan (PLDP)</h2>
+      <h3>Personal Leadership Development Plan (PLDP)</h3>
     </header>
     <main class="w3-card">
       <paper-tabs id="pldpTabs" selected="{{_selected}}" class="w3-card">

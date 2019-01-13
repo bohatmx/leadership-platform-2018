@@ -20,15 +20,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
 
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <!-- Ensure Web Animations polyfill is loaded since neon-animation 2.0 doesn't import it -->
 <link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<!-- Iron pages -->
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 
 <!-- Firebase Query -->
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+
+<!-- Datatable -->
+<link rel="import" href="../bower_components/bwt-datatable/bwt-datatable.html">
+<link rel="import" href="../bower_components/bwt-datatable/bwt-datatable-card.html">
 
 <link rel="import" href="app-icons.html">
 <link rel="import" href="js-xlsx.html">
@@ -37,259 +45,169 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="company-staff">
   <template>
     <template is="dom-if" if="[[_companyid]]">
-      <firebase-query id="users" path="/users" order-by-child="companyID" equal-to="[[_companyid]]" limit-to-first="{{minData}}"
-        data="{{usersData}}" disabled="true">
+      <!-- <firebase-query id="users" path="/user" order-by-child="companyID" equal-to="[[_companyid]]" limit-to-first="{{minData}}" data="{{usersData}}" disabled="true"> -->
+      <firebase-query id="users" path="/user" order-by-child="companyID" equal-to="[[_companyid]]" data="{{usersData}}" disabled="true">
       </firebase-query>
-      <!-- order-by-child="companyID"
-          equal-to="[[_companyid]]" -->
     </template>
 
     <style include="w3-styles">
-      .w3-modal{
-      padding-top: 200px!important;
-    }
-    .w3-modal-content{
-      right: 10px;
-      position: fixed;
-      min-width: 320px;
-      max-width: 600px!important;
-    }
-  </style>
+    </style>
 
     <style include="shared-styles">
-      :host{
-      --paper-icon-button-hover: {
-        color: red;
+      .card-head {
+        background-color: #e9e9e9;
+        min-height: 60px!important;
       }
-    }
-    .content {
-      display: block;
-      position: relative;
-      max-width: 1000px;
-      border: 1px solid #eaeaea;
-    }
-    
-    
-    @media (max-width: 960px) {
-      .content {
-        max-width: 800px;
+
+      @media screen and (max-width: 859px) {
+        .top-menu-margin {
+          margin-top: 35px !important;
+        }
       }
-    }
-    @media (max-width: 719px) {
-      .content {
-        max-width: 400px;
+      .card-wrapper{
+        min-height: 80vh!important;
       }
-    }
-    iron-list {
-      margin-left: 16px;
-      margin-right: 16px;
-      z-index: 1;
-      --iron-list-items-container: {
-        max-width: 100%;
-        margin: auto;
-        margin-top: 14px;
-        margin-bottom: 60px;
-        border-bottom: 1px solid #ddd;
-      };
-    }
-    .item {
-      @apply --layout-horizontal;
-      padding: 20px;
-      background-color: white;
-      border: 1px solid #ddd;
-      cursor: pointer;
-      margin-bottom: 10px;
-    }
-    .avatar {
-      height: 40px;
-      width: 40px;
-      border-radius: 20px;
-      box-sizing: border-box;
-      background-color: #DDD;
-    }
-    .pad {
-      padding: 0 16px;
-      @apply --layout-flex;
-      @apply --layout-vertical;
-    }
-    .primary {
-      font-size: 16px;
-      font-weight: bold;
-    }
-    .shortText, .longText {
-      font-size: 14px;
-    }
-    .longText {
-      color: gray;
-      display: none;
-    }
-   
-    .modal-header {
-        padding: 2px 16px;
-    }
-    .modal-body {padding: 2px 16px;}
-    .modal-footer {
-        padding: 2px 16px;
-        color: white;
-    }
-    /* Add Animation */
-    @-webkit-keyframes slideIn {
-        from {bottom: -300px; opacity: 0} 
-        to {bottom: 0; opacity: 1}
-    }
-    @keyframes slideIn {
-        from {bottom: -300px; opacity: 0}
-        to {bottom: 0; opacity: 1}
-    }
-    @-webkit-keyframes fadeIn {
-        from {opacity: 0} 
-        to {opacity: 1}
-    }
-    @keyframes fadeIn {
-        from {opacity: 0} 
-        to {opacity: 1}
-    }
-    .thought-prevImg{
-      display: flex;
-      height: 260px;
-      /* width: 100%; */
-      border-radius: 1px;
-      text-align: center;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 1px;
-      padding: 16px;
-    }
-    /* end dialog css */
-
-    @-webkit-keyframes fadeInUp{
-        0%{opacity:0;-webkit-transform:translateY(20px);transform:translateY(20px)}
-        100%{opacity:1;-webkit-transform:translateY(0);transform:translateY(0)}
-    }
-    @keyframes fadeInUp{
-        0%{opacity:0;-webkit-transform:translateY(20px);-ms-transform:translateY(20px);transform:translateY(20px)}
-        100%{opacity:1;-webkit-transform:translateY(0);-ms-transform:translateY(0);transform:translateY(0)}
-    }
-    .fadeInUp{
-        -webkit-animation-name:fadeInUp;
-        animation-name:fadeInUp;
-        opacity: 0;
-        -webkit-animation-duration: 0.5s;
-        animation-duration: 0.5s;
-        -webkit-animation-fill-mode: forwards;
-        animation-fill-mode: forwards;
-        animation-timing-function: ease-in;
-    }
-    .add-users-bar{
-      display: -webkit-flex;
-      display: flex;
-      flex-direction: row;
-      padding: 16px;
-      border: 1px solid #eaeaea;
-      margin-top: 16px;
-      align-items: center;
-      justify-content: flex-end;
-    }
-    .upload-buttons{
-      margin-top: 16px; 
-      width:100%;
-      display: flex;
-      display: -webkit-flex;
-      flex-direction: row;
-      align-items: flex-start;
-      justify-content: flex-start;
-    }
-    #selectFileForm{
-      width: 100%;
-      max-width: 340px;
-      padding: 16px;
-      text-align: left;
-      border: 1px solid #eaeaea;
-      border-radius: 2px;
-      padding: 16px;
-    }
-  </style>
-
-
-
-    <!-- The Modal -->
-    <div id="myModal" class="w3-modal">
-      <!-- Modal content -->
-      <div class="w3-modal-content w3-animate-right w3-card-2">
-        <div class="modal-header w3-theme-l1">
-          <span id="closeModal" class="w3-button w3-display-topright w3-red w3-text-white">&times;</span>
-          <h2 class="w3-text-white">
-            <iron-icon icon="app:group-add"></iron-icon>&nbsp;Upload Users
-          </h2>
-        </div>
-        <div class="modal-body">
-        </div>
-        <div class="thought-prevImg" id="thoughtImg">
-          <form id="selectFileForm">
-            <label id="pickFileLabel" class="paper-font-body2" style="cursor: pointer; margin-top: 10px;" for="file-uploader">
-              <paper-button class="custom indigo" id="pickFile">
-                <iron-icon icon="app:attach-file"></iron-icon>&nbsp;Select File (.xlsx, .xls)
-              </paper-button>
-            </label>
-            <br>
-            <p id="filename"></p>
-            <input id="file-uploader" type="file" on-change="checkfile" />
-            <div class="upload-buttons">
-              <div id="hideRemoveFile" hidden>
-                <paper-button class="custom" style="color:#eaeaea; background:#810029; margin-right: 6px;" raised
-                  on-tap="uploadNewUsers">Upload File</paper-button>
-                <paper-button class="custom" style="color:#810029; background:#eaeaea;" raised on-tap="removeFile">Remove
-                  File</paper-button>
-              </div>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer w3-theme-l1">
-        </div>
-      </div>
-    </div>
-
-    <!-- The Modal -->
-    <div id="singleUser" class="w3-modal">
-      <div class="w3-modal-content w3-animate-right w3-card-4">
-        <header class="w3-container w3-theme-l1">
-          <span id="closeSingleUser" class="w3-button w3-display-topright w3-red w3-text-white">&times;</span>
-          <h2 class="w3-text-white">
-            <iron-icon icon="app:person-add"></iron-icon>&nbsp;New User
-          </h2>
-        </header>
+      .staff-name{
+        font-family: Roboto, sans-serif, Helvetica, Arial, sans-serif;
+        font-size: 125%;
+        font-weight: 500;
+        color:#313534;
+        line-height: 1.846153846;
+      }
+      /* scss/organisms/_staff-result.scss */
+      .staff-results:before,
+      .staff-results:after {
+        content: " ";
+        display: table;
+      }
+      .staff-results .staff-user {
+        display: inline-block;
+        padding: 10px;
+      }
+      .hbox-xs {
+        display: table;
+        table-layout: fixed;
+        padding: 0;
+      }
+      .staff-results>div {
+        padding: 20px 10px;
+        margin-top:-1px;
+        border:1px solid #f2f3f3;
+        background:inherit;
+        color:inherit;
+        text-decoration:none;
+      }
+      .hbox-xs .hbox-column {
+        display:table-cell;
+      }
+      .width-2,
+      .size-2 {
+        width: 80px;
+      }
+      .staff-results>div img {
+        margin-right: 10px;
+      }
+      .hbox-xs .hbox-column {
+        display:table-cell;
+      }
+      .v-top {
+        float:none !important;
+        display: table-cell;
+        vertical-align:top;
+      }
+      .clearfix:after,
+      .clearfix:before {
+        content:" ";
+        display:table;
+      }
+      .stick-top-left,
+      .stick-top-right,
+      .stick-top-left-right {
+        position:absolute;
+        top: 0;
+      }
+      paper-input {
+      /* Reset some defaults */
+      --paper-input-container: { padding: 0;};
+      }
+    </style>
+    <style include="datatables-styles">
+    </style>
+    <div id="singleUser" class="ldp-modal w3-animate-zoom">
+      <div class="ldp-modal-content w3-round max-modal-width">
         <div class="w3-container">
-          <paper-dropdown-menu autofocus id="dropdown_menu" label="User Category" value="{{selectedCategory}}" style="width: -webkit-fill-available;"
-            tabindex="0">
-            <paper-listbox id="categoryList" slot="dropdown-content" attr-for-selected="value" selected="{{selectedCategory}}"
-              no-animations="true" style="min-width: 340px;">
-              <paper-item value="Standard User">Standard User</paper-item>
-              <template is="dom-if" if="[[_isSuperAdmin]]">
-                <paper-item value="Global Contributor">Global Contributor</paper-item>
-                <paper-item value="Company Admin">Company Admin</paper-item>
-              </template>
-            </paper-listbox>
-          </paper-dropdown-menu>
-          <paper-input id="firstName" name="firstName" always-float-label label="Firstname" type="text" required
-            tabindex="1"></paper-input>
-          <paper-input id="lastName" name="lastName" always-float-label label="Lastname" type="text" required tabindex="2"></paper-input>
-          <paper-input id="email" name="email" always-float-label label="Email" type="email" required tabindex="3"></paper-input>
+          <span id="closeNotifications" data="my-notifications" on-click="_closeUserModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white">&times;</span>
+          <div class="w3-large" style="padding:20px 15px">
+            <b class="w3-text-blue w3-center">
+                <iron-icon icon="app:person-add"></iron-icon>&nbsp;New User
+            </b>
+          </div>
+          <div class="w3-row">
+            <paper-dropdown-menu autofocus id="dropdown_menu" label="User Category" value="{{selectedCategory}}" style="width: -webkit-fill-available;"
+              tabindex="0">
+              <paper-listbox id="categoryList" slot="dropdown-content" attr-for-selected="value" selected="{{selectedCategory}}" no-animations="true" style="min-width: 340px;">
+                <paper-item value="Standard User">Standard User</paper-item>
+                <paper-item value="Corporate I-Leader">Corporate I-Leader</paper-item>
+                <paper-item value="Organisation Contributor">Organisation Contributor</paper-item>
+                <template is="dom-if" if="[[_isSuperAdmin]]">
+                  <paper-item value="Global Contributor">Global Contributor</paper-item>
+                  <paper-item value="Company Admin">Company Admin</paper-item>
+                </template>
+              </paper-listbox>
+            </paper-dropdown-menu>
+            <paper-input id="firstName" name="firstName" always-float-label label="Firstname" type="text" required
+              tabindex="1"></paper-input>
+            <paper-input id="lastName" name="lastName" always-float-label label="Lastname" type="text" required tabindex="2"></paper-input>
+            <paper-input id="email" name="email" always-float-label label="Email" type="email" required tabindex="3"></paper-input>
+          </div>
+          <div class="w3-row w3-light-gray w3-padding w3-margin-top w3-margin-bottom">
+            <div class="w3-twothird">
+              <paper-button raised class="w3-blue" on-tap="createNewUser">
+                <iron-icon icon="app:send"></iron-icon>&nbsp;SUBMIT
+              </paper-button>
+            </div>
+          </div>
         </div>
-        <footer class="w3-container w3-light-grey w3-padding">
-          <paper-button raised class="w3-blue" on-tap="createNewUser">
-            <iron-icon icon="app:send"></iron-icon>&nbsp;SUBMIT
-          </paper-button>
-        </footer>
       </div>
     </div>
-
+    <!-- upload -->
+    <div id="uploadUsersModal" class="ldp-modal w3-animate-zoom">
+      <div class="ldp-modal-content w3-round max-modal-width">
+        <div class="w3-container">
+          <span id="closeNotifications" data="my-notifications" on-click="_closeUploadModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white">&times;</span>
+          <div class="w3-large" style="padding:20px 15px">
+            <b class="w3-text-blue w3-center">
+              <iron-icon icon="app:group-add"></iron-icon>&nbsp;Upload Users
+            </b>
+          </div>
+          <div class="w3-row w3-padding">
+            <form id="selectFileForm" class="w3-row w3-padding">
+              <label id="pickFileLabel" class="paper-font-body2" style="cursor: pointer; margin-top: 10px;" for="file-uploader">
+                <paper-button class="custom indigo" id="pickFile">
+                  <iron-icon icon="app:attach-file"></iron-icon>&nbsp;Select File (.xlsx, .xls)
+                </paper-button>
+              </label>
+              <br>
+              <p id="filename"></p>
+              <input id="file-uploader" type="file" on-change="checkfile" />
+              <div class="upload-buttons w3-light-gray">
+                <div id="hideRemoveFile" hidden class="w3-row w3-padding">
+                  <paper-button class="w3-blue" raised on-tap="uploadNewUsers">Upload File</paper-button>
+                  <paper-button class="w3-blue" raised on-tap="removeFile">Remove File</paper-button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- user type -->
     <div id="user-type" class="ldp-modal w3-animate-zoom">
-			<div class="ldp-modal-content w3-round max-modal-width">
-				<div class="w3-container w3-padding-large">
-					<span id="closeUserType" data="user-type" on-click="_closeUserTypeModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white">&times;</span>
-					<div class="w3-large w3-border-bottom" style="padding:20px 15px">
-						<b class="w3-text-dark-gray w3-center"><iron-icon icon="app:create"></iron-icon>&nbsp;Change Type</b>
+      <div class="ldp-modal-content w3-round max-modal-width">
+        <div class="w3-container w3-padding-large">
+          <span id="closeUserType" data="user-type" on-click="_closeUserTypeModal" class="w3-button w3-display-topright w3-medium w3-red w3-text-white">&times;</span>
+          <div class="w3-large w3-border-bottom" style="padding:20px 15px">
+            <b class="w3-text-dark-gray w3-center"><iron-icon icon="app:create"></iron-icon>&nbsp;Change Type</b>
           </div>
           <div class="w3-row w3-margin">
             <paper-dropdown-menu autofocus id="dropdown_menu" label="User Category" value="{{selectedType}}" style="width: -webkit-fill-available;"
@@ -297,6 +215,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <paper-listbox id="typeList" slot="dropdown-content" attr-for-selected="value" selected="{{selectedType}}"
                 no-animations="true" style="min-width: 340px;">
                 <paper-item value="Standard User">Standard User</paper-item>
+                <paper-item value="Corporate I-Leader">Corporate I-Leader</paper-item>
+                <paper-item value="Organisation Contributor">Organisation Contributor</paper-item>
                 <template is="dom-if" if="[[_isSuperAdmin]]">
                   <paper-item value="Global Contributor">Global Contributor</paper-item>
                   <paper-item value="Company Admin">Company Admin</paper-item>
@@ -305,61 +225,91 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </paper-listbox>
             </paper-dropdown-menu>
           </div>
-					<div class="w3-row w3-light-grey w3-padding">
-						<paper-button raised class="w3-blue" on-tap="updateUserType">
+          <div class="w3-row w3-light-grey w3-padding">
+            <paper-button raised class="w3-blue" on-tap="updateUserType">
               <iron-icon icon="app:send"></iron-icon>&nbsp;SUBMIT
             </paper-button>
-					</div>
-				</div>
-			</div>
-		</div>
-
-    <!-- <div class="container search-bar">
-      <paper-search-bar hide-filter-button="true" placeholder="Search for Staff Members"></paper-search-bar>
-    </div>  -->
-    <div class="add-users-bar w3-card-1">
-      <paper-button raised class="custom indigo w3-small" on-tap="newUserDialog">
-        <iron-icon icon="app:person-add"></iron-icon>&nbsp; Add User
-      </paper-button>
-      <paper-button raised class="custom indigo w3-small" on-tap="uploadUsersDialog">
-        <iron-icon icon="app:group-add"></iron-icon>&nbsp; Upload Users (xls)
-      </paper-button>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="content fadeInUp">
-      <ul class="w3-ul w3-card-2 w3-hoverable">
-        <template is="dom-repeat" items="[[usersData]]" as="item" initial-count="10" target-framerate="10">
-          <li class="w3-bar" style="padding: 8px 0;">
-            <img class="w3-third w3-padding-small w3-circle" style="width:36px; height: 36px;" src="[[_profilePhoto(item.photoURL)]]">
-            <div class="w3-rest w3-bar-item" style="min-width:280px;">
-              <span class="w3-medium w3-text-dark-gray">[[item.firstName]] [[item.lastName]]</span><span class$="[[_isDisabled(item.disabled)]] w3-tag w3-tiny w3-round">[[_isDisabledText(item.disabled)]]</span><br>
-              <span class="w3-margin-bottom">[[item.email]]</span><br>
-              <br>
-              <span class="followBTNOther following w3-padding w3-card w3-hover-blue-gray" style="cursor:pointer;" on-tap="_openUserTypeModal" data="[[item.userID]]">[[_getUserTypeDesc(item.userType)]] <iron-icon icon="app:arrow-drop-down-circle"></iron-icon></span>
+    <section>
+      <div class="w3-row w3-center top-menu-margin">
+        <paper-spinner hidden="{{!isloading}}" class="w3-center" active="{{isloading}}" style="height: 50px; width: 50px; margin:auto"></paper-spinner></div>
+        <div class="card-wrapper w3-row w3-card w3-white">
+          <div class="card-head">
+            <div class="card-head w3-mobile">
+              <div class="w3-padding-small w3-left">
+                <paper-button raised class="w3-blue w3-margin-bottom w3-padding-small" on-tap="newUserDialog"><iron-icon icon="app:person-add"></iron-icon>&nbsp;Add User</paper-button>
+                <paper-button raised class="w3-blue w3-padding-small" on-tap="uploadUsersDialog"><iron-icon icon="app:group-add"></iron-icon>&nbsp;Upload Users (XLS)</paper-button>
+              </div>
             </div>
-            <!--  This is the Trash icon -->
-            <paper-icon-button isdisabled="[[item.disabled]]" username="[[item.firstName]] [[item.lastName]]" data="[[item.userID]]"
-              icon="myicons:delete" class="custom indigo w3-right" on-tap="deleteAccount"></paper-icon-button>
-              
-            <paper-icon-button isdisabled="[[item.disabled]]" username="[[item.firstName]] [[item.lastName]]" data="[[item.userID]]"
-              icon$="[[_statusIcon(item.disabled)]]" class="custom indigo w3-right" on-tap="disableAccount"></paper-icon-button>
-
-          </li>
-        </template>
-      </ul>
-    </div>
-    <div class="w3-row w3-center" style="width: 100%">
-      <div class="w3-row" style="width: 100%">
-        <paper-spinner active="{{isloadingmore}}"></paper-spinner>
+          </div>
+            
+          <div class="card-body w3-row">
+            <paper-datatable-card id="datatableCard" header="Company Staff" data-source$="{{dataSource}}" progress id-property="sha1" selected-ids="{{selectedIds}}" header-fixed>
+              <div slot="toolbar-main">
+                <paper-input value="{{searchTerm}}" on-input="_handleSearchStaff" label="Search..." style="display:inline-block"
+                  no-label-float>
+                  <div prefix>
+                    <iron-icon icon="search"></iron-icon>
+                  </div>
+                </paper-input>
+                <paper-icon-button icon="cached" on-tap="retrieveResults"></paper-icon-button>
+              </div>
+              <div class="w3-mobile" slot="toolbar-select">
+                <paper-button raised class="w3-green w3-tiny" on-tap="_openUserTypeModal"><iron-icon icon="myicons:create"></iron-icon>&nbsp;Change UserType</paper-button>
+              </div>
+              <div class="w3-mobile" slot="toolbar-select">
+                <paper-button raised class="w3-deep-orange w3-tiny w3-text-white" on-tap="disableAccount"><iron-icon icon="app:check"></iron-icon>&nbsp;Activate / Deactivate</paper-button>
+              </div>
+              <div class="w3-mobile" slot="toolbar-select">
+                <paper-button raised class="w3-red w3-tiny" on-tap="deleteAccount"><iron-icon icon="myicons:delete"></iron-icon>&nbsp;Delete</paper-button>
+              </div>
+              <paper-datatable id="datatable" selectable header-fixed selected-item="{{selectedItem}}" selected-key="{{selectedKey}}">
+                <paper-datatable-column id="profileImageColumn" header="" type="Object" property="" style="min-width: 50px;" >
+                  <template>
+                    <div>
+                      <img src="[[_profilePhoto(item.photoURL)]]" style="width:36px;height:36px;border-radius:16px;vertical-align: middle;margin-right:4px;">
+                    </div>
+                  </template>
+                </paper-datatable-column>
+                <paper-datatable-column id="firstNameColumn" header="Firstname" type="Object" property="firstName" style="min-width: 50px;"
+                  >
+                  <template>
+                    <div>
+                      <span style="vertical-align:middle;">[[item.firstName]]</span>
+                    </div>
+                  </template>
+                </paper-datatable-column>
+                <paper-datatable-column id="lastNameColumn" header="Lastname" property="lastName">
+        
+                </paper-datatable-column>
+                <paper-datatable-column header="E-mail" property="email" style="min-width: 200px;" ></paper-datatable-column>
+                </paper-datatable-column>
+                <paper-datatable-column header="User Type" type="Object" property="userType" >
+                  <template>
+                    <span>[[_getUserTypeDesc(item.userType)]]</span>
+                  </template>
+                </paper-datatable-column>
+                <paper-datatable-column class="w3-text-color" id="userStatusColumn" header="Status" type="Object" property="" style="min-width: 30px;" >
+                  <template>
+                    <div>
+                      <iron-icon style$="[[_isDisabled(item.disabled)]]" icon="myicons:radio-button-checked"></iron-icon>
+                    </div>
+                  </template>
+                </paper-datatable-column>
+              </paper-datatable>
+            </paper-datatable-card>
+          </div>
+        </div>
       </div>
-      <div class="w3-row w3-text-green" style="width: 100%">
-        <paper-button hidden="{{loadmore}}" on-tap="_loadMorePosts">Load More Users</paper-button>
-      </div>
+      <paper-toast id="toaster"></paper-toast>
+    </section>
 
-    </div>
-    <div id="snackbar"></div>
   </template>
-
   <script>
+    
     var _ua = window.navigator.userAgent;
     var scrollTopPosition
     iOS = /iPad|iPhone|iPod/.test(_ua),
@@ -373,51 +323,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         super.ready();
 
         var that = this;
-
         Polymer.RenderStatus.afterNextRender(this, () => {
-          var modal = Polymer.dom(this.root).querySelector('#myModal');
-          var modalsingleUser = Polymer.dom(this.root).querySelector('#singleUser');
-          var span = Polymer.dom(this.root).querySelector('#closeModal');
-          var spanSingleUSer = Polymer.dom(this.root).querySelector('#closeSingleUser');
-          var pickFileLabel = Polymer.dom(this.root).querySelector('#pickFileLabel');
-          var hideRemoveFile = Polymer.dom(this.root).querySelector('#hideRemoveFile');
-          var filename = Polymer.dom(this.root).querySelector('#filename');
-          var selectFileForm = Polymer.dom(this.root).querySelector('#selectFileForm');
-          var that = this;
-
-          if((this._companyid == "-KgsUcgfo7z1U9MXgd9i") || (this._companyid=="-LDVbbRyIMhukVtTVQ0n") ){
+          if ((this._companyid == "-KgsUcgfo7z1U9MXgd9i") || (this._companyid == "-LDVbbRyIMhukVtTVQ0n")) {
             this._isSuperAdmin = true;
           }
 
-          span.addEventListener('click', function (e) {
-            pickFileLabel.style = "display: block;";
-            filename.innerHTML = "";
-            hideRemoveFile.style = "display: none";
-            selectFileForm.reset();
-            modal.style.display = "none";
-          });
-
-          spanSingleUSer.addEventListener('click', function (e) {
-            // ios 11 bug caret position
-            if (iOS && iOS11) {
-              that.removeIOSBugfix();
-            }
-            this.selectedCategory = "";
-            modalsingleUser.style.display = "none";
-          });
-
-          // this.$.users.disabled=false;
           Polymer.dom(this.root).querySelector('#users').disabled = false;
         });
-
-        
       }
       static get properties() {
         return {
           user: {
-            type: Object
+            type: Object,
+            observer: "userReceived"
           },
+          uid: String,
+          nextpage: {
+						type: String,
+						value:"users-list",
+						notify: true
+					},
           _companyid: String,
+          isloading: {
+            type: Boolean,
+            value: true
+          },
           minData: {
             type: Number,
             value: 50
@@ -425,6 +355,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           usersData: {
             type: Object,
             observer: '_onusersDataDataReceived'
+          },
+          usersLen: {
+            type: Number,
+            value: 0
           },
           loadmore: {
             type: Boolean,
@@ -434,17 +368,106 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Boolean,
             value: false
           },
-          isloadingmore: {
-            type: Boolean,
-            value: true
-          },
-          edituserid:{
-            type:String,
+          edituserid: {
+            type: String,
             value: ""
           }
         };
       }
-      _getUserTypeDesc(type){
+      userReceived(){
+        if(this.user) {
+          this.uid = this.user.uid;
+          let database = firebase.database();
+          // clear previous search results
+          database.ref(`/searchResults/users/${this.uid}`).remove();
+        }
+      }
+      _initDatatable() {
+        if(this.usersData.length > 0){
+          this.usersLen = this.usersData.length;
+        }
+
+        var app = this.$.datatableCard;
+        var that = this;
+        app.dataSource = {
+          get: function (sort, page, pageSize) {
+            
+            return new Promise(function(resolve, reject){
+              var count = 0;
+              var staffData = [];
+              staffData = that._toArray(that.usersData)
+              
+              var startAt = Number((page - 1) * pageSize);
+              var endAt = Number((pageSize * page) - 1);
+              var clonedData = staffData.slice(startAt, endAt);
+
+              resolve(clonedData);
+            });
+          },
+          // none of the <templates> bind in an editable way right now, but if they would this is the function
+          // that's triggered after an edit
+          set: function (id, property, value) {
+            console.info("a save was triggered", arguments);
+          },
+          length: that.usersLen
+        };
+      }
+      _toArray(obj) {
+        var that = this;
+        if (obj != undefined) {
+          return Object.keys(obj).map(function (key) {
+            // if(key < pageSize){
+            obj[key].id = obj[key].uid;
+            // obj[key].id = Number(key);
+            // delete obj[key]['$key'];
+            return obj[key];
+            // }
+          });
+        }
+      }
+      _handleSearchStaff() {
+        var app = this.$.datatableCard;
+
+        var that = this;
+        app.dataSource = {
+          get: function (sort, page, pageSize) {
+            
+            return new Promise(function(resolve, reject){
+              var count = 0;
+              var searchedUsers = [];
+              var staffData = [];
+              staffData = that._toArray(that.usersData)
+
+              searchedUsers = staffData.filter(function (user) {
+                if(user.firstName != undefined){
+                  if (user.firstName.toLowerCase().indexOf(that.searchTerm.toLowerCase()) > -1) return true;
+                }
+                if(user.lastName != undefined){
+                  if (user.lastName.toLowerCase().indexOf(that.searchTerm.toLowerCase()) > -1) return true;
+                }
+                if(user.email != undefined){
+                  if (user.email.toLowerCase().indexOf(that.searchTerm.toLowerCase()) > -1) return true;
+                }
+              });
+
+              that.usersLen = searchedUsers.length
+
+              var startAt = Number((page - 1) * pageSize);
+              var endAt = Number((pageSize * page) - 1);
+              var clonedData = searchedUsers.slice(startAt, endAt);
+              
+              resolve(clonedData);
+            });
+          },
+          // none of the <templates> bind in an editable way right now, but if they would this is the function
+          // that's triggered after an edit
+          set: function (id, property, value) {
+            // console.info("a save was triggered", arguments);
+          },
+          length: that.usersLen
+        };
+      }
+      _getUserTypeDesc(type) {
         var userTypes = {
           4: "Global Contributor",
           5: "Master Contributor",
@@ -458,7 +481,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         return typedesc ? typedesc : "Standard User";
       }
-      _getUserType(type){
+      _getUserType(type) {
         var userTypes = {
           "Global Contributor": 4,
           "Master Contributor": 5,
@@ -472,11 +495,77 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         return typedesc ? typedesc : 8;
       }
+      
+      _onusersDataDataReceived(newData, oldData) {
+        var that = this;
+
+        if (newData.length > 0) {
+          // Initialize dataTable
+          that._initDatatable();
+          this.isloading = false;
+        }
+
+        setTimeout(function(){
+			    that.isloading = false;
+        },20000);
+
+      }
+      retrieveResults (){
+        // this.$.datatable.reload();
+
+        this.$.datatableCard.retrieveVisibleData();
+        // this._initDatatable();
+			};
+      disableAccount() {
+        var that = this;
+        const userProfile = this.selectedItem;
+
+        let userID = this.selectedItem.userID;
+        let userName = this.selectedItem.firstName+" "+this.selectedItem.lastName;
+        let active = this.selectedItem.disabled;
+
+        let disabled = true;
+        let disabledText = 'Deactivate';
+        
+        var currUserID = this.user.userID;
+        if (currUserID == userProfile.userID) {
+          Polymer.dom(that.root).querySelector('#toaster').show({
+            text: "Cannot deactivate your own account!"
+          });
+          return;
+        }
+        active ? disabled = false : true;
+        disabled ? disabledText = 'Deactivate' : disabledText = 'Activate';
+        if (confirm(disabledText + ' selected account: ' + userName + '?')) {
+          // Get a reference to the database service
+          let database = firebase.database();
+          // Update user data 
+          let updates = {};
+          updates['/users/' + userID + '/disabled'] = disabled;
+          updates['/user/' + userProfile.uid + '/disabled'] = disabled;
+
+          updates['writeOperations/disableUserElastic/'+userProfile.uid+'/writeOperationsID'] = userProfile.uid;
+          updates['writeOperations/disableUserElastic/'+userProfile.uid+'/uid'] = userProfile.uid;
+
+          database.ref().update(updates).then(()=>{
+            that.retrieveResults();
+            Polymer.dom(that.root).querySelector('#toaster').show({
+              text: "User Account deactivated!"
+            });
+          }).catch(()=>{
+            Polymer.dom(that.root).querySelector('#toaster').show({
+              text: "Error deactivated user account!"
+            });
+          });
+          
+        }
+      }
       updateUserType(){
         let database = firebase.database();
 
         var that = this;
-        const userProfile = this.usersData.find((value) => value.userID === that.edituserid ? value : null);
+        const userProfile = this.selectedItem;
+        // const userProfile = this.usersData.find((value) => value.userID === that.edituserid ? value : null);
         var selected = this.selectedType;
         var uid = userProfile.uid;
         var userID = userProfile.userID;
@@ -487,8 +576,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var currUserID = this.user.userID;
 
         if(currUserID == userID){
-          if((currUserType == 7) && (userType != 7) ){
-            this.showSnackBar('Could not remove Admin Role from your own account!');
+          if((currUserType == 7) && (userType != 7) ){            
+            Polymer.dom(that.root).querySelector('#toaster').show({
+              text: "Could not remove Admin Role from your own account!"
+            });
             return
           }
         }
@@ -502,18 +593,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         updates['/user/' + uid + '/userType'] = userType;
         updates['/user/' + uid + '/userDescription'] = selected;
 
+        // updates['writeOperations/updateUserElastic/'+uid+'/writeOperationsID'] = uid;
+        // updates['writeOperations/updateUserElastic/'+uid+'/uid'] = uid;
+
         this._closeUserTypeModal();
         database.ref().update(updates).then(()=>{
-          that.showSnackBar('User updated successfully.');
+          that.retrieveResults();
+          Polymer.dom(that.root).querySelector('#toaster').show({
+            text: "User updated successfully."
+          });
         }).catch(()=>{
-          that.showSnackBar('Error updating user details.');
+          Polymer.dom(that.root).querySelector('#toaster').show({
+            text: "Error updating user details."
+          });
         });
         
       }
-      _openUserTypeModal(e){
-        this.edituserid = e.currentTarget.data;
+      _openUserTypeModal(){
+        // this.edituserid = e.currentTarget.data;
         var that = this;
-        const userProfile = this.usersData.find((value) => value.userID === that.edituserid ? value : null);
+        const userProfile = this.selectedItem;
+        // const userProfile = this.usersData.find((value) => value.userID === that.edituserid ? value : null);
         this.selectedType = this._getUserTypeDesc(userProfile.userType);
 
         // ios 11 bug caret position
@@ -533,66 +633,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				var modal = Polymer.dom(this.root).querySelector('#user-type');
 				modal.style.display = 'none';
 			}
-      _loadMorePosts() {
-        this.scrollPos = window.scrollY;
-        this.isloadingmore = true;
-        this.minData += 50;
-      }
-      _onusersDataDataReceived(newData, oldData) {
-        var that = this;
-        if (newData.length > 0) {
-          this.loadmore = false;
-          this.isloadingmore = false;
-
-          setTimeout(function () {
-            window.scrollTo({
-              top: that.scrollPos,
-              behavior: "instant"
-            });
-          }, 1000);
-        }
-
-        setTimeout(function () {
-          that.loadmore = false;
-          that.isloadingmore = false;
-
-        }, 25000)
-      }
-      attached() {
-        // Use the document element
-        this.$.list.scrollTarget = this.ownerDocument.documentElement;
-      }
-      getClassForItem(item, selected) {
-        return selected ? 'item expanded' : 'item';
-      }
-      disableAccount(e) {
-        let userID = e.target.data;
-        let userName = e.target.username;
-        let active = e.target.isdisabled
-        let disabled = true;
-        let disabledText = 'Deactivate';
-
-        const userProfile = this.usersData.find((value) => value.userID === userID ? value : null);
-        var currUserID = this.user.userID;
-
-        if(currUserID == userProfile.userID){
-          this.showSnackBar('Cannot deactivate your own account!');
-          return
-        }
-
-        active ? disabled = false : true;
-        disabled ? disabledText = 'Deactivate' : disabledText = 'Activate';
-
-        if (confirm(disabledText + ' selected account: ' + userName + '?')) {
-          // Get a reference to the database service
-          let database = firebase.database();
-
-          // Update user data 
-          let updates = {};
-          updates['/users/' + userID + '/disabled'] = disabled;
-          database.ref().update(updates);
-        }
-      }
 
       findObjectByKey(array, key, value) {
         for (var i = 0; i < array.length; i++) {
@@ -621,12 +661,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             username
           } = e.target;
 
-          const userProfile = this.usersData.find((value) => value.userID === data ? value : null);
+          const userProfile = this.selectedItem
 
           var currUserID = this.user.userID;
 
           if(currUserID == userProfile.userID){
-            this.showSnackBar('Cannot delete your own account!');
+            Polymer.dom(this.root).querySelector('#toaster').show({
+              text: "Cannot delete your own account!"
+            });
             return
           }
 
@@ -638,7 +680,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           );
 
           if (answerEmail === '' || answerEmail === null || answerEmail !== userProfile.email) {
-            this.showSnackBar('User not deleted: Incorrect email address provided.');
+            Polymer.dom(this.root).querySelector('#toaster').show({
+              text: "User not deleted: Incorrect email address provided."
+            });
             return;
           }
 
@@ -647,7 +691,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.findAndDeleteDocument('users', userProfile.userID);
           this.findAndDeleteDocument('user', userProfile.uid);
 
-          this.showSnackBar(`Deleted ${userProfile.firstName} ${userProfile.lastName} successfully!`);
+          Polymer.dom(this.root).querySelector('#toaster').show({
+            text: `Deleted ${userProfile.firstName} ${userProfile.lastName} successfully!`
+          });
+          this.retrieveResults();
         } catch (error) {
 
           console.log(error);
@@ -657,17 +704,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       } // end deleteAccount func
 
       _isDisabled(disabled) {
-        return disabled ? "w3-red" : "w3-green";
+        return disabled ? "color:red" : "color:green";
       }
-      _isDisabledText(disabled) {
-        return disabled ? "Disabled" : "Active";
-      }
-      _statusIcon(disabled) {
-        return disabled ? "app:check" : "myicons:cancel";
-      }
-   
       uploadUsersDialog() {
-        var modal = Polymer.dom(this.root).querySelector('#myModal');
+        var modal = Polymer.dom(this.root).querySelector('#uploadUsersModal');
         modal.style.display = "block";
       }
       checkfile(e) {
@@ -680,8 +720,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.$.hideRemoveFile.style = "display: none";
           this.$.filename.innerHTML = fileName;
 
-          this.showSnackBar("Invalid file selected, valid files are of " +
-            validExts.toString() + " types.");
+          Polymer.dom(this.root).querySelector('#toaster').show({
+            text: "Invalid file selected, valid files are of " +
+            validExts.toString() + " types."
+          });
+          this.removeFile();
           return false;
         } else {
           this.$.hideRemoveFile.style = "display: block";
@@ -698,14 +741,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var selectFileForm = Polymer.dom(this.root).querySelector('#selectFileForm');
         selectFileForm.reset();
       }
-      showSnackBar(msg) {
-        var x = this.$.snackbar;
-        x.innerHTML = msg;
-        x.className = "show";
-        setTimeout(function () {
-          x.className = x.className.replace("show", "");
-        }, 3000);
-      }
+      
       isEqual(a, b) {
         return a === b;
       }
@@ -718,7 +754,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         modal.style.display = "block";
       }
       createNewUser() {
-        var span = Polymer.dom(this.root).querySelector('#closeSingleUser');
         var email = this.$.email.value;
         var firstName = this.$.firstName.value;
         var lastName = this.$.lastName.value;
@@ -727,18 +762,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var firstNameVal = this.$.firstName.validate();
         var lastNameVal = this.$.lastName.validate();
 
-        // let companyID = "-LDVbbRyIMhukVtTVQ0n";
-        // let companyName = "OneConnect Technologies";
-        // let companyID = "-KgsUcgfo7z1U9MXgd9i";
-        // let companyName = "Global Leadership Platform";
-        // let companyID = "-LFWwJDGboULCmA0aC_9";
-        // let companyName = "McDonald's";
         let companyID = this.user.companyID;
         let companyName = this.user.companyName;
 
         // Validate thought category
         if ((this.selectedCategory == undefined) || (this.selectedCategory == -1)) {
-          this.showSnackBar("Please select user category!");
+          Polymer.dom(this.root).querySelector('#toaster').show({
+            text: "Please select user category!"
+          });
           return;
         }
 
@@ -775,13 +806,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var database = firebase.database();
 
         if (!email || !emailVal) {
-          this.showSnackBar("Email is required!");
+          Polymer.dom(this.root).querySelector('#toaster').show({
+            text: "Email is required!"
+          });
           return;
         } else if (!firstName || !firstNameVal) {
-          this.showSnackBar("Firstname is required!");
+          Polymer.dom(this.root).querySelector('#toaster').show({
+            text: "Firstname is required!"
+          });
           return;
         } else if (!lastName || !lastNameVal) {
-          this.showSnackBar("Lastname is required!");
+          Polymer.dom(this.root).querySelector('#toaster').show({
+            text: "Lastname is required!"
+          });
           return;
         } else {
           var userID = database.ref().child('newUploadUsers').push().key;
@@ -813,12 +850,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.$.lastName.value = "";
           this.selectedCategory = "";
 
-          span.click();
-          this.showSnackBar("User created successfully!");
+          Polymer.dom(this.root).querySelector('#toaster').show({
+            text: "User created successfully!"
+          });
+
+          var modal = Polymer.dom(this.root).querySelector('#singleUser');
+				  modal.style.display = 'none';
         }
       }
       uploadNewUsers() {
-        var span = Polymer.dom(this.root).querySelector('#closeModal');
         var files = Polymer.dom(this.root).querySelector('#file-uploader').files;
         var i, f;
 
@@ -896,8 +936,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           reader.readAsBinaryString(f);
         }
 
-        span.click();
-        this.showSnackBar("Users uploaded successfully!");
+        Polymer.dom(this.root).querySelector('#toaster').show({
+          text: "Users uploaded successfully!"
+        });
+
+        var modal = Polymer.dom(this.root).querySelector('#uploadUsersModal');
+				modal.style.display = 'none';
+      }
+      _closeUploadModal(){
+        var modal = Polymer.dom(this.root).querySelector('#uploadUsersModal');
+				modal.style.display = 'none';
+      }
+      _closeUserModal(){
+        var modal = Polymer.dom(this.root).querySelector('#singleUser');
+				modal.style.display = 'none';
       }
       formatDate(date) {
         var d = new Date(date),
@@ -961,6 +1013,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
 
       }
+      
+
       _profilePhoto(photo) {
         let photo_url = "../images/default-user.png";
 
@@ -974,15 +1028,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         return photo_url;
       }
+
       addIOSBugfix() {
         // Get scroll position before moving top
         scrollTopPosition = $(document).scrollTop();
-        console.log('iOS device')
         // Add CSS to body "position: fixed"
         $("body").addClass("iosBugFixCaret");
         // $("body").css('position: fixed!important; width: 100%!important;');
       }
-
       removeIOSBugfix() {
         // Remove CSS to body "position: fixed"
         $("body").removeClass("iosBugFixCaret");
@@ -994,4 +1047,5 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     window.customElements.define(CompanyStaff.is, CompanyStaff);
   </script>
+  
 </dom-module>
