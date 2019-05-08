@@ -173,11 +173,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 						</a>
 						<div class="w3-row w3-padding w3-small w3-sb-title w3-sb-title-text">Leadership Development Plan (LDP)</div>
 						<a name="my-pldp" href="my-pldp" class="w3-row">
-								<paper-ripple></paper-ripple>
-								<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
-										<paper-icon-button icon="smapp:library-books"></paper-icon-button>
-								</div>
-								<div class="w3-rest sb-link-text">Personal (PLDP)</div>
+							<paper-ripple></paper-ripple>
+							<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
+								<paper-icon-button icon="smapp:library-books"></paper-icon-button>
+							</div>
+							<div class="w3-rest sb-link-text">Personal (LDP)
+								<template is="dom-if" if="{{pldp}}">
+									<div class="w3-new-badge nt w3-deep-orange" style="left:26px!important; top:6px!important; z-index:222; position:absolute;">
+										{{pldp}}
+									</div>
+								</template>
+							</div>
 						</a>
 						<template is="dom-if" if="[[hidecompany]]">
 								<div class="w3-row w3-padding w3-small w3-sb-title w3-sb-title-text">Company Profile</div>
@@ -201,7 +207,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 										<div class="w3-left sb-link-icon circle c48 w3-ldp-color shd">
 												<paper-icon-button icon="smapp:person"></paper-icon-button>
 										</div>
-										<div class="w3-rest sb-link-text">Company Staff</div>
+										<div class="w3-rest sb-link-text">Company Admin</div>
 								</a>
 								<a hidden$="{{notcompanyadmin}}" name="thoughts-management" href="thoughts-management" class="w3-row a-border-top w3-padding-bottom">
 										<paper-ripple></paper-ripple>
@@ -334,87 +340,91 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 		<script>
 
 		class SidebarMenus extends Polymer.Element {
-				static get is() { return 'sidebar-menus'; }
-				ready(){
-						super.ready();
-				}
-				static get properties() {
-				return {
-						page:{
-								type: String,
-								notify: true
-						},
-						leadershipapp: Boolean,
-						publicapp: Boolean,
-						userid: {
-								type: String,
-								notify: true,
-								observer: "userIdReceived"
-						},
-						salesapp: Boolean,
-						hrapp: Boolean,
-						hidecompany: Boolean,
-						notcompanyadmin: Boolean,
-						pendingstring: String,
-						userNotificationData: {
-							type: Object,
-							observer: "userNotificationDataChanged"
-						},
-						thoughtsCount: {
-								type: Object
-
-						},
-						articlesCount: {
-							type: Number,
-							value: 0
-						},
-						thoughts: {
-								type: Object
-						},
-						podcastsCount: {
-								type: Number,
-								value: 0
-						},
-						videoCount: {
-								type: Number,
-								value: 0
-						},
-						minData: {
-								type: Number,
-								value: 10
-						},
-						seen: {
-								type: Boolean,
-								value: false
-						},
-						indexThought: {
-								type: Number,
-								value: 0
-						},
-						dailythoughts: {
-								type: Number,
-								value: 0
-						},
-						companythoughts: {
-								type: Number,
-								value: 0
-						},
-						topleaderthoughts: {
-								type: Number,
-								value: 0
-						},
-						ileadcorporate: {
-								type: Number,
-								value: 0
-						},
-						ileadpublic: {
-								type: Number,
-								value: 0
-						},
-						selectedpage: {
+			static get is() { return 'sidebar-menus'; }
+			ready(){
+					super.ready();
+			}
+			static get properties() {
+			return {
+					page:{
 							type: String,
 							notify: true
-						},
+					},
+					leadershipapp: Boolean,
+					publicapp: Boolean,
+					userid: {
+							type: String,
+							notify: true,
+							observer: "userIdReceived"
+					},
+					salesapp: Boolean,
+					hrapp: Boolean,
+					hidecompany: Boolean,
+					notcompanyadmin: Boolean,
+					pendingstring: String,
+					userNotificationData: {
+						type: Object,
+						observer: "userNotificationDataChanged"
+					},
+					thoughtsCount: {
+							type: Object
+
+					},
+					articlesCount: {
+						type: Number,
+						value: 0
+					},
+					thoughts: {
+							type: Object
+					},
+					podcastsCount: {
+							type: Number,
+							value: 0
+					},
+					videoCount: {
+							type: Number,
+							value: 0
+					},
+					minData: {
+							type: Number,
+							value: 10
+					},
+					seen: {
+							type: Boolean,
+							value: false
+					},
+					indexThought: {
+							type: Number,
+							value: 0
+					},
+					dailythoughts: {
+							type: Number,
+							value: 0
+					},
+					companythoughts: {
+							type: Number,
+							value: 0
+					},
+					topleaderthoughts: {
+							type: Number,
+							value: 0
+					},
+					ileadcorporate: {
+							type: Number,
+							value: 0
+					},
+					ileadpublic: {
+							type: Number,
+							value: 0
+					},
+					selectedpage: {
+						type: String,
+						notify: true
+					},
+                    pldp: {
+                        type: Number,
+                        value: 0
+                    }
 
 				};
 			}
@@ -480,54 +490,55 @@ async userIdReceived() {
 var that = this;
 var database = firebase.database();
 
-var userNotificationRef = await database.ref('/users/' + this.userid + '/notifications')
-		.orderByChild("seen").equalTo(that.seen)
+	var userNotificationRef = await database.ref('/users/' + this.userid + '/notifications').orderByChild("seen").equalTo(that.seen)
 
+	var userPLDPNotificationRef = await database.ref('/users/' + this.userid + '/pldpnotifications').orderByChild("seen").equalTo(that.seen)
 
-userNotificationRef.on('child_added', (snapshot) => {
-		that.OnNotificationLoaded(snapshot.val());
-})
-userNotificationRef.on('child_removed', (snapshot) => {
+	userNotificationRef.on('child_added', (snapshot) => {
+			that.OnNotificationLoaded(snapshot.val());
+	})
+	userNotificationRef.on('child_removed', (snapshot) => {
 		var userNotificationData = snapshot.val();
 
 		switch (userNotificationData.notificationType) {
-				case 'thought':
-						if (userNotificationData.thoughtType == 'dailythoughts') {
-								this.dailythoughts = 0
-						} else if ((userNotificationData.thoughtType == 'companythoughts') && (userNotificationData.companyID != "-LEiZPT-C2PyLu_YLKNU") ) {
-								this.companythoughts = 0
-						} else if (userNotificationData.thoughtType == 'topleaderthoughts') {
-								this.topleaderthoughts = 0
-						} else if (userNotificationData.thoughtType == 'ileadcorporate') {
-								this.ileadcorporate = 0
-						} else if (userNotificationData.thoughtType == 'ileadpublic') {
-								this.ileadpublic = 0
-						} else if ((userNotificationData.thoughtType == 'companythoughts') && (userNotificationData.companyID == "-LEiZPT-C2PyLu_YLKNU") ) {
-								this.ileadpublic = 0
-						} else {
-							this.default = 0
-						}
-
-						break;
-				case 'podcast':
-						this.podcastsCount = 0
-
-						break;
-				case 'article':
-						this.articlesCount = 0
-
-						break;
-				case 'video':
-						this.videoCount = 0
-
-						break;
-
-				default:
-
-						break;
+			case 'thought':
+				if (userNotificationData.thoughtType == 'dailythoughts') {
+						this.dailythoughts = 0
+				} else if ((userNotificationData.thoughtType == 'companythoughts') && (userNotificationData.companyID != "-LEiZPT-C2PyLu_YLKNU") ) {
+						this.companythoughts = 0
+				} else if (userNotificationData.thoughtType == 'topleaderthoughts') {
+						this.topleaderthoughts = 0
+				} else if (userNotificationData.thoughtType == 'ileadcorporate') {
+						this.ileadcorporate = 0
+				} else if (userNotificationData.thoughtType == 'ileadpublic') {
+						this.ileadpublic = 0
+				} else if ((userNotificationData.thoughtType == 'companythoughts') && (userNotificationData.companyID == "-LEiZPT-C2PyLu_YLKNU") ) {
+						this.ileadpublic = 0
+				} else {
+					this.default = 0
+				}
+				break;
+			case 'podcast':
+				this.podcastsCount = 0
+				break;
+			case 'article':
+				this.articlesCount = 0
+				break;
+			case 'video':
+				this.videoCount = 0
+				break;
+			default:
+				break;
 		}
 
-})
+	})
+	userPLDPNotificationRef.on('child_added', (snapshot) => {
+		this.pldp++
+	});
+
+	userPLDPNotificationRef.on('child_removed', (snapshot) => {
+		this.pldp = 0
+	});
 }
 userNotificationDataChanged(a, b) {
 var notifications;
@@ -541,8 +552,7 @@ var seen = false;
 if (a != undefined) {
 		var newCount = a.length;
 		if (newCount > 0) {
-				var notificationsRef = database.ref('/users/' + this.userid + '/notifications').orderByChild(
-						"s").equalTo(seen);
+				var notificationsRef = database.ref('/users/' + this.userid + '/notifications').orderByChild("seen").equalTo(seen);
 
 
 				notificationsRef.on('child_added', function (data) {

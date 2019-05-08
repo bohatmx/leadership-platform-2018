@@ -535,7 +535,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 							<company-staff name="company-staff" _companyid="[[_companyid]]" user="[[_user]]" unresolved>
 								<div id="apploader"></div></company-staff>
 							<thoughts-management name="thoughts-management" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]"></thoughts-management>
-							<my-pldp name="my-pldp" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]"></my-pldp>
+							<my-pldp name="my-pldp" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]" unresolved>
+								<div id="apploader"></div></my-pldp>
 							<about-pldp name="about-pldp" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]"></about-pldp>
 							<add-thoughts name="add-thoughts" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]" addedit="[[addedit]]" company="[[company]]"></add-thoughts>
 							<add-article name="add-article" _companyid="[[_companyid]]" user="[[_user]]" previouspage="[[previousPage]]"></add-article>
@@ -949,8 +950,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				this.routeMap.set("i-lead", "I-LEAD")
 				this.routeMap.set("daily-thoughts", "Daily Thoughts")
 				this.routeMap.set("leadership-thoughts", "My Posts")
-				this.routeMap.set("my-pldp", "Personal PLDP")
-				this.routeMap.set("company-staff", "Company Staff")
+				this.routeMap.set("my-pldp", "Personal LDP")
+				this.routeMap.set("company-staff", "Company Admin")
 				this.routeMap.set("leadership-videos", "Videos")
 				this.routeMap.set("leadership-podcasts", "Podcasts & Audios")
 				this.routeMap.set("topleader-thoughts", "Global Contributors") // leadership-articles
@@ -1185,7 +1186,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				database.ref('/users/'+this._userID+'/notifications').orderByChild("seen").equalTo(seen).once('value').then((data)=>{
 					var myNotifications = data.val();
 					if(myNotifications === null){
-						console.log("No notifications");
 					}else{
 						this._notificationSeen(myNotifications)
 					}
@@ -1197,7 +1197,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				database.ref('/users/'+this._userID+'/pldpnotifications').orderByChild("seen").equalTo(seen).once('value').then((data)=>{
 					var myNotifications = data.val();
 					if(myNotifications === null){
-						console.log("No notifications");
 					}else{
 						this._pldpnotificationSeen(myNotifications)
 					}
@@ -1282,16 +1281,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				}
 			}
 
-			_pldpnotificationSeen(nots){
+			_pldpnotificationSeen(nots) {
 				var myNotifications = {};
 				var _userID = this._userID;
+				var page = this.routeData.page;
 
-				$.each(nots, function(n, nt){
-					myNotifications['/users/'+_userID+'/pldpnotifications/'+n+'/seen'] = true
-				});
+				if(page === "my-pldp"){
+					$.each(nots, function (n, nt) {
+						myNotifications['/users/' + _userID + '/pldpnotifications/' + n + '/seen'] = true
+					});
 
-				let database = firebase.database();
-				database.ref().update(myNotifications);
+					let database = firebase.database();
+					database.ref().update(myNotifications);
+				}
 			}
 
 			isEqual(a, b) {
@@ -1421,6 +1423,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 				}else if(page == 'leadership-ebooks')
 					this._selected = 8 - modselect;
 				 else if(page == 'my-pldp'){
+					this._closeNotificationsModal();
 					this.$.paperSpeed.style.visibility = 'hidden';
 					if(oldpage == 'my-pldp') oldpage = 'company-thoughts';
 					if(oldpage != undefined)

@@ -309,9 +309,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         _usersDataChange(newData, oldData) {
         }
         _sort(a, b) {  
-			if (a.dateRegistered > b.dateRegistered) return -1;
-			if (a.dateRegistered < b.dateRegistered) return 1;
-			return 0;
+            a = new Date(a.dateRegistered);
+            b = new Date(b.dateRegistered);
+            return a>b ? -1 : a<b ? 1 : 0;
+            // console.log("a: ",a)
+            // if(a.key != undefined){
+            //     if (a.key > b.key) return -1;
+            //     if (a.key < b.key) return 1;
+            //     return 0;
+            // }
+
+            // return 0;
+            
 		}
         _profilePhoto(photo){
             let photo_url = "../images/default-user.png";

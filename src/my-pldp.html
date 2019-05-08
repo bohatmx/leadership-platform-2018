@@ -89,14 +89,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
         
       }
-      
-      .header-container{
-        background-color: var(--app-status-color);
-        margin-bottom: 30px;
-        padding: 4px 8px;
-        color: var(--app-secondary-text);
-        font-size: 8pt;
-      }
 
       paper-fab-speed-dial{
         bottom: 0px;
@@ -139,19 +131,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .spinner{width: 60%; height: 100vh; display: flex; position: absolute; align-items: center; justify-content: center;}
-
+      
       @media screen and (max-width: 500px){
         .header-container{
           margin-top: 35px!important;
         }
       }
-      
-    </style>
 
-    <header class="header-container">
-      <h3>Personal Leadership Development Plan (PLDP)</h3>
-    </header>
-    <main class="w3-card">
+    </style>
+    <main class="w3-card header-container">
       <paper-tabs id="pldpTabs" selected="{{_selected}}" class="w3-card">
         <paper-tab>My Tasks</paper-tab>
         <paper-tab>Favorites</paper-tab>

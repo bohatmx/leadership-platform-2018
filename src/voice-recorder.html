@@ -12,389 +12,572 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/paper-progress/paper-progress.html">
 
 <link rel="import" href="my-recorder.html">
+<link rel="import" href="app-icons.html">
 <dom-module id="voice-recorder">
-    <template>
-    <style include="w3-styles"></style>
-    <style include="shared-styles">
-        :host {
-            position: relative;
-            display: block;
-            overflow: hidden;
-        }
-        .recorder-area{
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            background-color: #2e2e2e;
-            border-radius: 6px;
-            color: #fff;
-            height: auto;
-            padding: 16px;
-            min-height: 410px;
-        }
-        .maroon{
-            background-color: #8a0f36;
-        }
-        .record-btns{
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: center;
-        }
-    </style>
+	<template>
+		<style include="w3-styles"></style>
+		<style include="shared-styles">
+			:host {
+				position: relative;
+				display: block;
+				overflow: hidden;
+			}
 
-    <div class="container">
-        <div class="recorder-area">
-            <iron-image src="../data/mic.png" style="width:auto; height:80px;" preload sizing="contain"></iron-image>
-            <div class="w3-center">
-                <div id="msg" class="w3-center w3-padding w3-small">Max 2 minutes.</div>
-                <div id="timeobj" class="w3-center w3-padding w3-xxlarge"></div>
-                <div id="log" class="w3-center w3-padding"></div>
-            </div>
-            <!-- <pre id="log"></pre> -->
-            <br>
-            <div class="record-btns">
-                <paper-button id="startrecord" style="margin-right: 16px;" class="maroon" on-tap="startRecording" raised>record</paper-button>
-                <paper-button style="background:#eaeaea;" id="stoprecord" class="w3-text-red" on-tap="stopRecording" disabled raised>stop</paper-button>
-            </div>
-            <h4 class="w3-center">Recording</h4>
-            <div id="recordingslist" class="record-btns"></div>
-            <div style="width:100%;" id="hideRemoveRecording" hidden class="w3-center w3-padding">
-                <paper-button style="color:#810029; background:#eaeaea; margin-bottom: 6px;" raised on-tap="removeRecordings">Delete</paper-button>
-            </div>
-        </div>  
-    </div>
-    </template>
-    <script>
-    var AudioContex;
-    var context;
-    var audioBuffer = [];
-    var myArrayBuffer, nowBuffering, source;
-    var newBlob = new Blob();
-    var podcast_ID='';
+			.recorder-area {
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				background-color: #2e2e2e;
+				border-radius: 6px;
+				color: #fff;
+				height: auto;
+				padding: 16px;
+				min-height: 410px;
+			}
 
-    var audio_context;
-    var recorder;
-    var processor;
+			.maroon {
+				background-color: #8a0f36;
+			}
 
-    class VoiceRecorder extends Polymer.Element {
-        static get is() { return 'voice-recorder'; }
-        ready(){
-        super.ready();
-        sessionStorage.setItem("closeElement", false);
-      }
-      static get properties() {
-        return {
-            user: {
-            type: Object
-            },
-            timer: Number,
-            _companyid: String,
-            previouspage: String,
-        };
-      }
+			.record-btns {
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+				justify-content: center;
+			}
+		</style>
 
-    removeItems(){
-        var recordingslist = this.$.recordingslist;
+		<div class="container">
+			<div class="recorder-area">
+				<iron-image src="../data/mic.png" style="width:auto; height:80px;" preload sizing="contain">
+				</iron-image>
+				<div id="msg" class="w3-center w3-padding w3-small">Max 2 minutes.</div>
+				<div class="record-btns w3-padding">
+					<paper-button hidden="[[hideRecord]]" id="startrecord" class="w3-blue w3-small"
+						on-tap="startRecording" raised>
+						<iron-icon icon="app:mic"></iron-icon>&nbsp;record
+					</paper-button>
+					<paper-button hidden="[[hideStop]]" id="stoprecord" class="w3-red w3-small" on-tap="stopRecording"
+						raised>
+						<iron-icon icon="app:stop"></iron-icon>&nbsp;stop
+					</paper-button>
+				</div>
+				<div class="w3-center">
+					<div id="timeobj" class="w3-center w3-padding w3-xxlarge"></div>
+					<div id="log" class="w3-center w3-padding"></div>
+				</div>
+				<div id="recordingslist" class="record-btns"></div>
+				<div class="w3-padding"
+					style="display:flex;display: -webkit-flex; display: -webkit-flex;display: -ms-flexbox; flex-direction: row; align-content: center;justify-content: center;">
+					<span id="podcastMessage" hidden="[[hideMessage]]">Please click below to save your voice
+						message.</span>
+				</div>
+				<br />
+				<div>
+					<div style="width:100%;">
+						<paper-progress hidden="[[hideProgress]]" value="{{bytesTransferred}}" min="0" max="100"
+							style="width: 100%;padding: 4px 0px!important">
+						</paper-progress>
+					</div>
+					<div
+						style="display:flex;display: -webkit-flex; display: -webkit-flex;display: -ms-flexbox; flex-direction: row; align-content: center;justify-content: center; width: 100%;">
+						<paper-button hidden="[[hideCancel]]" class="w3-red w3-small" raised on-tap="cancelUpload">
+							<iron-icon icon="myicons:cancel"></iron-icon>&nbsp;Cancel
+						</paper-button>
+						<paper-button hidden="[[hidePause]]" class="w3-light-gray w3-small" raised on-tap="pauseUpload">
+							<iron-icon icon="app:pause"></iron-icon>&nbsp;Pause
+						</paper-button>
+						<paper-button hidden="[[hideResume]]" class="w3-green w3-small" raised on-tap="resumeUpload">
+							<iron-icon icon="icons:cloud-upload"></iron-icon>&nbsp;Resume
+						</paper-button>
+						<paper-button hidden="[[hideSave]]" class="w3-green w3-small" on-tap="uploadFile" raised>
+							<iron-icon icon="app:cloud-upload"></iron-icon>&nbsp;Save
+						</paper-button>
+						<paper-button hidden="[[hideDelete]]" class="w3-red w3-small" on-tap="removeRecordings" raised>
+							<iron-icon icon="myicons:cancel"></iron-icon>&nbsp;Delete
+						</paper-button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</template>
+	<script>
+		var AudioContex;
+		var context;
+		var audioBuffer = [];
+		var uploadTask;
+		var myArrayBuffer, nowBuffering, source;
+		var newBlob = new Blob();
+		var podcast_ID = '';
 
-        audioBuffer = [];
+		var audio_context;
+		var recorder;
+		var processor;
 
-        this.$.log.innerHTML = "";
+		class VoiceRecorder extends Polymer.Element {
+			static get is() { return 'voice-recorder'; }
+			ready() {
+				super.ready();
+				sessionStorage.setItem("closeElement", false);
+			}
+			static get properties() {
+				return {
+					user: {
+						type: Object
+					},
+					timer: Number,
+					_companyid: String,
+					previouspage: String,
+					hideRecord: {
+						type: Boolean,
+						value: false
+					},
+					hideStop: {
+						type: Boolean,
+						value: true
+					},
+					hidePause: {
+						type: Boolean,
+						value: true
+					},
+					hideResume: {
+						type: Boolean,
+						value: true
+					},
+					hideSave: {
+						type: Boolean,
+						value: true
+					},
+					hideCancel: {
+						type: Boolean,
+						value: true
+					},
+					hideDelete: {
+						type: Boolean,
+						value: true
+					},
+					hideProgress: {
+						type: Boolean,
+						value: true
+					},
+					hideMessage: {
+						type: Boolean,
+						value: true
+					},
+					downloadurl: {
+						type: String,
+						value: "",
+						notify: true
+					},
+					storagename: {
+						type: String,
+						value: "",
+						notify: true
+					},
+					isuploading: {
+						type: Boolean,
+						value: false,
+						notify: true
+					},
+					bytesTransferred: {
+						type: Number,
+						value: 0,
+						notify: true
+					}
+				};
+			}
 
-        while (recordingslist.firstChild) {
-            recordingslist.removeChild(recordingslist.firstChild);
-        }
-    }
-    //   recorder js functions
-    init() {
-        var that = this;
-        
-        try {
-        // webkit shim
-        // window.AudioContext = window.AudioContext || window.webkitAudioContext;
-        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia;
-        window.URL = window.URL || window.webkitURL;
-        
-        // audio_context = new AudioContext;
-        audio_context = null;
-        if (typeof AudioContext !== "undefined")
-        {
-            audio_context = new AudioContext();
-        }
-        else if (typeof webkitAudioContext !== "undefined")
-        {
-            audio_context = new webkitAudioContext();
-        }
-        else
-        {
-            // this.__log("No web audio support in this browser!");
-            alert('No web audio support in this browser!');
-            return;
-        }
-            
-        processor = audio_context.createScriptProcessor(4096, 2, 2);
-        processor.connect(audio_context.destination);
-        } catch (e) {
-            // this.__log('No web audio support in this browser! ');
-            alert('No web audio support in this browser!');
-        }
-    
-        if (navigator.getUserMedia) {
-            this.__log('Recording...'); 
-            navigator.getUserMedia({audio: true}, this.startUserMedia, function(e) {
-                this.__log('No live audio input');
-            });
+			removeItems() {
+				var recordingslist = this.$.recordingslist;
 
-            this.timerFunction();
+				audioBuffer = [];
 
-            // let recorded = this.wait(8000).then(
-            //     () =>{that.stopRecording()}
-            // );
+				this.$.log.innerHTML = "";
 
-        } else if (navigator.webkitGetUserMedia) {
-            this.__log('Recording...');    
-            navigator.webkitGetUserMedia({audio: true}, this.startUserMedia, function(e) {
-                this.__log('No live audio input');
-            });
+				while (recordingslist.firstChild) {
+					recordingslist.removeChild(recordingslist.firstChild);
+				}
+			}
+			//   recorder js functions
+			init() {
+				var that = this;
 
-            this.timerFunction();
+				try {
+					// webkit shim
+					// window.AudioContext = window.AudioContext || window.webkitAudioContext;
+					navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia;
+					window.URL = window.URL || window.webkitURL;
 
-            // let recorded = this.wait(8000).then(
-            //     () =>{that.stopRecording()}
-            // );
-        } else if (navigator.mediaDevices.getUserMedia) {
-            this.__log('Recording...');    
-            navigator.mediaDevices.getUserMedia({audio: true}).then(this.startUserMedia).catch(function(e) {
-                this.__log('No live audio input');
-            });
+					// audio_context = new AudioContext;
+					audio_context = null;
+					if (typeof AudioContext !== "undefined") {
+						audio_context = new AudioContext();
+					}
+					else if (typeof webkitAudioContext !== "undefined") {
+						audio_context = new webkitAudioContext();
+					}
+					else {
+						// this.__log("No web audio support in this browser!");
+						alert('No web audio support in this browser!');
+						return;
+					}
 
-            this.timerFunction();
+					processor = audio_context.createScriptProcessor(4096, 2, 2);
+					processor.connect(audio_context.destination);
+				} catch (e) {
+					// this.__log('No web audio support in this browser! ');
+					alert('No web audio support in this browser!');
+				}
 
-            // let recorded = this.wait(8000).then(
-            //     () =>{that.stopRecording()}
-            // );
-        } else {
-            this.__log('No user media support');
-        }
-    }
-    createDownloadLink() {
-        var recordingslist = this.shadowRoot.querySelector('#recordingslist');
-        var hideRemoveRecording = this.$.hideRemoveRecording;
-        var rec = this.recording;
-        
-        recorder && recorder.exportWAV(function(blob) {
-        var url = URL.createObjectURL(blob);
-        var au = document.createElement('audio');
+				if (navigator.getUserMedia) {
+					this.__log('Recording...');
+					navigator.getUserMedia({ audio: true }, this.startUserMedia, function (e) {
+						this.__log('No live audio input');
+					});
 
-        audioBuffer.push(blob);
+					this.timerFunction();
 
-        au.controls = true;
-        au.src = url;
-        recordingslist.appendChild(au);
-        hideRemoveRecording.style = 'display: block;';
-        });
-    }
-    voicemail(){
-        return audioBuffer;
-    }
 
-    removeRecordings(){
-        var recordingslist = this.$.recordingslist;
-        audioBuffer = [];
+				} else if (navigator.webkitGetUserMedia) {
+					this.__log('Recording...');
+					navigator.webkitGetUserMedia({ audio: true }, this.startUserMedia, function (e) {
+						this.__log('No live audio input');
+					});
 
-        this.$.log.innerHTML = "";
+					this.timerFunction();
 
-        while (recordingslist.firstChild) {
-            recordingslist.removeChild(recordingslist.firstChild);
-        }
+				} else if (navigator.mediaDevices.getUserMedia) {
+					this.__log('Recording...');
+					navigator.mediaDevices.getUserMedia({ audio: true }).then(this.startUserMedia).catch(function (e) {
+						this.__log('No live audio input');
+					});
 
-        this.$.hideRemoveRecording.style = 'display: none;';
-    }
+					this.timerFunction();
 
-    __log(e, data) {
-        var log = this.$.log;
-        log.innerHTML += "\n" + e + " " + (data || '');
-    }	
+				} else {
+					this.__log('No user media support');
+				}
+			}
+			createDownloadLink() {
+				var recordingslist = this.shadowRoot.querySelector('#recordingslist');
+				var rec = this.recording;
 
-    startUserMedia(stream) {
-        window.localStream = stream;
+				recorder && recorder.exportWAV(function (blob) {
+					var url = URL.createObjectURL(blob);
+					var au = document.createElement('audio');
 
-        var input = audio_context.createMediaStreamSource(stream);
-        
-        recorder = new Recorder(input,processor);
-        // recorder = new Recorder(input);
-        
-        // this.startRecordingAftrInit();
-        audio_context.resume();
-        recorder && recorder.record();
-    }
+					audioBuffer.push(blob);
 
-    startRecording() {
-        var button = this.$.startrecord;
-        var log = this.$.log;
-        var recordingslist = this.$.recordingslist;
-        this.$.hideRemoveRecording.style = 'display: none;';
-        var that = this;
+					au.controls = true;
+					au.src = url;
+					recordingslist.appendChild(au);
+				});
+			}
+			voicemail() {
+				// return audioBuffer;
+				return { downloadurl: this.downloadurl, storagename: this.storagename }
+			}
 
-        log.innerHTML = "";
-        audioBuffer = [];
-        while (recordingslist.firstChild) {
-            recordingslist.removeChild(recordingslist.firstChild);
-        }
+			removeRecordings() {
+				//update controls 
+				this.hideRecord = false
+				this.hideStop = true
+				this.hidePause = true
+				this.hideResume = true
+				this.hideSave = true
+				this.hideCancel = true
+				this.hideDelete = true
+				this.hideProgress = true
+				this.hideMessage = true
+				var timeobj = Polymer.dom(this.root).querySelector('#timeobj');
+				timeobj.innerHTML = "";
+				this.isuploading = false;
+				this.downloadurl = "";
+				this.storagename = "";
 
-        this.init();
-        button.disabled = true;
-        button.nextElementSibling.disabled = false;
-    }
+				var recordingslist = this.$.recordingslist;
+				audioBuffer = [];
 
-    wait(delayInMS) {
-        return new Promise(resolve => setTimeout(resolve, delayInMS));
-    }
+				this.$.log.innerHTML = "";
 
-    timerFunction(){
-        var timeobj = Polymer.dom(this.root).querySelector('#timeobj');
-        // Get starting date and time
-        var timeMillisec = new Date();
-        var countDownDate = new Date(timeMillisec).getTime();
-        var that = this;
+				while (recordingslist.firstChild) {
+					recordingslist.removeChild(recordingslist.firstChild);
+				}
 
-        // Update the count down every 1 second
-        this.timer = setInterval(function() {
-            // Get todays date and time
-            var now = new Date().getTime();
-            
-            // Find the distance between now and the count down date
-            var distance = now - countDownDate;
-            
-            // Time calculations for minutes and seconds
-            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            var minutesText = "";
-            if(minutes == 0) minutesText = "00<sup>m</sup>";
-            else minutesText = "0"+minutes+"<sup>m</sup>"
+			}
 
-            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-            var secondsText = "";
-            if(seconds < 10) secondsText = "0"+seconds;
-            else secondsText = seconds;
-            
-            // Output the result in an element with id="demo"
-            timeobj.innerHTML = minutesText +" " + secondsText + "<sup>s</sup>";
-            
-            // If the count down is finished, write some text 
-            if (minutes == 2) {
-                clearInterval(that.timer);
-                that.stopRecording();
-            }
-            
-        }, 1000);
-    }
+			__log(e, data) {
+				var log = this.$.log;
+				log.innerHTML = (data || '');
+			}
 
-    startRecordingAftrInit() {
-        audio_context.resume();
-        recorder && recorder.record();
-        this.__log('Recording...');
-    }
+			startUserMedia(stream) {
+				window.localStream = stream;
 
-    stopRecording() {
-        var button = this.$.stoprecord;
+				var input = audio_context.createMediaStreamSource(stream);
 
-        recorder && recorder.stop();
-        // stop timer
-        clearInterval(this.timer);
+				recorder = new Recorder(input, processor);
 
-        button.disabled = true;
+				audio_context.resume();
+				recorder && recorder.record();
+			}
 
-        button.previousElementSibling.disabled = false;
-        this.__log('Done');
-        
-        localStream.getAudioTracks()[0].stop();
-        
-        // create WAV download link using audio data blob
-        this.createDownloadLink();
-        
-        recorder.clear();
-        audio_context.close();
-        audio_context = null;
-        processor = null;
-    }
+			startRecording() {
+				var log = this.$.log;
+				var recordingslist = this.$.recordingslist;
+				var that = this;
 
-    uploadFile(){
-        // File or Blob
-        var filename = new Date().toISOString()+'.wav';
-        var downloadURL='';
-        var database = firebase.database();
-        var updates = {};
+				// update buttons
+				this.hideRecord = true
+				this.hideStop = false
+				this.hidePause = true
+				this.hideResume = true
+				this.hideSave = true
+				this.hideCancel = true
+				this.hideDelete = true
+				this.hideProgress = true
+				this.hideMessage = true
+				this.isuploading = false;
+				this.downloadurl = "";
+				this.storagename = "";
+				
+				log.innerHTML = "";
+				audioBuffer = [];
+				while (recordingslist.firstChild) {
+					recordingslist.removeChild(recordingslist.firstChild);
+				}
 
-        this.__log('Uploading file...please wait.');
+				this.init();
+			}
 
-        var file = audioBuffer[0];
-        let journalUserID = this.user.userID;
-        let journalUserName = this.user.firstName+" "+this.user.lastName;
+			wait(delayInMS) {
+				return new Promise(resolve => setTimeout(resolve, delayInMS));
+			}
 
-        // Create the file metadata
-        var metadata = {
-        contentType: 'audio/wav'
-        };
-        var storageRef = firebase.storage().ref();
+			timerFunction() {
+				var timeobj = Polymer.dom(this.root).querySelector('#timeobj');
+				// Get starting date and time
+				var timeMillisec = new Date();
+				var countDownDate = new Date(timeMillisec).getTime();
+				var that = this;
 
-        var uploadTask = storageRef.child('podcasts/' + filename).put(audioBuffer[0], metadata);
+				// Update the count down every 1 second
+				this.timer = setInterval(function () {
+					// Get todays date and time
+					var now = new Date().getTime();
 
-        console.log("storage ref: ", storageRef);
+					// Find the distance between now and the count down date
+					var distance = now - countDownDate;
 
-        // Listen for state changes, errors, and completion of the upload.
-        uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
-        function(snapshot) {
-            // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
-            var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            console.log('Upload is ' + progress + '% done');
-            switch (snapshot.state) {
-            case firebase.storage.TaskState.PAUSED: // or 'paused'
-                console.log('Upload is paused');
-                break;
-            case firebase.storage.TaskState.RUNNING: // or 'running'
-                console.log('Upload is running');
-                break;
-            }
-        }, function(error) {
-            console.log("error uploading: ", error)
+					// Time calculations for minutes and seconds
+					var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+					var minutesText = "";
+					if (minutes == 0) minutesText = "00<sup>m</sup>";
+					else minutesText = "0" + minutes + "<sup>m</sup>"
 
-        // A full list of error codes is available at
-        // https://firebase.google.com/docs/storage/web/handle-errors
-        switch (error.code) {
-            case 'storage/unauthorized':
-            // User doesn't have permission to access the object
-            break;
+					var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+					var secondsText = "";
+					if (seconds < 10) secondsText = "0" + seconds;
+					else secondsText = seconds;
 
-            case 'storage/canceled':
-            // User canceled the upload
-            break;
+					// Output the result in an element with id="demo"
+					timeobj.innerHTML = minutesText + " " + secondsText + "<sup>s</sup>";
 
-            case 'storage/unknown':
-            // Unknown error occurred, inspect error.serverResponse
-            break;
-        }
-        }, function() {
-            // Upload completed successfully, now we can get the download URL
-            downloadURL = uploadTask.snapshot.downloadURL;
+					// If the count down is finished, write some text 
+					if (minutes == 2) {
+						clearInterval(that.timer);
+						that.stopRecording();
+					}
 
-            updates['/podcasts/'+podcast_ID+'/active'] = true;
-            updates['/podcasts/'+podcast_ID+'/company_status'] = "general_true";
-            updates['/podcasts/'+podcast_ID+'/userID'] = journalUserID;
-            updates['/podcasts/'+podcast_ID+'/userName'] = journalUserName;
-            updates['/podcasts/'+podcast_ID+'/podcastSize'] = 0;
-            updates['/podcasts/'+podcast_ID+'/url'] = downloadURL;
+				}, 1000);
+			}
 
-            database.ref().update(updates);
-            podcast_ID = '';
-        });
-    }
+			startRecordingAftrInit() {
+				audio_context.resume();
+				recorder && recorder.record();
+				this.__log('Recording...');
+			}
 
-    }
-    window.customElements.define(VoiceRecorder.is, VoiceRecorder);
-    </script>
+			stopRecording() {
+				// update controls
+				this.hideRecord = true
+				this.hideStop = true
+				this.hidePause = true
+				this.hideResume = true
+				this.hideSave = false
+				this.hideCancel = true
+				this.hideDelete = false
+				this.hideProgress = true
+				this.hideMessage = false
+
+				this.$.podcastMessage.innerHTML = "Please click below to save your voice message."
+
+				recorder && recorder.stop();
+				// stop timer
+				clearInterval(this.timer);
+
+				this.__log('Done');
+
+				localStream.getAudioTracks()[0].stop();
+
+				// create WAV download link using audio data blob
+				this.createDownloadLink();
+
+				recorder.clear();
+				audio_context.close();
+				audio_context = null;
+				processor = null;
+			}
+
+			resumeUpload() {
+				uploadTask.resume();
+				//update controls 
+				this.hideRecord = true
+				this.hideStop = true
+				this.hidePause = false
+				this.hideResume = true
+				this.hideSave = true
+				this.hideCancel = false
+				this.hideDelete = true
+				this.hideProgress = false
+				this.hideMessage = false
+			}
+			cancelUpload() {
+				uploadTask.cancel();
+				//update controls 
+				this.hideRecord = false
+				this.hideStop = true
+				this.hidePause = true
+				this.hideResume = true
+				this.hideSave = true
+				this.hideCancel = true
+				this.hideDelete = true
+				this.hideProgress = true
+				this.hideMessage = true
+				this.isuploading = false;
+				this.downloadurl = "";
+				this.storagename = "";
+
+				var timeobj = Polymer.dom(this.root).querySelector('#timeobj');
+				timeobj.innerHTML = "";
+
+				audioBuffer = [];
+				this.removeRecordings();
+				this.removeItems()
+			}
+			pauseUpload() {
+				//update controls 
+				this.hideRecord = true
+				this.hideStop = true
+				this.hidePause = true
+				this.hideResume = false
+				this.hideSave = true
+				this.hideCancel = false
+				this.hideDelete = true
+				this.hideProgress = false
+				this.hideMessage = false
+
+				uploadTask.pause();
+				this.$.podcastMessage.innerHTML = "Paused..."
+			}
+
+			uploadFile() {
+				// File or Blob
+				var filename = new Date().toISOString() + '.wav';
+				var database = firebase.database();
+				var updates = {};
+				var self = this;
+
+				//update controls 
+				this.hideRecord = true
+				this.hideStop = true
+				this.hidePause = false
+				this.hideResume = true
+				this.hideSave = true
+				this.hideCancel = false
+				this.hideDelete = true
+				this.hideProgress = false
+				this.hideMessage = false
+
+				this.isuploading = true;
+
+				// this.__log('Uploading file...please wait.');
+				this.$.podcastMessage.innerHTML = "Uploading message...please wait."
+
+				var file = audioBuffer[0];
+
+				// Create the file metadata
+				var metadata = {
+					contentType: 'audio/wav'
+				};
+				var storageRef = firebase.storage().ref();
+
+				uploadTask = storageRef.child('podcasts/' + filename).put(audioBuffer[0], metadata);
+
+
+				// Listen for state changes, errors, and completion of the upload.
+				uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
+					function (snapshot) {
+						// Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+						var progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+						self.bytesTransferred = progress;
+						console.log('Upload is ' + progress + '% done');
+						switch (snapshot.state) {
+							case firebase.storage.TaskState.PAUSED: // or 'paused'
+								// console.log('Upload is paused');
+								self.$.podcastMessage.innerHTML = "Paused..."
+								break;
+							case firebase.storage.TaskState.RUNNING: // or 'running'
+								console.log('Upload is running');
+								self.$.podcastMessage.innerHTML = "Uploading message...please wait."
+								break;
+						}
+					}, function (error) {
+						// A full list of error codes is available at
+						// https://firebase.google.com/docs/storage/web/handle-errors
+						switch (error.code) {
+							case 'storage/unauthorized':
+								self.$.podcastMessage.innerHTML = `Error saving message: ${error.message}`
+								// User doesn't have permission to access the object
+								break;
+
+							case 'storage/canceled':
+								self.$.podcastMessage.innerHTML = `Error saving message: ${error.message}`
+								// User canceled the upload
+								break;
+
+							case 'storage/unknown':
+								self.$.podcastMessage.innerHTML = `Error saving message: ${error.message}`
+								// Unknown error occurred, inspect error.serverResponse
+								break;
+						}
+					}, function () {
+						// Upload completed successfully, now we can get the download URL
+						self.downloadurl = uploadTask.snapshot.downloadURL;
+						self.storagename = filename;
+						//update controls 
+						self.hideStop = true
+						self.hideRecord = true
+						self.hidePause = true
+						self.hideResume = true
+						self.hideSave = true
+						self.hideCancel = true
+						self.hideDelete = false
+						self.hideProgress = true
+						self.hideMessage = false
+						self.$.podcastMessage.innerHTML = "Your voice message was saved successfully. You may now Submit to publish the post."
+						self.isuploading = false;
+					});
+			}
+
+		}
+		window.customElements.define(VoiceRecorder.is, VoiceRecorder);
+	</script>
 </dom-module>

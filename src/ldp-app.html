@@ -21,52 +21,55 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="lazy-import" href="sign-in.html">
 
 <dom-module id="ldp-app">
-  <template>
-    <!-- Public App -->
-    <!-- <firebase-app
-        auth-domain="leadershipplatform-158316.firebaseapp.com"
-        database-url="https://leadershipplatform-158316.firebaseio.com"
-        api-key="AIzaSyAf_oJi6fgm6-ZrVPeOVdW2DDoeu3v5SxY"
-        storage-bucket="leadershipplatform-158316.appspot.com"
-        messaging-sender-id="438289288307">  -->
-    
-    <!-- Test App -->    
-    <firebase-app
-        auth-domain="glp-test.firebaseapp.com"
-        database-url="https://glp-test.firebaseio.com"
-        api-key="AIzaSyBJH4pbQEzEpxtEomcnYjlUfsiFC5nqHoQ"
-        storage-bucket="glp-test.appspot.com"
-        messaging-sender-id="805735980290">
-    </firebase-app>
+    <template>
+        <!-- Public App -->
+        <firebase-app auth-domain="leadershipplatform-158316.firebaseapp.com"
+            database-url="https://leadershipplatform-158316.firebaseio.com"
+            api-key="AIzaSyAf_oJi6fgm6-ZrVPeOVdW2DDoeu3v5SxY" storage-bucket="leadershipplatform-158316.appspot.com"
+            messaging-sender-id="438289288307">
 
-    <style>
-      :host {display: block;background-color: #f6f6f6;}
-      paper-dialog{max-width:500px!important;}
+            <!-- Test App -->
+            <!-- <firebase-app auth-domain="glp-test.firebaseapp.com" database-url="https://glp-test.firebaseio.com"
+            api-key="AIzaSyBJH4pbQEzEpxtEomcnYjlUfsiFC5nqHoQ" storage-bucket="glp-test.appspot.com"
+            messaging-sender-id="805735980290">
+        </firebase-app> -->
 
-        /* ============ Snack Bar ======================== */
-        #snackbar {
-            visibility: hidden;
-            min-width: 250px;
-            margin-left: -120px;
-            background-color: var(--paper-green-400);
-            color: #fff;
-            text-align: center;
-            border-radius: 2px;
-            padding: 10px;
-            position: fixed;
-            z-index: 1;
-            left: 40%;
-            bottom: 30px;
-            font-size: 14px;
-            white-space: pre-wrap;
-            display: flex;
-        }
-        #snackbar.show {
-            visibility: visible;
-            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
-            animation: fadein 0.5s, fadeout 0.5s 2.5s;
-        }
-        /* .snacklogo {
+            <style>
+                :host {
+                    display: block;
+                    background-color: #f6f6f6;
+                }
+
+                paper-dialog {
+                    max-width: 500px !important;
+                }
+
+                /* ============ Snack Bar ======================== */
+                #snackbar {
+                    visibility: hidden;
+                    min-width: 250px;
+                    margin-left: -120px;
+                    background-color: var(--paper-green-400);
+                    color: #fff;
+                    text-align: center;
+                    border-radius: 2px;
+                    padding: 10px;
+                    position: fixed;
+                    z-index: 1;
+                    left: 40%;
+                    bottom: 30px;
+                    font-size: 14px;
+                    white-space: pre-wrap;
+                    display: flex;
+                }
+
+                #snackbar.show {
+                    visibility: visible;
+                    -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+                    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+                }
+
+                /* .snacklogo {
             background-image: url('../../images/manifest/icon-48x48.png');
             background-repeat: no-repeat;
             background-size: contain;
@@ -74,534 +77,577 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             height: 48px;
             width: 48px;
         } */
-        .snackmsg{
-            display: flex;
-            flex-direction: column;
-            margin-left: 10px;
-            text-align: left;
-        }
-        @-webkit-keyframes fadein {
-            from {bottom: 0; opacity: 0;} 
-            to {bottom: 30px; opacity: 1;}
-        }
+                .snackmsg {
+                    display: flex;
+                    flex-direction: column;
+                    margin-left: 10px;
+                    text-align: left;
+                }
 
-        @keyframes fadein {
-            from {bottom: 0; opacity: 0;}
-            to {bottom: 30px; opacity: 1;}
-        }
-        @-webkit-keyframes fadeout {
-            from {bottom: 30px; opacity: 1;} 
-            to {bottom: 0; opacity: 0;}
-        }
-        @keyframes fadeout {
-            from {bottom: 30px; opacity: 1;}
-            to {bottom: 0; opacity: 0;}
-        }
-    </style>
-    <app-location route="{{route}}" use-hash-as-path></app-location>
-    <app-route route="{{route}}"
-        pattern="/lead/:follow_id/:nextpage"
-        data="{{routeData}}"
-        tail="{{subroute}}">
-   </app-route>
-    
-        <template id="mainTemplate" is="dom-if" if="{{signedIn}}">
-            <firebase-query
-                app-name="[main]"
-                id="qryuser"
-                path="/users"
-                order-by-child="uid"
-                equal-to="{{user.uid}}"
-                data="{{userdata}}">
-            </firebase-query>
+                @-webkit-keyframes fadein {
+                    from {
+                        bottom: 0;
+                        opacity: 0;
+                    }
 
-            <my-app notcompanyadmin="{{notcompanyadmin}}" approvethoughts="[[approveThoughts]]" addthoughts = "[[addThoughts]]" addarticle = "[[addArticle]]" hidecompany = "[[hidecompany]]" mythoughts = "[[myThoughts]]" _user="[[_user]]" _companyid="[[_user.companyID]]" hidemenu="[[hidemenu]]" hidesubmenu="[[hidesubmenu]]" _publicid="[[_publicid]]" unresolved>
-                <div id="apploader"></div></my-app>
-            
-        </template>
-        <template is="dom-if" if="[[!signedIn]]">
-            <sign-in></sign-in>
-        </template>
-        
-    <div id="snackbar">
-        <div class="snackmsg">
-            <div id="snacktitle" class="snacktitle"></div>
-            <div id="snackbody" class="snackbody"></div>
-        </div>
-    </div>
+                    to {
+                        bottom: 30px;
+                        opacity: 1;
+                    }
+                }
 
-    <paper-toast id="updateToast" duration="0" text="A new update is available! ">
-        <paper-button onclick="window.location.reload(true)">
-            Refresh
-        </paper-button>
-        <paper-button on-tap="hideToast">
-            Cancel
-        </paper-button>
-    </paper-toast>
+                @keyframes fadein {
+                    from {
+                        bottom: 0;
+                        opacity: 0;
+                    }
 
-    <paper-dialog id="verifyDialog">
-        <h2>Email Verification Required</h2>
-    <paper-dialog-scrollable>
-        A verification message has been sent to your account: {{emailtoverify}}. Once you verify your email you'll be able to access Global Leadership Platform.
-    </paper-dialog-scrollable>
-    <div class="buttons">
-        <paper-button dialog-dismiss>CLOSE</paper-button>
-        <!-- <paper-button dialog-confirm autofocus on-tap="_resendEmail">RESEND</paper-button> -->
-    </div>
-    </paper-dialog>
+                    to {
+                        bottom: 30px;
+                        opacity: 1;
+                    }
+                }
 
-    <firebase-auth id="auth" user="{{user}}" provider="google" status-known="{{statusKnown}}" on-error="handleError" signed-in="{{userSignedIn}}">
-    </firebase-auth>
+                @-webkit-keyframes fadeout {
+                    from {
+                        bottom: 30px;
+                        opacity: 1;
+                    }
 
-  </template>
-  
-  <script>
+                    to {
+                        bottom: 0;
+                        opacity: 0;
+                    }
+                }
+
+                @keyframes fadeout {
+                    from {
+                        bottom: 30px;
+                        opacity: 1;
+                    }
+
+                    to {
+                        bottom: 0;
+                        opacity: 0;
+                    }
+                }
+
+                paper-toast {
+                    --paper-toast-background-color: var(--paper-green-500) !important;
+                    z-index: 999999999;
+                }
+            </style>
+            <app-location route="{{route}}" use-hash-as-path></app-location>
+            <app-route route="{{route}}" pattern="/lead/:follow_id/:nextpage" data="{{routeData}}" tail="{{subroute}}">
+            </app-route>
+
+            <template id="mainTemplate" is="dom-if" if="{{signedIn}}">
+                <firebase-query app-name="[main]" id="qryuser" path="/users" order-by-child="uid"
+                    equal-to="{{user.uid}}" data="{{userdata}}">
+                </firebase-query>
+
+                <my-app notcompanyadmin="{{notcompanyadmin}}" approvethoughts="[[approveThoughts]]"
+                    addthoughts="[[addThoughts]]" addarticle="[[addArticle]]" hidecompany="[[hidecompany]]"
+                    mythoughts="[[myThoughts]]" _user="[[_user]]" _companyid="[[_user.companyID]]"
+                    hidemenu="[[hidemenu]]" hidesubmenu="[[hidesubmenu]]" _publicid="[[_publicid]]" unresolved>
+                    <div id="apploader"></div>
+                </my-app>
+
+            </template>
+            <template is="dom-if" if="[[!signedIn]]">
+                <sign-in></sign-in>
+            </template>
+
+            <div id="snackbar">
+                <div class="snackmsg">
+                    <div id="snacktitle" class="snacktitle"></div>
+                    <div id="snackbody" class="snackbody"></div>
+                </div>
+            </div>
+
+            <paper-toast id="updateToast" duration="0" text="A new update is available! ">
+                <paper-button onclick="window.location.reload(true)">
+                    Refresh
+                </paper-button>
+                <paper-button on-tap="hideToast">
+                    Cancel
+                </paper-button>
+            </paper-toast>
+
+            <paper-dialog id="verifyDialog">
+                <h2>Email Verification Required</h2>
+                <paper-dialog-scrollable>
+                    A verification message has been sent to your account: {{emailtoverify}}. Once you verify your email
+                    you'll be able to access Global Leadership Platform.
+                </paper-dialog-scrollable>
+                <div class="buttons">
+                    <paper-button dialog-dismiss>CLOSE</paper-button>
+                    <!-- <paper-button dialog-confirm autofocus on-tap="_resendEmail">RESEND</paper-button> -->
+                </div>
+            </paper-dialog>
+
+            <firebase-auth id="auth" user="{{user}}" provider="google" status-known="{{statusKnown}}"
+                on-error="handleError" signed-in="{{userSignedIn}}">
+            </firebase-auth>
+
+    </template>
+
+    <script>
         var _platform;
         var nav = window.navigator;
         var _ua = window.navigator.userAgent;
 
-        var plat = function() {
-			var plat = '';
+        var plat = function () {
+            var plat = '';
 
-			if((/iphone|ipod|ipad/i).test(_ua) && (nav.platform.match(/iPhone|iPod|iPad/i))) plat = 'iOS';
-			if((/macintosh/i).test(_ua) && (nav.platform.match(/MacIntel/i))) plat = 'MacOS';
-			if((/android/i).test(_ua) && (nav.platform.match(/Linux/i))) plat = 'Android';
-			if((/windows nt/i).test(_ua) && (nav.platform.match(/Win32/i))) plat = 'Windows';
-			if((/windows nt/i).test(_ua) && (nav.platform.match(/Win64/i))) plat = 'Windows';
-			if((/windows phone/i).test(_ua)) plat = 'WindowsPhone';
+            if ((/iphone|ipod|ipad/i).test(_ua) && (nav.platform.match(/iPhone|iPod|iPad/i))) plat = 'iOS';
+            if ((/macintosh/i).test(_ua) && (nav.platform.match(/MacIntel/i))) plat = 'MacOS';
+            if ((/android/i).test(_ua) && (nav.platform.match(/Linux/i))) plat = 'Android';
+            if ((/windows nt/i).test(_ua) && (nav.platform.match(/Win32/i))) plat = 'Windows';
+            if ((/windows nt/i).test(_ua) && (nav.platform.match(/Win64/i))) plat = 'Windows';
+            if ((/windows phone/i).test(_ua)) plat = 'WindowsPhone';
 
-			if(nav.platform.match(/Win32/i)) plat = 'Windows';
-			else if(nav.platform.match(/Win64/i)) plat = 'Windows';
-			else if(nav.platform.match(/MacIntel/i)) plat = 'MacOS';
-			else if(nav.platform.match(/iPhone|iPod|iPad/i)) plat = 'iOS';
-			else if(nav.platform.match(/blackberry/i)) plat = 'BlackBerry';
+            if (nav.platform.match(/Win32/i)) plat = 'Windows';
+            else if (nav.platform.match(/Win64/i)) plat = 'Windows';
+            else if (nav.platform.match(/MacIntel/i)) plat = 'MacOS';
+            else if (nav.platform.match(/iPhone|iPod|iPad/i)) plat = 'iOS';
+            else if (nav.platform.match(/blackberry/i)) plat = 'BlackBerry';
 
-			return plat;
+            return plat;
         };
-        
-		_platform = plat();
+
+        _platform = plat();
         localStorage.setItem("platform", _platform);
 
         Polymer.setPassiveTouchGestures(true);
-    /**
-     * @customElement
-     * @polymer
-     */
-     Polymer({
-        is: 'ldp-app',
-        properties: { 
-           user: {
-               type: Object
-           },
-           _selected: {
-                type: Number,
-                value: 0,
-                notify: true
+        /**
+         * @customElement
+         * @polymer
+         */
+        Polymer({
+            is: 'ldp-app',
+            properties: {
+                user: {
+                    type: Object
+                },
+                _selected: {
+                    type: Number,
+                    value: 0,
+                    notify: true
+                },
+                uid: String,
+                addThoughts: {
+                    type: Boolean
+                },
+                hidemenu: {
+                    type: Boolean,
+                    value: true,
+                    notify: true
+                },
+                hidesubmenu: {
+                    type: Boolean,
+                    value: true,
+                    notify: true
+                },
+                approveThoughts: {
+                    type: Boolean
+                },
+                notcompanyadmin: {
+                    type: Boolean,
+                    value: true,
+                    notify: true
+                },
+                addArticle: {
+                    type: Boolean
+                },
+                myThoughts: {
+                    type: Boolean,
+                    value: false
+                },
+                hidecompany: {
+                    type: Boolean,
+                    value: true,
+                    notify: true
+                },
+                statusKnown: {
+                    type: Object
+                },
+                userdata: {
+                    type: Object,
+                    notify: true,
+                    observer: '_onUserDataReceived'
+                },
+                _user: {
+                    type: Object,
+                    notify: true
+                },
+                _companyID: String,
+                signedIn: {
+                    type: Boolean,
+                    notify: true,
+                },
+                userSignedIn: {
+                    type: Boolean,
+                    observer: 'userLoggedIn'
+                },
+                routeData: {
+                    type: String,
+                    observer: "_onrouteData"
+                },
             },
-            uid: String,
-           addThoughts: {
-               type: Boolean
-           },
-           hidemenu: {
-               type: Boolean,
-               value: true,
-               notify: true
-           },
-           hidesubmenu: {
-               type: Boolean,
-               value: true,
-               notify: true
-           },
-           approveThoughts: {
-               type: Boolean
-           },
-           notcompanyadmin: {
-               type: Boolean,
-               value: true,
-               notify: true
-           },
-           addArticle: {
-               type: Boolean
-           },
-           myThoughts: {
-               type: Boolean,
-               value: false
-           },
-           hidecompany: {
-               type: Boolean,
-               value: true,
-               notify: true
-           },
-           statusKnown: {
-               type: Object
-           },
-           userdata: {
-                type: Object,
-                notify: true,
-                observer: '_onUserDataReceived'
-            },
-           _user: {
-               type: Object,
-               notify: true
-           },
-           _companyID: String,
-           signedIn: {
-               type: Boolean,
-               notify: true,
-           },
-           userSignedIn: {
-               type: Boolean,
-               observer: 'userLoggedIn'
-           },
-           routeData: {
-            type: String,
-            observer: "_onrouteData"
-          },
-        },
-        ready: function(){
-            var that = this;
-
-            Polymer.RenderStatus.afterNextRender(this, () => {
-                // this.removeAttribute('unresolved');
-                if(!this.user){
-                    this.loadPage('sign-in');
-                }
-                this.loadPage('my-app');
-                /* Other lazy code here */
-
-                // public app id
-                var appID = "AIzaSyAf_oJi6fgm6-ZrVPeOVdW2DDoeu3v5SxY";
-                
-                // Test app id
-                // var appID = "AIzaSyBJH4pbQEzEpxtEomcnYjlUfsiFC5nqHoQ";
-                
-                var logged = localStorage.getItem("firebase:authUser:"+appID+":[DEFAULT]");
-
-                // set messaging
-                const messaging = firebase.messaging();
-                
-                if(logged) {
-                    this.signedIn = true;
-                    // Get a reference to the database service
-                    var database = firebase.database();
-
-                    // Request for Permission
-                    this.requestPermission();
-
-                    // [START refresh_token]
-                    // Callback fired if Instance ID token is updated.
-                    messaging.onTokenRefresh(function() {
-                        messaging.getToken()
-                        .then(function(refreshedToken) {
-                            return messaging.getToken();
-                        })
-                        .then(function(currentToken) {
-                            if (currentToken) {
-                                if((/android|windows|windowsphone/i).test(_platform)){
-                                    setTokenSentToServer(false);
-                                    setTokenToLocalStorage(currentToken);
-                                    sendTokenToServer();
-                                }
-                                
-                            }
-                        })
-                        .catch(function(err) {
-                            console.log('Unable to retrieve refreshed token ', err);
-                        });
-
-                        // [END request_permission]
-                        function setTokenToLocalStorage(currentToken) {
-                            var previousToken = window.localStorage.getItem('currentToken');
-
-                            if(previousToken == undefined || previousToken == "undefined" || previousToken == null || previousToken == "null") previousToken = "";
-
-                            if (currentToken) {
-                                var data = {
-                                    "uid": that.user.uid,
-                                    "previousToken": previousToken,
-                                    "currentToken":currentToken
-                                }
-                                
-                                database.ref('/data-modelling/userWriteable/tokenRefresh/'+that.user.uid).set(data);
-                            }
-                            
-                            window.localStorage.setItem('currentToken', currentToken);
-                        }
-                        function sendTokenToServer() {
-                            if (!isTokenSentToServer()) {
-
-                            } 
-                        }
-                        function isTokenSentToServer() {
-                            return window.localStorage.getItem('sentToServer') == 1;
-                        }
-                        function setTokenSentToServer(sent) {
-                            window.localStorage.setItem('sentToServer', sent ? 1 : 0);
-                        }
-                        
-                    });
-                    // [END refresh_token]
-                }
-                else this.signedIn = false;
-
-                // setTimeout(function(){if(that.signedIn === false) that.loadPage('sign-in') }, 1000);
-
-                var msg = messaging.onMessage(function(payload) {
-                    
-                    showSnackBar(payload.notification);
-                });
-
-                var x = Polymer.dom(this.root).querySelector('#snackbar');
-                var snacktitle = Polymer.dom(this.root).querySelector('#snacktitle');
-                var snackbody = Polymer.dom(this.root).querySelector('#snackbody');
-
-                function showSnackBar(msg){
-                    // var x = this.$.snackbar;
-
-                    snacktitle.innerHTML = msg.title;
-                    snackbody.innerHTML = msg.body;
-                    x.className = "show";
-                    setTimeout(function(){ x.className = x.className.replace("show", ""); }, 10000);
-                }
-                // [END receive_message]
-
-            });
-
-        },
-        update: function (worker) {
-            console.log("update found");
-            this.$.updateToast.show();
-        },
-        hideToast: function(){this.$.updateToast.toggle()},
-        requestPermission: function() {
-            // set messaging
-            const messaging = firebase.messaging();
-
-            // [START request_permission]
-            messaging.requestPermission()
-            .then(function() {
-                return messaging.getToken();
-            })
-            .then(function(currentToken) {
-                if (currentToken) {
-                    setTokenToLocalStorage(currentToken);
-                } 
-            })
-            .catch(function(err) {
-                // console.log('Unable to get permission to notify.', err);
-            });
-            // [END request_permission]
-            function setTokenToLocalStorage(currentToken) {
-                window.localStorage.setItem('currentToken', currentToken);
-            }
-        },
-        // Send the Instance ID token your application server, so that it can:
-        // - send messages back to this app
-        // - subscribe/unsubscribe the token from topics
-        sendTokenToServer: function() {
-            // Get a reference to the database service
-            var database = firebase.database();
-
-            if (!this.isTokenSentToServer()) {
-                console.log("Token not sent to server.");
-                // Update user fcmToken
-                // var updates = {};
-                // updates['/users/' + this._user.userID+'/fcmToken'] = localStorage.getItem('currentToken');
-                // database.ref().update(updates);
-
-                // this.setTokenSentToServer(true);
-            } 
-        },
-        isTokenSentToServer: function() {
-            return window.localStorage.getItem('sentToServer') == 1;
-        },
-        setTokenSentToServer: function(sent) {
-            window.localStorage.setItem('sentToServer', sent ? 1 : 0);
-        },
-        _resendEmail(){
-            var that = this;
-            var actionCodeSettings = {
-                url: window.location.origin
-            };
-            this.user.sendEmailVerification(actionCodeSettings).then(function() {
-                // Email sent.
-                that.$.verifyDialog.open();
-                firebase.auth().signOut();
-            }).catch(function(error) {
-                // An error happened.
-            });
-        },
-        userLoggedIn: function(){
-            if(this.user){
-                if(!this.user.emailVerified){
-                    this.emailtoverify = this.user.email;
-                    this._resendEmail();
-                    return;
-                }
-            }
-            if(this.userSignedIn === true) {
-                this.signedIn = true;
-                var database = firebase.database();
-                var userRef = database.ref('users').orderByChild("uid").equalTo(this.user.uid);
-                
+            ready: function () {
                 var that = this;
-                // set messaging
-                const messaging = firebase.messaging();
 
-                messaging.getToken()
-                .then(function(refreshedToken) {
-                    return messaging.getToken();
-                })
-                .then(function(currentToken) {
-                    if((/android|windows|windowsphone/i).test(_platform)){
-                        var previousToken = window.localStorage.getItem('currentToken');
-                        if(previousToken == undefined || previousToken == "undefined" || previousToken == null || previousToken == "null") previousToken = "";
-
-                        if (currentToken) {
-                            var data = {
-                                "uid": that.user.uid,
-                                "previousToken": previousToken,
-                                "currentToken":currentToken
-                            }
-                            
-                            database.ref('/data-modelling/userWriteable/tokenRefresh/'+that.user.uid).set(data);
-                        }
+                Polymer.RenderStatus.afterNextRender(this, () => {
+                    // this.removeAttribute('unresolved');
+                    if (!this.user) {
+                        this.loadPage('sign-in');
                     }
-                    
-                })
-                .catch(function(err) {
-                    console.log('Unable to retrieve refreshed token ', err);
-                });
+                    this.loadPage('my-app');
+                    /* Other lazy code here */
 
-                userRef.on('child_added', function(snapshot, prevChildKey) {
-                    var newUser = snapshot.val();
-                    that._user = newUser;
-                    that._companyID = that._user.companyID;
-                    localStorage.setItem("_companyID",that._companyID);
-                    that._publicid = "-LEiZPT-C2PyLu_YLKNU";
- 
-                    that.approveThoughts = false;
-
-                    // set user name and logo
-                    localStorage.setItem("fullName", that._user.firstName+' '+that._user.lastName);
-                    
-                    if(that._user.photoURL != undefined || that._user.photoURL) {
-                        localStorage.setItem("userLogo", that._user.photoURL);
-                    }else{
-                        localStorage.setItem("userLogo", "../images/default-user.png");
-                    }
-
-                    if((that._user.userType == 4) || (that._user.userType == 5) || (that._user.userType == 6) || (that._user.userType == 7) || (that._user.userType == 9) || (that._user.userType == 3) || (that._user.userType == 8)){
-                        that.hidemenu = false;
-
-                        if((that._user.userType === 5) || (that._user.userType === 3) || (that._user.userType === 8)) that.hidesubmenu = true; 
-                        else that.hidesubmenu = false;                
-                    }
-                    else{
-                        that.hidemenu = true;  
-                        that.hidesubmenu = true;
-                    }
-
-                    if(that._user.userType === 7) that.notcompanyadmin = false; 
-                    else that.notcompanyadmin = true;
-                });
-
-                this.$.mainTemplate.render();
-            };
-        },
-        _onrouteData: function(newData, oldData){
-            if(newData != undefined){
-                if(newData.follow_id != undefined){
-                    localStorage.setItem("follow_id", ""+newData.follow_id);
-
-                    // public appID
+                    // public app id
                     var appID = "AIzaSyAf_oJi6fgm6-ZrVPeOVdW2DDoeu3v5SxY";
 
                     // Test app id
                     // var appID = "AIzaSyBJH4pbQEzEpxtEomcnYjlUfsiFC5nqHoQ";
 
-                    var logged = localStorage.getItem("firebase:authUser:"+appID+":[DEFAULT]");
-                    
-                    if(logged) {
-                        window.location = "./company-thoughts";
+                    var logged = localStorage.getItem("firebase:authUser:" + appID + ":[DEFAULT]");
+
+                    // set messaging
+                    const messaging = firebase.messaging();
+
+                    if (logged) {
+                        this.signedIn = true;
+                        // Get a reference to the database service
+                        var database = firebase.database();
+
+                        // Request for Permission
+                        this.requestPermission();
+
+                        // [START refresh_token]
+                        // Callback fired if Instance ID token is updated.
+                        messaging.onTokenRefresh(function () {
+                            messaging.getToken()
+                                .then(function (refreshedToken) {
+                                    return messaging.getToken();
+                                })
+                                .then(function (currentToken) {
+                                    if (currentToken) {
+                                        if ((/android|windows|windowsphone/i).test(_platform)) {
+                                            setTokenSentToServer(false);
+                                            setTokenToLocalStorage(currentToken);
+                                            sendTokenToServer();
+                                        }
+
+                                    }
+                                })
+                                .catch(function (err) {
+                                    console.log('Unable to retrieve refreshed token ', err);
+                                });
+
+                            // [END request_permission]
+                            function setTokenToLocalStorage(currentToken) {
+                                var previousToken = window.localStorage.getItem('currentToken');
+
+                                if (previousToken == undefined || previousToken == "undefined" || previousToken == null || previousToken == "null") previousToken = "";
+
+                                if (currentToken) {
+                                    var data = {
+                                        "uid": that.user.uid,
+                                        "previousToken": previousToken,
+                                        "currentToken": currentToken
+                                    }
+
+                                    database.ref('/data-modelling/userWriteable/tokenRefresh/' + that.user.uid).set(data);
+                                }
+
+                                window.localStorage.setItem('currentToken', currentToken);
+                            }
+                            function sendTokenToServer() {
+                                if (!isTokenSentToServer()) {
+
+                                }
+                            }
+                            function isTokenSentToServer() {
+                                return window.localStorage.getItem('sentToServer') == 1;
+                            }
+                            function setTokenSentToServer(sent) {
+                                window.localStorage.setItem('sentToServer', sent ? 1 : 0);
+                            }
+
+                        });
+                        // [END refresh_token]
+                    }
+                    else this.signedIn = false;
+
+                    // setTimeout(function(){if(that.signedIn === false) that.loadPage('sign-in') }, 1000);
+
+                    var msg = messaging.onMessage(function (payload) {
+
+                        showSnackBar(payload.notification);
+                    });
+
+                    var x = Polymer.dom(this.root).querySelector('#snackbar');
+                    var snacktitle = Polymer.dom(this.root).querySelector('#snacktitle');
+                    var snackbody = Polymer.dom(this.root).querySelector('#snackbody');
+
+                    function showSnackBar(msg) {
+                        // var x = this.$.snackbar;
+
+                        snacktitle.innerHTML = msg.title;
+                        snackbody.innerHTML = msg.body;
+                        x.className = "show";
+                        setTimeout(function () { x.className = x.className.replace("show", ""); }, 10000);
+                    }
+                    // [END receive_message]
+
+                });
+
+            },
+            update: function (worker) {
+                console.log("update found");
+                this.$.updateToast.show();
+            },
+            hideToast: function () { this.$.updateToast.toggle() },
+            requestPermission: function () {
+                // set messaging
+                const messaging = firebase.messaging();
+
+                // [START request_permission]
+                messaging.requestPermission()
+                    .then(function () {
+                        return messaging.getToken();
+                    })
+                    .then(function (currentToken) {
+                        if (currentToken) {
+                            setTokenToLocalStorage(currentToken);
+                        }
+                    })
+                    .catch(function (err) {
+                        // console.log('Unable to get permission to notify.', err);
+                    });
+                // [END request_permission]
+                function setTokenToLocalStorage(currentToken) {
+                    window.localStorage.setItem('currentToken', currentToken);
+                }
+            },
+            // Send the Instance ID token your application server, so that it can:
+            // - send messages back to this app
+            // - subscribe/unsubscribe the token from topics
+            sendTokenToServer: function () {
+                // Get a reference to the database service
+                var database = firebase.database();
+
+                if (!this.isTokenSentToServer()) {
+                    console.log("Token not sent to server.");
+                    // Update user fcmToken
+                    // var updates = {};
+                    // updates['/users/' + this._user.userID+'/fcmToken'] = localStorage.getItem('currentToken');
+                    // database.ref().update(updates);
+
+                    // this.setTokenSentToServer(true);
+                }
+            },
+            isTokenSentToServer: function () {
+                return window.localStorage.getItem('sentToServer') == 1;
+            },
+            setTokenSentToServer: function (sent) {
+                window.localStorage.setItem('sentToServer', sent ? 1 : 0);
+            },
+            _resendEmail() {
+                var that = this;
+                var follow_id = localStorage.getItem("follow_id");
+                var action_url = window.location.origin;
+
+                // if follow id exists, set that to action code settings
+                if ((follow_id != undefined) && (follow_id.length > 0)) {
+                    action_url = action_url + `/#/lead/${follow_id}/options`;
+                }
+
+                var actionCodeSettings = {
+                    url: action_url
+                };
+
+                this.user.sendEmailVerification(actionCodeSettings).then(function () {
+                    // Email sent.
+                    that.$.verifyDialog.open();
+                    firebase.auth().signOut();
+                }).catch(function (error) {
+                    // An error happened.
+                });
+            },
+            userLoggedIn: function () {
+                if (this.user) {
+                    if (!this.user.emailVerified) {
+                        this.emailtoverify = this.user.email;
+                        this._resendEmail();
+                        return;
                     }
                 }
-            }
-		},
-        loadPage: function(page){
-            var resolvedPageUrl = this.resolveUrl(page + '.html');
-            Polymer.importHref(
-                resolvedPageUrl,
-                null,
-                'sign-in.html',
-                true);
-        },
-        _onUserDataReceived: function(newData, oldData){
-            var newCount = 0;
-            
-            if(newData != undefined){
-                newCount = newData.length;
-                if(newCount == 0){
-                    this.loadPage('sign-in');
-                    return;
+                if (this.userSignedIn === true) {
+                    this.signedIn = true;
+                    var database = firebase.database();
+                    var userRef = database.ref('users').orderByChild("uid").equalTo(this.user.uid);
+
+                    var that = this;
+                    // set messaging
+                    const messaging = firebase.messaging();
+
+                    messaging.getToken()
+                        .then(function (refreshedToken) {
+                            return messaging.getToken();
+                        })
+                        .then(function (currentToken) {
+                            if ((/android|windows|windowsphone/i).test(_platform)) {
+                                var previousToken = window.localStorage.getItem('currentToken');
+                                if (previousToken == undefined || previousToken == "undefined" || previousToken == null || previousToken == "null") previousToken = "";
+
+                                if (currentToken) {
+                                    var data = {
+                                        "uid": that.user.uid,
+                                        "previousToken": previousToken,
+                                        "currentToken": currentToken
+                                    }
+
+                                    database.ref('/data-modelling/userWriteable/tokenRefresh/' + that.user.uid).set(data);
+                                }
+                            }
+
+                        })
+                        .catch(function (err) {
+                            console.log('Unable to retrieve refreshed token ', err);
+                        });
+
+                    userRef.on('child_added', function (snapshot, prevChildKey) {
+                        var newUser = snapshot.val();
+                        that._user = newUser;
+                        that._companyID = that._user.companyID;
+                        localStorage.setItem("_companyID", that._companyID);
+                        that._publicid = "-LEiZPT-C2PyLu_YLKNU";
+
+                        that.approveThoughts = false;
+
+                        // set user name and logo
+                        localStorage.setItem("fullName", that._user.firstName + ' ' + that._user.lastName);
+
+                        if (that._user.photoURL != undefined || that._user.photoURL) {
+                            localStorage.setItem("userLogo", that._user.photoURL);
+                        } else {
+                            localStorage.setItem("userLogo", "../images/default-user.png");
+                        }
+
+                        if ((that._user.userType == 4) || (that._user.userType == 5) || (that._user.userType == 6) || (that._user.userType == 7) || (that._user.userType == 9) || (that._user.userType == 3) || (that._user.userType == 8)) {
+                            that.hidemenu = false;
+
+                            if ((that._user.userType === 5) || (that._user.userType === 3) || (that._user.userType === 8)) that.hidesubmenu = true;
+                            else that.hidesubmenu = false;
+                        }
+                        else {
+                            that.hidemenu = true;
+                            that.hidesubmenu = true;
+                        }
+
+                        if (that._user.userType === 7) that.notcompanyadmin = false;
+                        else that.notcompanyadmin = true;
+                    });
+
+                    this.$.mainTemplate.render();
+                };
+            },
+            _onrouteData: function (newData, oldData) {
+                if (newData != undefined) {
+                    if (newData.follow_id != undefined) {
+                        localStorage.setItem("follow_id", "" + newData.follow_id);
+
+                        // public appID
+                        var appID = "AIzaSyAf_oJi6fgm6-ZrVPeOVdW2DDoeu3v5SxY";
+
+                        // Test app id
+                        // var appID = "AIzaSyBJH4pbQEzEpxtEomcnYjlUfsiFC5nqHoQ";
+
+                        var logged = localStorage.getItem("firebase:authUser:" + appID + ":[DEFAULT]");
+
+                        if (logged) {
+                            window.location = "./company-thoughts";
+                        }
+                    }
                 }
-            }
-          for (var item in newData) {
-            if(newData[item] != undefined){
-                this._user = newData[item];
-                
-                this._companyID = this._user.companyID;
-                this._publicid = "-LEiZPT-C2PyLu_YLKNU";
+            },
+            loadPage: function (page) {
+                var resolvedPageUrl = this.resolveUrl(page + '.html');
+                Polymer.importHref(
+                    resolvedPageUrl,
+                    null,
+                    'sign-in.html',
+                    true);
+            },
+            _onUserDataReceived: function (newData, oldData) {
+                var newCount = 0;
 
-                this.approveThoughts = false;
-
-                // set user name and logo
-                localStorage.setItem("fullName", this._user.firstName+' '+this._user.lastName);
-                
-                if(this._user.photoURL != undefined || this._user.photoURL) {
-                    localStorage.setItem("userLogo", this._user.photoURL);
-                }else{
-                    localStorage.setItem("userLogo", "../images/default-user.png");
+                if (newData != undefined) {
+                    newCount = newData.length;
+                    if (newCount == 0) {
+                        this.loadPage('sign-in');
+                        return;
+                    }
                 }
+                for (var item in newData) {
+                    if (newData[item] != undefined) {
+                        this._user = newData[item];
 
-                // rights for standard user
-                // if(this._user.userType == 8){
-                //     this.hidemenu = true;
-                //     this.hidesubmenu = true;
-                // }
-                // else 
-                if((this._user.userType == 4) || (this._user.userType == 5) || (this._user.userType == 6) || (this._user.userType == 7) || (this._user.userType == 9) || (this._user.userType == 3) || (this._user.userType == 8)){
-                    this.hidemenu = false;
+                        this._companyID = this._user.companyID;
+                        this._publicid = "-LEiZPT-C2PyLu_YLKNU";
 
-                    if((this._user.userType === 5) || (this._user.userType === 3) || (this._user.userType === 8)) this.hidesubmenu = true; 
-                    else this.hidesubmenu = false;                
+                        this.approveThoughts = false;
+
+                        // set user name and logo
+                        localStorage.setItem("fullName", this._user.firstName + ' ' + this._user.lastName);
+
+                        if (this._user.photoURL != undefined || this._user.photoURL) {
+                            localStorage.setItem("userLogo", this._user.photoURL);
+                        } else {
+                            localStorage.setItem("userLogo", "../images/default-user.png");
+                        }
+
+                        // rights for standard user
+                        // if(this._user.userType == 8){
+                        //     this.hidemenu = true;
+                        //     this.hidesubmenu = true;
+                        // }
+                        // else 
+                        if ((this._user.userType == 4) || (this._user.userType == 5) || (this._user.userType == 6) || (this._user.userType == 7) || (this._user.userType == 9) || (this._user.userType == 3) || (this._user.userType == 8)) {
+                            this.hidemenu = false;
+
+                            if ((this._user.userType === 5) || (this._user.userType === 3) || (this._user.userType === 8)) this.hidesubmenu = true;
+                            else this.hidesubmenu = false;
+                        }
+                        else {
+                            this.hidemenu = true;
+                            this.hidesubmenu = true;
+                        }
+
+                        if (this._user.userType === 7) this.notcompanyadmin = false;
+                        else this.notcompanyadmin = true;
+                    }
+
                 }
-                else{
-                    this.hidemenu = true;  
-                    this.hidesubmenu = true;
+            },
+            isEqual: function (a, b) {
+                var c = a === b;
+
+                if (c === false) {
+                    // this.showSnackBar("Please Sign Up before loggin in.");
                 }
-
-                if(this._user.userType === 7) this.notcompanyadmin = false; 
-                else this.notcompanyadmin = true;
+                return c;
+            },
+            showSnackBar: function (msg) {
+                var x = this.$.snackbar;
+                x.innerHTML = msg;
+                x.className = "show";
+                setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
             }
-            
-          }
-        },
-        isEqual: function(a, b) {
-            var c = a === b;
+        });
 
-            if(c === false){
-                // this.showSnackBar("Please Sign Up before loggin in.");
-            }
-            return c;
-        },
-        showSnackBar: function(msg){
-            var x = this.$.snackbar;
-            x.innerHTML = msg;
-            x.className = "show";
-            setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
-        }
-      });
-
-  </script>
+    </script>
 </dom-module>
